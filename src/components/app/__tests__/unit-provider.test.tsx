@@ -99,11 +99,14 @@ describe("readCookieUnit", () => {
   });
 
   it("returns the default unit when document is unavailable", () => {
-    vi.stubGlobal("document");
+    const originalDocument = globalThis.document;
+    Reflect.deleteProperty(globalThis, "document");
 
-    expect(readCookieUnit()).toBe("F");
-
-    vi.unstubAllGlobals();
+    try {
+      expect(readCookieUnit()).toBe("F");
+    } finally {
+      globalThis.document = originalDocument;
+    }
   });
 });
 
