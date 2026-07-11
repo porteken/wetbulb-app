@@ -339,17 +339,15 @@ describe("home", () => {
     });
 
     it("should show loading state during graph generation", async () => {
-      vi.mocked(FetchTrendGraphData).mockImplementationOnce(
-        async () => {
-          await createDelay(100);
-          return {
-            increase_per_year: 0.5,
-            trendline_wetbulbs: [20, 22, 24],
-            year_wetbulbs: [20, 22, 24],
-            years: [2000, 2001, 2002],
-          };
-        },
-      );
+      vi.mocked(FetchTrendGraphData).mockImplementationOnce(async () => {
+        await createDelay(100);
+        return {
+          increase_per_year: 0.5,
+          trendline_wetbulbs: [20, 22, 24],
+          year_wetbulbs: [20, 22, 24],
+          years: [2000, 2001, 2002],
+        };
+      });
 
       renderHome(<Home {...defaultProps} />);
 
