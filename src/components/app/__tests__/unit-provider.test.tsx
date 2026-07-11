@@ -11,7 +11,11 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 vi.unmock("@/components/app/unit-provider");
 
-import { readCookieUnit, UnitProvider, useTemperatureUnit } from "../unit-provider";
+import {
+  readCookieUnit,
+  UnitProvider,
+  useTemperatureUnit,
+} from "../unit-provider";
 import { UnitToggle } from "../unit-toggle";
 
 const setCookie = (value: string) => {
