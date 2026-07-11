@@ -430,8 +430,8 @@ describe("error Classes", () => {
       });
 
       it("should handle null and undefined errors", () => {
-        const nullResult = handleAsyncError(undefined as any);
-        const undefinedResult = handleAsyncError(undefined as any);
+        const nullResult = handleAsyncError(null);
+        const undefinedResult = handleAsyncError(null);
 
         expect(nullResult.message).toBe("An unknown error occurred");
         expect(undefinedResult.message).toBe("An unknown error occurred");

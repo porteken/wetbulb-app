@@ -119,7 +119,7 @@ describe("headerBar", () => {
       unobserve(): void {}
     }
 
-    globalThis.ResizeObserver = MockResizeObserver as typeof ResizeObserver;
+    globalThis.ResizeObserver = MockResizeObserver;
   });
 
   beforeEach(() => {
