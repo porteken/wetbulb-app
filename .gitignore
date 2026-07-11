@@ -34,8 +34,8 @@ yarn-error.log*
 
 # local env files
 .env*.local
-!README.md
 *.md
+!README.md
 # vercel
 .vercel
 /.idea

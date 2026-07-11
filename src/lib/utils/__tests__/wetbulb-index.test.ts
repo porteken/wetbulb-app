@@ -36,46 +36,46 @@ describe("wetbulb-index", () => {
       expect(result.value).toBe("76.1");
     });
 
-    it("should keep wetbulb = 81 in Moderate Risk", () => {
-      const result = getWetbulbInfo(81);
+    it("should keep wetbulb = 80 in Moderate Risk", () => {
+      const result = getWetbulbInfo(80);
       expect(result.level).toBe("Moderate Risk");
       expect(result.color).toBe("text-amber-600");
-      expect(result.value).toBe("81.0");
+      expect(result.value).toBe("80.0");
     });
 
-    it("should return High Risk for wetbulb just above 81", () => {
-      const result = getWetbulbInfo(81.1);
+    it("should return High Risk for wetbulb just above 80", () => {
+      const result = getWetbulbInfo(80.1);
       expect(result.level).toBe("High Risk");
       expect(result.color).toBe("text-orange-600");
-      expect(result.value).toBe("81.1");
+      expect(result.value).toBe("80.1");
     });
 
-    it("should keep wetbulb = 84 in High Risk", () => {
-      const result = getWetbulbInfo(84);
+    it("should keep wetbulb = 83 in High Risk", () => {
+      const result = getWetbulbInfo(83);
       expect(result.level).toBe("High Risk");
       expect(result.color).toBe("text-orange-600");
-      expect(result.value).toBe("84.0");
+      expect(result.value).toBe("83.0");
     });
 
-    it("should return Extreme Risk for wetbulb just above 84", () => {
-      const result = getWetbulbInfo(84.1);
+    it("should return Extreme Risk for wetbulb just above 83", () => {
+      const result = getWetbulbInfo(83.1);
       expect(result.level).toBe("Extreme Risk");
       expect(result.color).toBe("text-red-600");
-      expect(result.value).toBe("84.1");
+      expect(result.value).toBe("83.1");
     });
 
-    it("should keep wetbulb = 86 in Extreme Risk", () => {
-      const result = getWetbulbInfo(86);
+    it("should keep wetbulb = 87 in Extreme Risk", () => {
+      const result = getWetbulbInfo(87);
       expect(result.level).toBe("Extreme Risk");
       expect(result.color).toBe("text-red-600");
-      expect(result.value).toBe("86.0");
+      expect(result.value).toBe("87.0");
     });
 
-    it("should return Empirical Limit for wetbulb just above 86", () => {
-      const result = getWetbulbInfo(86.1);
+    it("should return Empirical Limit for wetbulb just above 87", () => {
+      const result = getWetbulbInfo(87.1);
       expect(result.level).toBe("Empirical Limit");
       expect(result.color).toBe("text-red-800");
-      expect(result.value).toBe("86.1");
+      expect(result.value).toBe("87.1");
     });
 
     it("should keep wetbulb = 94 in Empirical Limit", () => {

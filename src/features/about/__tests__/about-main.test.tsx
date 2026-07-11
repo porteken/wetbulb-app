@@ -104,7 +104,7 @@ describe("aboutMain", () => {
       "https://www.psu.edu/news/research/story/humans-cant-endure-temperatures-and-humidities-high-previously-thought",
     );
 
-    const limitText = screen.getByText(/closer to\s*87°F/iu);
+    const limitText = screen.getByText(/closer to\s*88°F/iu);
     expect(limitText).toBeInTheDocument();
   });
 

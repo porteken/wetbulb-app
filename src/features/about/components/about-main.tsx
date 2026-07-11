@@ -50,18 +50,20 @@ const About: FC<AboutProperties> = ({ LocationOptions }: AboutProperties) => (
           it feels, and the body starts to lose its ability to cool down.
         </p>
         <p className="mt-4 max-w-3xl text-base/7 text-muted-foreground">
-          At wet-bulb temperatures between 68°F and 77°F, heat-related illness
-          risk is generally considered low, though sustained physical
-          exertion still warrants caution, as discussed in{" "}
+          At wet-bulb temperatures between 68°F and 76°F (20°C–24°C),
+          heat-related illness risk is generally considered low, though
+          sustained physical exertion still warrants caution, as discussed
+          in{" "}
           <Link
             className="text-primary underline underline-offset-4 transition hover:text-primary/80"
             href={APP_CONFIG.WETBULB_LOW_RISK_URL}
           >
             this research
           </Link>
-          . Between roughly 77°F and 87°F, risk climbs through moderate,
-          high, and extreme categories as the body's ability to cool itself
-          through sweat becomes increasingly limited — thresholds outlined in{" "}
+          . Between roughly 77°F and 94°F (25°C–34°C), risk climbs through
+          moderate, high, and extreme categories as the body's ability to
+          cool itself through sweat becomes increasingly limited —
+          thresholds outlined in{" "}
           <Link
             className="text-primary underline underline-offset-4 transition hover:text-primary/80"
             href={APP_CONFIG.WETBULB_EXERCISE_SAFETY_URL}
@@ -79,7 +81,7 @@ const About: FC<AboutProperties> = ({ LocationOptions }: AboutProperties) => (
             recent research
           </Link>{" "}
           found that this empirical limit is actually lower — closer to
-          87°F (30.6°C) — for young, healthy adults under real-world
+          88°F (31°C) — for young, healthy adults under real-world
           conditions.
         </p>
       </article>
