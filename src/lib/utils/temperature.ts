@@ -1,26 +1,30 @@
 import type { TemperatureUnit } from "@/lib/constants";
 
-/** Exact F->C conversion; the DB stores wetbulb values in °F. */
+/** Exact C->F conversion; the DB stores wetbulb values in °C. */
+export const celsiusToFahrenheit = (celsius: number): number =>
+  (celsius * 9) / 5 + 32;
+
+/** Exact F->C conversion, kept for symmetry/potential reverse use. */
 export const fahrenheitToCelsius = (fahrenheit: number): number =>
   ((fahrenheit - 32) * 5) / 9;
 
-/** C->F conversion rounded to the nearest whole °F, per the app's threshold convention. */
-export const celsiusToFahrenheit = (celsius: number): number =>
-  Math.round((celsius * 9) / 5 + 32);
+/** C->F conversion rounded to the nearest whole °F, used only when deriving
+ * the wetbulb index's fixed threshold boundaries for display. */
+export const roundedCelsiusToFahrenheit = (celsius: number): number =>
+  Math.round(celsiusToFahrenheit(celsius));
 
-/** Converts a °F/year (or other delta) rate, which has no +32 offset to apply. */
-export const fahrenheitDeltaToCelsius = (fahrenheitDelta: number): number =>
-  (fahrenheitDelta * 5) / 9;
+/** Converts a °C/year (or other delta) rate, which has no +32 offset to apply. */
+export const celsiusDeltaToFahrenheit = (celsiusDelta: number): number =>
+  (celsiusDelta * 9) / 5;
 
-export const convertFromFahrenheit = (
-  fahrenheitValue: number,
+export const convertFromCelsius = (
+  celsiusValue: number,
   unit: TemperatureUnit,
-): number =>
-  unit === "C" ? fahrenheitToCelsius(fahrenheitValue) : fahrenheitValue;
+): number => (unit === "F" ? celsiusToFahrenheit(celsiusValue) : celsiusValue);
 
 export const formatTemperature = (
-  fahrenheitValue: number,
+  celsiusValue: number,
   unit: TemperatureUnit,
   decimals = 1,
 ): string =>
-  `${convertFromFahrenheit(fahrenheitValue, unit).toFixed(decimals)}°${unit}`;
+  `${convertFromCelsius(celsiusValue, unit).toFixed(decimals)}°${unit}`;

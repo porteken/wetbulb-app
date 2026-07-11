@@ -87,6 +87,7 @@ describe("graph Components", () => {
         option="avg"
         season="Annual"
         trendlineWetbulbs={mockTrendlineWetbulbs3}
+        unit="C"
         yearWetbulbs={mockYearWetbulbs3}
         years={mockYears1}
       />,
@@ -109,6 +110,7 @@ describe("graph Components", () => {
         option="avg"
         season="Annual"
         trendlineWetbulbs={mockTrendlineWetbulbs4}
+        unit="C"
         yearWetbulbs={mockYearWetbulbs4}
         years={mockYears1}
       />,
@@ -123,6 +125,23 @@ describe("graph Components", () => {
     );
   });
 
+  it("converts Celsius-sourced values to Fahrenheit for display by default", () => {
+    render(
+      <GenerateTrendGraph
+        increasePerYear={1}
+        option="avg"
+        season="Annual"
+        trendlineWetbulbs={mockTrendlineWetbulbs3}
+        yearWetbulbs={mockYearWetbulbs3}
+        years={mockYears1}
+      />,
+    );
+
+    expect(
+      screen.getByText("2020–2022 · Increase per year: +1.80°F"),
+    ).toBeInTheDocument();
+  });
+
   describe("generateTrendGraph", () => {
     it("renders the chart shell and descriptive title", () => {
       render(
@@ -131,6 +150,7 @@ describe("graph Components", () => {
           option="avg"
           season="Annual"
           trendlineWetbulbs={mockTrendlineWetbulbs1}
+          unit="C"
           yearWetbulbs={mockYearWetbulbs1}
           years={mockYears1}
         />,
@@ -138,7 +158,7 @@ describe("graph Components", () => {
 
       expect(screen.getByText("Average Annual Wetbulb")).toBeInTheDocument();
       expect(
-        screen.getByText("2020–2022 · Increase per year: +0.50°F"),
+        screen.getByText("2020–2022 · Increase per year: +0.50°C"),
       ).toBeInTheDocument();
       expect(screen.getByTestId("trend-chart")).toBeInTheDocument();
       expect(
@@ -226,6 +246,7 @@ describe("graph Components", () => {
           referenceWetbulbs={mockReferenceWetbulbs2}
           referenceYear="2000"
           season="Annual"
+          unit="C"
         />,
       );
 

@@ -21,7 +21,10 @@ import {
   type TemperatureUnit,
 } from "@/lib/constants";
 import { YearOptions } from "@/lib/utils/select-options";
-import { convertFromFahrenheit, fahrenheitDeltaToCelsius } from "@/lib/utils/temperature";
+import {
+  celsiusDeltaToFahrenheit,
+  convertFromCelsius,
+} from "@/lib/utils/temperature";
 import {
   getWetbulbInfo,
   WETBULB_INDEX_LEGEND_ITEMS,
@@ -34,13 +37,13 @@ import React, { memo, useCallback, useMemo, useTransition } from "react";
 import type { LocationOptionSection } from "@/types/types";
 
 const formatWetbulbValue = (value: number, unit: TemperatureUnit): string =>
-  `${convertFromFahrenheit(value, unit).toFixed(1)}°${unit}`;
+  `${convertFromCelsius(value, unit).toFixed(1)}°${unit}`;
 const getWetbulbRange = (
   p10: number,
   p90: number,
   unit: TemperatureUnit,
 ): string =>
-  `${convertFromFahrenheit(p10, unit).toFixed(1)}-${convertFromFahrenheit(p90, unit).toFixed(1)}`;
+  `${convertFromCelsius(p10, unit).toFixed(1)}-${convertFromCelsius(p90, unit).toFixed(1)}`;
 const convertChangeFrom2000 = (
   changeFrom2000: number | undefined,
   unit: TemperatureUnit,
@@ -49,8 +52,8 @@ const convertChangeFrom2000 = (
     return undefined;
   }
 
-  return unit === "C"
-    ? fahrenheitDeltaToCelsius(changeFrom2000)
+  return unit === "F"
+    ? celsiusDeltaToFahrenheit(changeFrom2000)
     : changeFrom2000;
 };
 const colorMapping = (value: number) => {
@@ -545,7 +548,7 @@ const RankingRow = memo(({ item, push, unit }: RankingRowProperties) => {
             <span
               className={`font-semibold ${getWetbulbInfo(FutureValueLower).color}`}
             >
-              {convertFromFahrenheit(FutureValueLower, unit).toFixed(1)}
+              {convertFromCelsius(FutureValueLower, unit).toFixed(1)}
             </span>
             <span className="text-muted-foreground"> - </span>
             <span

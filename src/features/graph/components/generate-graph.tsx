@@ -10,8 +10,8 @@ import {
   type TemperatureUnit,
 } from "@/lib/constants";
 import {
-  convertFromFahrenheit,
-  fahrenheitDeltaToCelsius,
+  convertFromCelsius,
+  celsiusDeltaToFahrenheit,
 } from "@/lib/utils/temperature";
 import * as React from "react";
 import {
@@ -748,14 +748,14 @@ const convertForecastData = (
 ): TrendForecastData | undefined =>
   forecastData && {
     forecastValues: forecastData.forecastValues.map((value) =>
-      convertFromFahrenheit(value, unit),
+      convertFromCelsius(value, unit),
     ),
     forecastYears: forecastData.forecastYears,
     lowerBound10: forecastData.lowerBound10.map((value) =>
-      convertFromFahrenheit(value, unit),
+      convertFromCelsius(value, unit),
     ),
     upperBound90: forecastData.upperBound90.map((value) =>
-      convertFromFahrenheit(value, unit),
+      convertFromCelsius(value, unit),
     ),
   };
 
@@ -788,8 +788,8 @@ export const GenerateTrendGraph = ({
   const convertedForecastData = convertForecastData(forecastData, unit);
   const chartData = buildTrendChartData(
     years,
-    yearWetbulbs.map((value) => convertFromFahrenheit(value, unit)),
-    trendlineWetbulbs.map((value) => convertFromFahrenheit(value, unit)),
+    yearWetbulbs.map((value) => convertFromCelsius(value, unit)),
+    trendlineWetbulbs.map((value) => convertFromCelsius(value, unit)),
     convertedForecastData,
   );
 
@@ -797,7 +797,7 @@ export const GenerateTrendGraph = ({
   const startYear = years.at(0) ?? GRAPH_CONFIG.YEAR_RANGE.START;
   const endYear = years.at(-1) ?? GRAPH_CONFIG.YEAR_RANGE.END;
   const increasePerYearInUnit =
-    unit === "C" ? fahrenheitDeltaToCelsius(increasePerYear) : increasePerYear;
+    unit === "F" ? celsiusDeltaToFahrenheit(increasePerYear) : increasePerYear;
   const increaseText = formatIncreasePerYearText(increasePerYearInUnit);
 
   return (
@@ -846,8 +846,8 @@ export const GenerateReferenceGraph = ({
 
   const chartData = buildReferenceChartData(
     dates,
-    currentWetbulbs.map((value) => convertFromFahrenheit(value, unit)),
-    referenceWetbulbs.map((value) => convertFromFahrenheit(value, unit)),
+    currentWetbulbs.map((value) => convertFromCelsius(value, unit)),
+    referenceWetbulbs.map((value) => convertFromCelsius(value, unit)),
   );
 
   return (

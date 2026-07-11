@@ -5,7 +5,7 @@ import {
   type GraphSeason,
   type TemperatureUnit,
 } from "@/lib/constants";
-import { convertFromFahrenheit } from "@/lib/utils/temperature";
+import { convertFromCelsius } from "@/lib/utils/temperature";
 
 export interface WetbulbDescription {
   colorClass: string;
@@ -27,8 +27,12 @@ interface WetbulbIndexLegendItem {
   colorClass: string;
   fillClass: string;
   level: WetbulbIndexLevel;
+  /** Upper bound in °C — the DB stores wetbulb values in Celsius, so
+   * classification always compares against this, regardless of display unit. */
   max?: number;
-  /** Clean Celsius range label — sourced from the original °C thresholds, not derived from `max`. */
+  /** Clean Fahrenheit range label — sourced independently from the °C
+   * thresholds (rounded to the nearest °F), not derived from `max` at
+   * render time, to avoid rounding drift. */
   rangeLabelC: string;
   rangeLabelF: string;
 }
@@ -38,7 +42,7 @@ export const WETBULB_INDEX_LEGEND_ITEMS: readonly WetbulbIndexLegendItem[] = [
     colorClass: "text-green-600",
     fillClass: "bg-green-500",
     level: "None",
-    max: 68,
+    max: 20,
     rangeLabelC: "< 20°C",
     rangeLabelF: "< 68°F",
   },
@@ -46,7 +50,7 @@ export const WETBULB_INDEX_LEGEND_ITEMS: readonly WetbulbIndexLegendItem[] = [
     colorClass: "text-yellow-600",
     fillClass: "bg-yellow-400",
     level: "Low Risk",
-    max: 76,
+    max: 24,
     rangeLabelC: "20–24°C",
     rangeLabelF: "68–76°F",
   },
@@ -54,7 +58,7 @@ export const WETBULB_INDEX_LEGEND_ITEMS: readonly WetbulbIndexLegendItem[] = [
     colorClass: "text-amber-600",
     fillClass: "bg-amber-500",
     level: "Moderate Risk",
-    max: 80,
+    max: 26,
     rangeLabelC: "25–26°C",
     rangeLabelF: "77–80°F",
   },
@@ -62,7 +66,7 @@ export const WETBULB_INDEX_LEGEND_ITEMS: readonly WetbulbIndexLegendItem[] = [
     colorClass: "text-orange-600",
     fillClass: "bg-orange-500",
     level: "High Risk",
-    max: 83,
+    max: 28,
     rangeLabelC: "27–28°C",
     rangeLabelF: "81–83°F",
   },
@@ -70,7 +74,7 @@ export const WETBULB_INDEX_LEGEND_ITEMS: readonly WetbulbIndexLegendItem[] = [
     colorClass: "text-red-600",
     fillClass: "bg-red-500",
     level: "Extreme Risk",
-    max: 87,
+    max: 30,
     rangeLabelC: "29–30°C",
     rangeLabelF: "84–87°F",
   },
@@ -78,7 +82,7 @@ export const WETBULB_INDEX_LEGEND_ITEMS: readonly WetbulbIndexLegendItem[] = [
     colorClass: "text-red-800",
     fillClass: "bg-red-700",
     level: "Empirical Limit",
-    max: 94,
+    max: 34,
     rangeLabelC: "31–34°C",
     rangeLabelF: "88–94°F",
   },
@@ -106,13 +110,13 @@ const MIN_CONFIDENCE_INTERVAL = 0.1;
 
 function buildWetbulbInfo(
   item: WetbulbIndexLegendItem,
-  wetbulbValueFahrenheit: number,
+  wetbulbValueCelsius: number,
   unit: TemperatureUnit,
 ): WetbulbInfo {
   return {
     color: item.colorClass,
     level: item.level,
-    value: `${convertFromFahrenheit(wetbulbValueFahrenheit, unit).toFixed(1)}°${unit}`,
+    value: `${convertFromCelsius(wetbulbValueCelsius, unit).toFixed(1)}°${unit}`,
   };
 }
 
@@ -123,7 +127,7 @@ export interface ForecastWetbulbDescriptionOptions {
 }
 
 export function getForecastWetbulbDescription(
-  wetbulbValueFahrenheit: number,
+  wetbulbValueCelsius: number,
   year: number,
   options: ForecastWetbulbDescriptionOptions = {},
 ): WetbulbDescription {
@@ -132,7 +136,7 @@ export function getForecastWetbulbDescription(
     unit = DEFAULT_TEMPERATURE_UNIT,
     upperBound90,
   } = options;
-  const info = getWetbulbInfo(wetbulbValueFahrenheit, unit);
+  const info = getWetbulbInfo(wetbulbValueCelsius, unit);
 
   const hasValidBounds =
     lowerBound10 !== undefined &&
@@ -142,7 +146,7 @@ export function getForecastWetbulbDescription(
     Math.abs(upperBound90 - lowerBound10) > MIN_CONFIDENCE_INTERVAL;
 
   const confidenceRange = hasValidBounds
-    ? `(10-90%: ${convertFromFahrenheit(lowerBound10, unit).toFixed(1)}-${convertFromFahrenheit(upperBound90, unit).toFixed(1)}°${unit})`
+    ? `(10-90%: ${convertFromCelsius(lowerBound10, unit).toFixed(1)}-${convertFromCelsius(upperBound90, unit).toFixed(1)}°${unit})`
     : undefined;
 
   return {
@@ -160,7 +164,7 @@ export interface WetbulbDescriptionOptions {
 }
 
 export function getWetbulbDescription(
-  wetbulbValueFahrenheit: number,
+  wetbulbValueCelsius: number,
   measureType: string,
   options: WetbulbDescriptionOptions = {},
 ): WetbulbDescription {
@@ -169,7 +173,7 @@ export function getWetbulbDescription(
     unit = DEFAULT_TEMPERATURE_UNIT,
     year = GRAPH_CONFIG.YEAR_RANGE.END,
   } = options;
-  const info = getWetbulbInfo(wetbulbValueFahrenheit, unit);
+  const info = getWetbulbInfo(wetbulbValueCelsius, unit);
   const measure = measureType === "avg" ? "average" : "max";
   const seasonLabel =
     season === DEFAULT_GRAPH_SEASON ? "annual" : season.toLowerCase();
@@ -182,7 +186,7 @@ export function getWetbulbDescription(
 }
 
 export function getWetbulbInfo(
-  wetbulbValueFahrenheit: number,
+  wetbulbValueCelsius: number,
   unit: TemperatureUnit = DEFAULT_TEMPERATURE_UNIT,
 ): WetbulbInfo {
   const foundItem = WETBULB_INDEX_LEGEND_ITEMS.find((legendItem, index) => {
@@ -190,8 +194,8 @@ export function getWetbulbInfo(
       return true;
     }
     return index === 0
-      ? wetbulbValueFahrenheit < legendItem.max
-      : wetbulbValueFahrenheit <= legendItem.max;
+      ? wetbulbValueCelsius < legendItem.max
+      : wetbulbValueCelsius <= legendItem.max;
   });
 
   const item = foundItem ?? WETBULB_INDEX_LEGEND_ITEMS.at(-1);
@@ -200,5 +204,5 @@ export function getWetbulbInfo(
     throw new Error("Wetbulb index legend items are empty or invalid");
   }
 
-  return buildWetbulbInfo(item, wetbulbValueFahrenheit, unit);
+  return buildWetbulbInfo(item, wetbulbValueCelsius, unit);
 }

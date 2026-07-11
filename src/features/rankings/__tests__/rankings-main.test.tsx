@@ -176,15 +176,15 @@ const mockLocationOptions = [
 ];
 
 const createMockRankingItem = (overrides = {}) => ({
-  avg_wetbulb: 74,
+  avg_wetbulb: 25,
   changeFrom2000: 0.5,
   city: "Test City",
-  FutureValueLower: 78,
-  FutureValueUpper: 88,
+  FutureValueLower: 25,
+  FutureValueUpper: 30,
   location_id: 1,
-  max_wetbulb: 82,
-  p10: 68,
-  p90: 78,
+  max_wetbulb: 30,
+  p10: 20,
+  p90: 25,
   rank: 1,
   state: "TX",
   ...overrides,
@@ -192,178 +192,178 @@ const createMockRankingItem = (overrides = {}) => ({
 
 const mockRankings = [
   createMockRankingItem({
-    avg_wetbulb: 72.5,
+    avg_wetbulb: 22.5,
     city: "Austin",
     location_id: 1,
-    max_wetbulb: 80.5,
+    max_wetbulb: 26.9,
     rank: 1,
     state: "TX",
   }),
   createMockRankingItem({
-    avg_wetbulb: 76,
+    avg_wetbulb: 24.4,
     city: "Dallas",
     location_id: 2,
-    max_wetbulb: 84,
+    max_wetbulb: 28.9,
     rank: 2,
     state: "TX",
   }),
   createMockRankingItem({
-    avg_wetbulb: 80,
+    avg_wetbulb: 26.7,
     city: "Houston",
     location_id: 3,
-    max_wetbulb: 88,
+    max_wetbulb: 31.1,
     rank: 3,
     state: "TX",
   }),
   createMockRankingItem({
-    avg_wetbulb: 85,
+    avg_wetbulb: 29.4,
     city: "Phoenix",
     location_id: 4,
-    max_wetbulb: 93,
+    max_wetbulb: 33.9,
     rank: 4,
     state: "AZ",
   }),
   createMockRankingItem({
-    avg_wetbulb: 87,
+    avg_wetbulb: 30.6,
     city: "Tucson",
     location_id: 5,
-    max_wetbulb: 95,
+    max_wetbulb: 35,
     rank: 5,
     state: "AZ",
   }),
   createMockRankingItem({
-    avg_wetbulb: 90,
+    avg_wetbulb: 32.2,
     city: "Miami",
     location_id: 6,
-    max_wetbulb: 98,
+    max_wetbulb: 36.7,
     rank: 6,
     state: "FL",
   }),
   createMockRankingItem({
-    avg_wetbulb: 88.5,
+    avg_wetbulb: 31.4,
     city: "Orlando",
     location_id: 7,
-    max_wetbulb: 96.5,
+    max_wetbulb: 35.8,
     rank: 7,
     state: "FL",
   }),
   createMockRankingItem({
-    avg_wetbulb: 67,
+    avg_wetbulb: 19.4,
     city: "Denver",
     location_id: 8,
-    max_wetbulb: 75,
+    max_wetbulb: 23.9,
     rank: 8,
     state: "CO",
   }),
   createMockRankingItem({
-    avg_wetbulb: 65,
+    avg_wetbulb: 18.3,
     city: "Boulder",
     location_id: 9,
-    max_wetbulb: 73,
+    max_wetbulb: 22.8,
     rank: 9,
     state: "CO",
   }),
   createMockRankingItem({
-    avg_wetbulb: 72.5,
+    avg_wetbulb: 22.5,
     city: "Chicago",
     location_id: 10,
-    max_wetbulb: 80.5,
+    max_wetbulb: 26.9,
     rank: 10,
     state: "IL",
   }),
   createMockRankingItem({
-    avg_wetbulb: 70.5,
+    avg_wetbulb: 21.4,
     city: "Springfield",
     location_id: 11,
-    max_wetbulb: 78.5,
+    max_wetbulb: 25.8,
     rank: 11,
     state: "IL",
   }),
   createMockRankingItem({
-    avg_wetbulb: 61.5,
+    avg_wetbulb: 16.4,
     city: "Seattle",
     location_id: 12,
-    max_wetbulb: 69.5,
+    max_wetbulb: 20.8,
     rank: 12,
     state: "WA",
   }),
   createMockRankingItem({
-    avg_wetbulb: 63.5,
+    avg_wetbulb: 17.5,
     city: "Spokane",
     location_id: 13,
-    max_wetbulb: 71.5,
+    max_wetbulb: 21.9,
     rank: 13,
     state: "WA",
   }),
   createMockRankingItem({
-    avg_wetbulb: 62.5,
+    avg_wetbulb: 16.9,
     city: "Portland",
     location_id: 14,
-    max_wetbulb: 70.5,
+    max_wetbulb: 21.4,
     rank: 14,
     state: "OR",
   }),
   createMockRankingItem({
-    avg_wetbulb: 60.5,
+    avg_wetbulb: 15.8,
     city: "Eugene",
     location_id: 15,
-    max_wetbulb: 68.5,
+    max_wetbulb: 20.3,
     rank: 15,
     state: "OR",
   }),
   createMockRankingItem({
-    avg_wetbulb: 69,
+    avg_wetbulb: 20.6,
     city: "Boston",
     location_id: 16,
-    max_wetbulb: 77,
+    max_wetbulb: 25,
     rank: 16,
     state: "MA",
   }),
   createMockRankingItem({
-    avg_wetbulb: 70,
+    avg_wetbulb: 21.1,
     city: "Cambridge",
     location_id: 17,
-    max_wetbulb: 78,
+    max_wetbulb: 25.6,
     rank: 17,
     state: "MA",
   }),
   createMockRankingItem({
-    avg_wetbulb: 74,
+    avg_wetbulb: 23.3,
     city: "New York",
     location_id: 18,
-    max_wetbulb: 82,
+    max_wetbulb: 27.8,
     rank: 18,
     state: "NY",
   }),
   createMockRankingItem({
-    avg_wetbulb: 71.5,
+    avg_wetbulb: 21.9,
     city: "Buffalo",
     location_id: 19,
-    max_wetbulb: 79.5,
+    max_wetbulb: 26.4,
     rank: 19,
     state: "NY",
   }),
   createMockRankingItem({
-    avg_wetbulb: 78,
+    avg_wetbulb: 25.6,
     city: "Los Angeles",
     location_id: 20,
-    max_wetbulb: 86,
+    max_wetbulb: 30,
     rank: 20,
     state: "CA",
   }),
   createMockRankingItem({
-    avg_wetbulb: 73,
+    avg_wetbulb: 22.8,
     city: "San Francisco",
     location_id: 21,
-    max_wetbulb: 81,
+    max_wetbulb: 27.2,
     rank: 21,
     state: "CA",
   }),
   createMockRankingItem({
-    avg_wetbulb: 77,
+    avg_wetbulb: 25,
     city: "San Diego",
     location_id: 22,
-    max_wetbulb: 85,
+    max_wetbulb: 29.4,
     rank: 22,
     state: "CA",
   }),
@@ -382,14 +382,14 @@ const noDataCityRankings = [
 ];
 
 const rangeCityRankings = [
-  createMockRankingItem({ city: "Range City", p10: 64.5, p90: 78.5 }),
+  createMockRankingItem({ city: "Range City", p10: 18, p90: 25 }),
 ];
 
 const futureCityRankings = [
   createMockRankingItem({
     city: "Future City",
-    FutureValueLower: 80,
-    FutureValueUpper: 90,
+    FutureValueLower: 25,
+    FutureValueUpper: 32,
   }),
 ];
 
@@ -407,10 +407,10 @@ const stableCityRankings = [
 
 const extremeHeatCityRankings = [
   createMockRankingItem({
-    avg_wetbulb: 98,
+    avg_wetbulb: 36,
     city: "Extreme Heat City",
     location_id: 23,
-    max_wetbulb: 104,
+    max_wetbulb: 40,
   }),
 ];
 
@@ -760,13 +760,13 @@ describe("rankingsMain", () => {
     it("should display change from 2000 with positive indicator", () => {
       render(<RankingsMain {...defaultProps} rankings={hotCityRankings} />);
 
-      expect(screen.getByText("+1.5°F")).toBeInTheDocument();
+      expect(screen.getByText("+2.7°F")).toBeInTheDocument();
     });
 
     it("should display change from 2000 with negative indicator", () => {
       render(<RankingsMain {...defaultProps} rankings={coolCityRankings} />);
 
-      expect(screen.getByText("-0.5°F")).toBeInTheDocument();
+      expect(screen.getByText("-0.9°F")).toBeInTheDocument();
     });
 
     it("should display N/A for undefined change from 2000", () => {
@@ -779,14 +779,14 @@ describe("rankingsMain", () => {
     it("should display WETBULB range correctly", () => {
       render(<RankingsMain {...defaultProps} rankings={rangeCityRankings} />);
 
-      expect(screen.getByText("64.5-78.5°F")).toBeInTheDocument();
+      expect(screen.getByText("64.4-77.0°F")).toBeInTheDocument();
     });
 
     it("should display 2100 forecast range when available", () => {
       render(<RankingsMain {...defaultProps} rankings={futureCityRankings} />);
 
-      expect(screen.getByText("80.0")).toBeInTheDocument();
-      expect(screen.getByText("90.0°F")).toBeInTheDocument();
+      expect(screen.getByText("77.0")).toBeInTheDocument();
+      expect(screen.getByText("89.6°F")).toBeInTheDocument();
     });
 
     it("should display N/A for undefined 2100 forecast", () => {
@@ -820,14 +820,14 @@ describe("rankingsMain", () => {
     it("should apply correct color for positive change values", () => {
       render(<RankingsMain {...defaultProps} rankings={hotCityRankings} />);
 
-      const changeCell = screen.getByText("+1.5°F");
+      const changeCell = screen.getByText("+2.7°F");
       expect(changeCell).toHaveClass("text-red-600");
     });
 
     it("should apply correct color for negative change values", () => {
       render(<RankingsMain {...defaultProps} rankings={coolCityRankings} />);
 
-      const changeCell = screen.getByText("-0.5°F");
+      const changeCell = screen.getByText("-0.9°F");
       expect(changeCell).toHaveClass("text-blue-600");
     });
 

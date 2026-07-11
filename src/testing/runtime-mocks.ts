@@ -51,17 +51,17 @@ const FORECAST_YEARS = Array.from({ length: 75 }, (_, index) => 2026 + index);
 const GRAPH_SEASONS = ["Annual", "Spring", "Summer", "Fall", "Winter"] as const;
 const SEASONAL_AVG_OFFSETS = {
   Annual: 0,
-  Fall: -0.8,
-  Spring: -1.6,
-  Summer: 4.5,
-  Winter: -7.5,
+  Fall: -0.44,
+  Spring: -0.89,
+  Summer: 2.5,
+  Winter: -4.17,
 } as const;
 const SEASONAL_MAX_OFFSETS = {
-  Annual: 4.5,
-  Fall: 3.6,
-  Spring: 2.3,
-  Summer: 6.8,
-  Winter: 1.4,
+  Annual: 2.5,
+  Fall: 2,
+  Spring: 1.28,
+  Summer: 3.78,
+  Winter: 0.78,
 } as const;
 
 const LOCATIONS = [
@@ -71,8 +71,8 @@ const LOCATIONS = [
     lng: -112.074,
     location_id: 1,
     state: "AZ",
-    trendPerYear: 0.15,
-    year2000Avg: 68.2,
+    trendPerYear: 0.08,
+    year2000Avg: 20.1,
   },
   {
     city: "Miami",
@@ -80,8 +80,8 @@ const LOCATIONS = [
     lng: -80.1918,
     location_id: 2,
     state: "FL",
-    trendPerYear: 0.1,
-    year2000Avg: 78.8,
+    trendPerYear: 0.06,
+    year2000Avg: 26,
   },
   {
     city: "Dallas",
@@ -89,8 +89,8 @@ const LOCATIONS = [
     lng: -96.797,
     location_id: 3,
     state: "TX",
-    trendPerYear: 0.13,
-    year2000Avg: 74.7,
+    trendPerYear: 0.07,
+    year2000Avg: 23.7,
   },
   {
     city: "Denver",
@@ -98,8 +98,8 @@ const LOCATIONS = [
     lng: -104.9903,
     location_id: 4,
     state: "CO",
-    trendPerYear: 0.09,
-    year2000Avg: 58.4,
+    trendPerYear: 0.05,
+    year2000Avg: 14.7,
   },
   {
     city: "Seattle",
@@ -107,8 +107,8 @@ const LOCATIONS = [
     lng: -122.3321,
     location_id: 5,
     state: "WA",
-    trendPerYear: 0.07,
-    year2000Avg: 56.8,
+    trendPerYear: 0.04,
+    year2000Avg: 13.8,
   },
   {
     city: "Minneapolis",
@@ -116,8 +116,8 @@ const LOCATIONS = [
     lng: -93.265,
     location_id: 6,
     state: "MN",
-    trendPerYear: 0.08,
-    year2000Avg: 62.1,
+    trendPerYear: 0.04,
+    year2000Avg: 16.7,
   },
 ] as const;
 
@@ -143,7 +143,7 @@ const buildWetbulbYearRows = (): RuntimeWetbulbRow[] => {
         const month = 6 + Math.floor(index / 4);
         const day = 1 + (index % 4) * 7;
         const date = `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
-        const wetbulb = round(seasonalBase + (index - 4.5) * 0.35);
+        const wetbulb = round(seasonalBase + (index - 4.5) * 0.19);
 
         rows.push({
           date,
@@ -177,15 +177,15 @@ const MOCK_TABLES: RuntimeMockTables = {
           avg_wetbulb: avg,
           change_from_2000: round((year - 2000) * location.trendPerYear),
           city: location.city,
-          future_lower: round(forecastWetbulb - 2.2),
-          future_upper: round(forecastWetbulb + 2.2),
+          future_lower: round(forecastWetbulb - 1.2),
+          future_upper: round(forecastWetbulb + 1.2),
           location_id: location.location_id,
           max_wetbulb: round(
             getAverageWetbulb(location.location_id, year) +
               SEASONAL_MAX_OFFSETS[season],
           ),
-          p10: round(avg - 2.5),
-          p90: round(avg + 2.5),
+          p10: round(avg - 1.4),
+          p90: round(avg + 1.4),
           season,
           state: location.state,
           year,
@@ -222,10 +222,10 @@ const MOCK_TABLES: RuntimeMockTables = {
 
         return {
           location_id: location.location_id,
-          lower: round(forecastWetbulb - 2.2),
+          lower: round(forecastWetbulb - 1.2),
           wetbulb: forecastWetbulb,
           season,
-          upper: round(forecastWetbulb + 2.2),
+          upper: round(forecastWetbulb + 1.2),
           year,
         };
       });
@@ -248,10 +248,10 @@ const MOCK_TABLES: RuntimeMockTables = {
 
         return {
           location_id: location.location_id,
-          lower: round(forecastWetbulb - 2.2),
+          lower: round(forecastWetbulb - 1.2),
           wetbulb: forecastWetbulb,
           season,
-          upper: round(forecastWetbulb + 2.2),
+          upper: round(forecastWetbulb + 1.2),
           year,
         };
       });
@@ -262,8 +262,8 @@ const MOCK_TABLES: RuntimeMockTables = {
       const avg = getAverageWetbulb(location.location_id, year);
       return {
         location_id: location.location_id,
-        p10: round(avg - 2.5),
-        p90: round(avg + 2.5),
+        p10: round(avg - 1.4),
+        p90: round(avg + 1.4),
         year,
       };
     }),
@@ -277,8 +277,8 @@ const MOCK_TABLES: RuntimeMockTables = {
           avg_wetbulb: round(avg + SEASONAL_AVG_OFFSETS[season]),
           location_id: location.location_id,
           max_wetbulb: round(avg + SEASONAL_MAX_OFFSETS[season]),
-          p10: round(avg - 2.5),
-          p90: round(avg + 2.5),
+          p10: round(avg - 1.4),
+          p90: round(avg + 1.4),
           season,
           year,
         };
