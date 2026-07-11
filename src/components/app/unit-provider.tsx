@@ -24,7 +24,7 @@ const readCookieUnit = (): TemperatureUnit => {
   }
 
   const match = new RegExp(
-    `(?:^|;\\s*)${TEMPERATURE_UNIT_COOKIE_NAME}=([^;]+)`,
+    String.raw`(?:^|;\s*)${TEMPERATURE_UNIT_COOKIE_NAME}=([^;]+)`,
     "u",
   ).exec(document.cookie);
 
@@ -43,9 +43,9 @@ const writeCookieUnit = (unit: TemperatureUnit): void => {
 
 export function UnitProvider({
   children,
-}: {
+}: Readonly<{
   children: React.ReactNode;
-}): React.ReactElement {
+}>): React.ReactElement {
   const [unit, setUnit] = React.useState<TemperatureUnit>(
     DEFAULT_TEMPERATURE_UNIT,
   );
