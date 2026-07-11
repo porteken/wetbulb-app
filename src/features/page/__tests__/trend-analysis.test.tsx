@@ -39,17 +39,21 @@ vi.mock("@/lib/api/fetch-client", () => ({
 
 vi.mock("@/lib/utils/wetbulb-index", () => ({
   getForecastWetbulbDescription: mockFn(
-    (value: number, year: number, lower: number, upper: number) => ({
+    (
+      value: number,
+      year: number,
+      options?: { lowerBound10?: number; upperBound90?: number },
+    ) => ({
       colorClass: "text-red-500",
-      confidenceRange: `(range: ${lower}-${upper})`,
+      confidenceRange: `(range: ${options?.lowerBound10}-${options?.upperBound90})`,
       prefix: "Forecast:",
       value: "High",
     }),
   ),
   getWetbulbDescription: mockFn(
-    (value: number, option: string, year: number) => ({
+    (value: number, option: string, options?: { year?: number }) => ({
       colorClass: "text-orange-500",
-      prefix: `${year} Thermal Stress:`,
+      prefix: `${options?.year} Thermal Stress:`,
       value: "Moderate",
     }),
   ),
@@ -289,12 +293,11 @@ describe("trendAnalysis", () => {
       renderWithQueryClient(<TrendAnalysis {...defaultProps} />);
 
       await waitFor(() => {
-        expect(getWetbulbDescription).toHaveBeenCalledWith(
-          26,
-          "avg",
-          2023,
-          "Annual",
-        );
+        expect(getWetbulbDescription).toHaveBeenCalledWith(26, "avg", {
+          season: "Annual",
+          unit: "F",
+          year: 2023,
+        });
       });
 
       await waitFor(() => {
@@ -706,12 +709,11 @@ describe("trendAnalysis", () => {
       renderWithQueryClient(<TrendAnalysis {...defaultProps} />);
 
       await waitFor(() => {
-        expect(getWetbulbDescription).toHaveBeenCalledWith(
-          25,
-          "avg",
-          2023,
-          "Annual",
-        );
+        expect(getWetbulbDescription).toHaveBeenCalledWith(25, "avg", {
+          season: "Annual",
+          unit: "F",
+          year: 2023,
+        });
       });
     });
 

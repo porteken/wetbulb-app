@@ -3,6 +3,7 @@
 const RANK_THREE = 3;
 
 import { PageShell } from "@/components/app/page-shell";
+import { useTemperatureUnit } from "@/components/app/unit-provider";
 import { WetbulbIndexLegend } from "@/components/app/wetbulb-index-legend";
 import { Pagination } from "@/components/ui/pagination";
 import { Select } from "@/components/ui/select";
@@ -17,8 +18,10 @@ import {
   GRAPH_SEASONS,
   normalizeGraphSeason,
   type GraphSeason,
+  type TemperatureUnit,
 } from "@/lib/constants";
 import { YearOptions } from "@/lib/utils/select-options";
+import { convertFromFahrenheit, fahrenheitDeltaToCelsius } from "@/lib/utils/temperature";
 import {
   getWetbulbInfo,
   WETBULB_INDEX_LEGEND_ITEMS,
@@ -30,8 +33,26 @@ import React, { memo, useCallback, useMemo, useTransition } from "react";
 
 import type { LocationOptionSection } from "@/types/types";
 
-const getWetbulbRange = (p10: number, p90: number): string =>
-  `${p10.toFixed(1)}-${p90.toFixed(1)}`;
+const formatWetbulbValue = (value: number, unit: TemperatureUnit): string =>
+  `${convertFromFahrenheit(value, unit).toFixed(1)}°${unit}`;
+const getWetbulbRange = (
+  p10: number,
+  p90: number,
+  unit: TemperatureUnit,
+): string =>
+  `${convertFromFahrenheit(p10, unit).toFixed(1)}-${convertFromFahrenheit(p90, unit).toFixed(1)}`;
+const convertChangeFrom2000 = (
+  changeFrom2000: number | undefined,
+  unit: TemperatureUnit,
+): number | undefined => {
+  if (changeFrom2000 === undefined) {
+    return undefined;
+  }
+
+  return unit === "C"
+    ? fahrenheitDeltaToCelsius(changeFrom2000)
+    : changeFrom2000;
+};
 const colorMapping = (value: number) => {
   if (value > 0) {
     return "text-red-600 dark:text-red-400";
@@ -430,9 +451,10 @@ SortHeader.displayName = "SortHeader";
 interface RankingRowProperties {
   item: RankingItem;
   push: (href: string) => void;
+  unit: TemperatureUnit;
 }
 
-const RankingRow = memo(({ item, push }: RankingRowProperties) => {
+const RankingRow = memo(({ item, push, unit }: RankingRowProperties) => {
   const {
     avg_wetbulb,
     changeFrom2000,
@@ -462,6 +484,7 @@ const RankingRow = memo(({ item, push }: RankingRowProperties) => {
   );
 
   const avgWetbulbInfo = getWetbulbInfo(avg_wetbulb);
+  const changeFrom2000InUnit = convertChangeFrom2000(changeFrom2000, unit);
 
   return (
     <tr
@@ -487,7 +510,7 @@ const RankingRow = memo(({ item, push }: RankingRowProperties) => {
       </td>
       <td className="px-6 py-4 text-sm whitespace-nowrap">
         <span className={`font-semibold ${avgWetbulbInfo.color}`}>
-          {avg_wetbulb.toFixed(1)}°F
+          {formatWetbulbValue(avg_wetbulb, unit)}
         </span>
       </td>
       <td className="px-6 py-4 text-sm whitespace-nowrap">
@@ -495,24 +518,24 @@ const RankingRow = memo(({ item, push }: RankingRowProperties) => {
           <span className="text-muted-foreground">N/A</span>
         ) : (
           <span className={`font-semibold ${getWetbulbInfo(max_wetbulb).color}`}>
-            {max_wetbulb.toFixed(1)}°F
+            {formatWetbulbValue(max_wetbulb, unit)}
           </span>
         )}
       </td>
       <td className="px-6 py-4 text-sm whitespace-nowrap text-muted-foreground">
         {p10 !== undefined && p90 !== undefined ? (
-          `${getWetbulbRange(p10, p90)}°F`
+          `${getWetbulbRange(p10, p90, unit)}°${unit}`
         ) : (
           <span className="text-muted-foreground">N/A</span>
         )}
       </td>
       <td className="px-6 py-4 text-sm whitespace-nowrap">
-        {changeFrom2000 === undefined ? (
+        {changeFrom2000InUnit === undefined ? (
           <span className="text-muted-foreground">N/A</span>
         ) : (
-          <span className={`font-semibold ${colorMapping(changeFrom2000)}`}>
-            {changeFrom2000 > 0 ? "+" : ""}
-            {changeFrom2000.toFixed(1)}°F
+          <span className={`font-semibold ${colorMapping(changeFrom2000InUnit)}`}>
+            {changeFrom2000InUnit > 0 ? "+" : ""}
+            {changeFrom2000InUnit.toFixed(1)}°{unit}
           </span>
         )}
       </td>
@@ -522,13 +545,13 @@ const RankingRow = memo(({ item, push }: RankingRowProperties) => {
             <span
               className={`font-semibold ${getWetbulbInfo(FutureValueLower).color}`}
             >
-              {FutureValueLower.toFixed(1)}
+              {convertFromFahrenheit(FutureValueLower, unit).toFixed(1)}
             </span>
             <span className="text-muted-foreground"> - </span>
             <span
               className={`font-semibold ${getWetbulbInfo(FutureValueUpper).color}`}
             >
-              {FutureValueUpper.toFixed(1)}°F
+              {formatWetbulbValue(FutureValueUpper, unit)}
             </span>
           </div>
         ) : (
@@ -551,6 +574,7 @@ export function RankingsMain({
   shouldPersistInitialSeason = false,
 }: Readonly<RankingsMainProperties>) {
   const router = useRouter();
+  const { unit } = useTemperatureUnit();
   const handlePush = React.useCallback(
     (url: string) => {
       router.push(url);
@@ -789,6 +813,7 @@ export function RankingsMain({
                         item={item}
                         key={item.location_id}
                         push={handlePush}
+                        unit={unit}
                       />
                     ))
                   )}

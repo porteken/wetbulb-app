@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import React from "react";
 import { describe, expect, it, vi } from "vitest";
 
@@ -106,6 +106,20 @@ describe("aboutMain", () => {
 
     const limitText = screen.getByText(/closer to\s*88°F/iu);
     expect(limitText).toBeInTheDocument();
+  });
+
+  it("should render the wetbulb index table with combined F and C ranges", () => {
+    render(<AboutMain LocationOptions={mockLocationOptions} />);
+
+    const table = screen.getByRole("table");
+    expect(within(table).getByText("None")).toBeInTheDocument();
+    expect(within(table).getByText("< 68°F (< 20°C)")).toBeInTheDocument();
+    expect(within(table).getByText("Low Risk")).toBeInTheDocument();
+    expect(
+      within(table).getByText("68–76°F (20–24°C)"),
+    ).toBeInTheDocument();
+    expect(within(table).getByText("Theoretical Limit")).toBeInTheDocument();
+    expect(within(table).getByText("≥ 95°F (≥ 35°C)")).toBeInTheDocument();
   });
 
   it("should render without location options", () => {

@@ -8,6 +8,24 @@ export const APP_CONFIG = {
   WETBULB_LOW_RISK_URL: "https://escholarship.org/content/qt2xz601d0/qt2xz601d0.pdf",
 } as const;
 
+export const TEMPERATURE_UNIT_COOKIE_NAME = "temperature-unit" as const;
+export const TEMPERATURE_UNITS = ["F", "C"] as const;
+export type TemperatureUnit = (typeof TEMPERATURE_UNITS)[number];
+export const DEFAULT_TEMPERATURE_UNIT: TemperatureUnit = "F";
+
+const isTemperatureUnit = (value: string): value is TemperatureUnit =>
+  (TEMPERATURE_UNITS as readonly string[]).includes(value);
+
+export const normalizeTemperatureUnit = (
+  value: string | undefined,
+): TemperatureUnit => {
+  if (value && isTemperatureUnit(value)) {
+    return value;
+  }
+
+  return DEFAULT_TEMPERATURE_UNIT;
+};
+
 export const GRAPH_MEASURE_COOKIE_NAME = "graph-measure" as const;
 export const GRAPH_SEASON_COOKIE_NAME = "graph-season" as const;
 export const REFERENCE_YEAR_COOKIE_NAME = "reference-year" as const;

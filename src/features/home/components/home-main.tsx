@@ -2,6 +2,7 @@
 
 import { PageLoader } from "@/components/app/page-loader";
 import { PageShell } from "@/components/app/page-shell";
+import { useTemperatureUnit } from "@/components/app/unit-provider";
 import { useIgnorePersistenceError } from "@/hooks/use-ignore-persistence-error";
 import { useIsMobileViewport } from "@/hooks/use-is-mobile-viewport";
 import {
@@ -69,6 +70,7 @@ const Home: FC<MapProperties> = ({
   );
   const isMobileViewport = useIsMobileViewport();
   const [isMobileGraphLegendOpen, setIsMobileGraphLegendOpen] = useState(false);
+  const { unit } = useTemperatureUnit();
   const markerPrefetchOptionsRef = useRef({
     graphMeasure: selectedGraphMeasure,
     graphSeason: selectedGraphSeason,
@@ -128,7 +130,7 @@ const Home: FC<MapProperties> = ({
         trendQuery.data,
         forecastQuery.data,
         selectedGraphMeasure,
-        selectedGraphSeason,
+        { season: selectedGraphSeason, unit },
       );
 
       return {
@@ -141,6 +143,7 @@ const Home: FC<MapProperties> = ({
       forecastQuery.data,
       selectedGraphMeasure,
       selectedGraphSeason,
+      unit,
     ]);
   const graphLoading = trendQuery.isLoading;
   const graphHasError = trendQuery.isError;
@@ -284,6 +287,7 @@ const Home: FC<MapProperties> = ({
           seasonOptions={seasonOptions}
           selectOptions={selectOptions}
           trendGraphSnapshot={trendGraphSnapshot}
+          unit={unit}
         />
       </Modal>
     </div>

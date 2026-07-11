@@ -1,4 +1,9 @@
-import { DEFAULT_GRAPH_SEASON, type GraphSeason } from "@/lib/constants";
+import {
+  DEFAULT_GRAPH_SEASON,
+  DEFAULT_TEMPERATURE_UNIT,
+  type GraphSeason,
+  type TemperatureUnit,
+} from "@/lib/constants";
 import {
   getForecastWetbulbDescription,
   getWetbulbDescription,
@@ -32,6 +37,7 @@ interface TrendAnalysisResult {
 
 function computeForecastWetbulbLevel(
   forecastData: ForecastGraphData,
+  unit: TemperatureUnit,
 ): WetbulbDescription | undefined {
   if (
     forecastData.forecastValues.length === 0 ||
@@ -57,12 +63,16 @@ function computeForecastWetbulbLevel(
     return undefined;
   }
 
-  return getForecastWetbulbDescription(
-    finalForecastValue,
-    finalForecastYear,
-    finalLowerBound10,
-    finalUpperBound90,
-  );
+  return getForecastWetbulbDescription(finalForecastValue, finalForecastYear, {
+    lowerBound10: finalLowerBound10,
+    unit,
+    upperBound90: finalUpperBound90,
+  });
+}
+
+export interface DeriveTrendAnalysisOptions {
+  season?: GraphSeason;
+  unit?: TemperatureUnit;
 }
 
 // Pure derivation over already-fetched trend/forecast data — pairs with
@@ -72,7 +82,7 @@ export const deriveTrendAnalysis = (
   trendData: TrendGraphDataProperties,
   forecastData: ForecastGraphData | undefined,
   option: string,
-  season: GraphSeason = DEFAULT_GRAPH_SEASON,
+  { season = DEFAULT_GRAPH_SEASON, unit = DEFAULT_TEMPERATURE_UNIT }: DeriveTrendAnalysisOptions = {},
 ): TrendAnalysisResult => {
   const { increase_per_year, trendline_wetbulbs, year_wetbulbs, years } = trendData;
   const snapshot: TrendGraphSnapshot = {
@@ -106,14 +116,13 @@ export const deriveTrendAnalysis = (
 
   return {
     forecastWetbulbLevel: forecastData
-      ? computeForecastWetbulbLevel(forecastData)
+      ? computeForecastWetbulbLevel(forecastData, unit)
       : undefined,
-    wetbulbDescription: getWetbulbDescription(
-      currentWetbulbValue,
-      option,
-      currentYear,
+    wetbulbDescription: getWetbulbDescription(currentWetbulbValue, option, {
       season,
-    ),
+      unit,
+      year: currentYear,
+    }),
     snapshot,
   };
 };

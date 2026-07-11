@@ -2,6 +2,7 @@
 
 import { ChartSkeleton } from "@/components/app/chart-skeleton";
 import { ForecastControls } from "@/components/app/forecast-controls";
+import { useTemperatureUnit } from "@/components/app/unit-provider";
 import { ErrorGraphDisplay } from "@/features/home/components/error-graph-display";
 import { useForecastData } from "@/features/home/hooks/use-forecast-data";
 import { useTrendGraphData } from "@/features/home/hooks/use-trend-graph-data";
@@ -118,6 +119,7 @@ const TrendAnalysisComponent: React.FC<TrendAnalysisProperties> = ({
   const isMobileViewport = useIsMobileViewport();
   const [isMobileLegendOpen, setIsMobileLegendOpen] = React.useState(false);
   const ignorePersistenceError = useIgnorePersistenceError();
+  const { unit } = useTemperatureUnit();
 
   const showTrendLegend = !isMobileViewport || isMobileLegendOpen;
 
@@ -165,7 +167,7 @@ const TrendAnalysisComponent: React.FC<TrendAnalysisProperties> = ({
       trendQuery.data,
       forecastQuery.data,
       selectedGraphMeasure,
-      graphSeason,
+      { season: graphSeason, unit },
     );
 
     return {
@@ -173,7 +175,13 @@ const TrendAnalysisComponent: React.FC<TrendAnalysisProperties> = ({
       wetbulbDescription: result.wetbulbDescription,
       trendGraphSnapshot: result.snapshot,
     };
-  }, [trendQuery.data, forecastQuery.data, selectedGraphMeasure, graphSeason]);
+  }, [
+    trendQuery.data,
+    forecastQuery.data,
+    selectedGraphMeasure,
+    graphSeason,
+    unit,
+  ]);
   const hasTrendError = trendQuery.isError;
 
   const handleGraphMeasureChange = React.useCallback(
@@ -324,6 +332,7 @@ const TrendAnalysisComponent: React.FC<TrendAnalysisProperties> = ({
                   season={trendGraphSnapshot.season}
                   showLegend={showTrendLegend}
                   trendlineWetbulbs={trendGraphSnapshot.trendline_wetbulbs}
+                  unit={unit}
                   yearWetbulbs={trendGraphSnapshot.year_wetbulbs}
                   years={trendGraphSnapshot.years}
                 />

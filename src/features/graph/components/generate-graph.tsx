@@ -3,10 +3,16 @@
 import { ChartResponsiveContainer } from "@/components/app/chart-responsive-container";
 import {
   DEFAULT_GRAPH_SEASON,
+  DEFAULT_TEMPERATURE_UNIT,
   GRAPH_COLORS,
   GRAPH_CONFIG,
   type GraphSeason,
+  type TemperatureUnit,
 } from "@/lib/constants";
+import {
+  convertFromFahrenheit,
+  fahrenheitDeltaToCelsius,
+} from "@/lib/utils/temperature";
 import * as React from "react";
 import {
   Area,
@@ -34,6 +40,7 @@ interface GenerateTrendGraphOptions {
   season?: GraphSeason;
   showLegend?: boolean;
   trendlineWetbulbs: number[];
+  unit?: TemperatureUnit;
   useCompactDesktopHeight?: boolean;
   yearWetbulbs: number[];
   years: number[];
@@ -48,6 +55,7 @@ interface GenerateReferenceGraphOptions {
   referenceYear: string;
   season?: GraphSeason;
   showLegend?: boolean;
+  unit?: TemperatureUnit;
 }
 
 interface ChartShellProperties {
@@ -70,6 +78,7 @@ interface ChartTooltipProperties {
   active?: boolean;
   label?: number | string;
   payload?: ChartTooltipPayload[];
+  unit: TemperatureUnit;
 }
 
 interface ReferenceChartPoint {
@@ -113,6 +122,7 @@ interface TrendChartBodyProperties {
   season: GraphSeason;
   shouldAnimate: boolean;
   showLegend: boolean;
+  unit: TemperatureUnit;
 }
 
 interface ReferenceChartBodyProperties {
@@ -123,6 +133,7 @@ interface ReferenceChartBodyProperties {
   season: GraphSeason;
   shouldAnimate: boolean;
   showLegend: boolean;
+  unit: TemperatureUnit;
 }
 
 const DATE_FORMATTER = new Intl.DateTimeFormat("en-US", {
@@ -184,12 +195,15 @@ const getGraphFillHeightClass = (useCompactDesktopHeight: boolean): string =>
     ? "h-full min-h-[clamp(220px,42vh,520px)] sm:min-h-[clamp(300px,45vh,500px)]"
     : "h-full min-h-[clamp(220px,42vh,520px)] sm:min-h-[clamp(450px,70vh,850px)]";
 
-const formatWetbulbValue = (value?: number): string => {
+const formatWetbulbValue = (
+  value: number | undefined,
+  unit: TemperatureUnit,
+): string => {
   if (value === undefined || Number.isNaN(value)) {
     return "—";
   }
 
-  return `${WETBULB_FORMATTER.format(value)}°F`;
+  return `${WETBULB_FORMATTER.format(value)}°${unit}`;
 };
 
 const shouldAnimateCharts = (): boolean => {
@@ -393,6 +407,7 @@ const ChartTooltip = ({
   active,
   label,
   payload,
+  unit,
 }: ChartTooltipProperties): React.ReactElement | null => {
   if (!active || !payload || payload.length === 0) {
     return null;
@@ -430,7 +445,7 @@ const ChartTooltip = ({
               {entry.name}
             </span>
             <span className="font-semibold text-foreground">
-              {formatWetbulbValue(entry.value)}
+              {formatWetbulbValue(entry.value, unit)}
             </span>
           </div>
         ))}
@@ -438,8 +453,9 @@ const ChartTooltip = ({
       {typeof point.confidenceLow === "number" &&
         typeof point.confidenceHigh === "number" && (
           <p className="mt-2 border-t border-border/70 pt-2 text-[11px] text-muted-foreground">
-            80% confidence interval: {formatWetbulbValue(point.confidenceLow)} to{" "}
-            {formatWetbulbValue(point.confidenceHigh)}
+            80% confidence interval:{" "}
+            {formatWetbulbValue(point.confidenceLow, unit)} to{" "}
+            {formatWetbulbValue(point.confidenceHigh, unit)}
           </p>
         )}
     </div>
@@ -513,6 +529,7 @@ const TrendChartBody = ({
   season,
   shouldAnimate,
   showLegend,
+  unit,
 }: TrendChartBodyProperties): React.ReactElement => {
   const yAxisDomain = React.useMemo(
     () =>
@@ -544,7 +561,10 @@ const TrendChartBody = ({
     [isMobileViewport],
   );
 
-  const tooltipContent = React.useMemo(() => <ChartTooltip />, []);
+  const tooltipContent = React.useMemo(
+    () => <ChartTooltip unit={unit} />,
+    [unit],
+  );
   const chartMargin = React.useMemo(
     () => getChartMargin({ isMobileViewport, showLegend }),
     [isMobileViewport, showLegend],
@@ -628,6 +648,7 @@ const ReferenceChartBody = ({
   season,
   shouldAnimate,
   showLegend,
+  unit,
 }: ReferenceChartBodyProperties): React.ReactElement => {
   const yAxisDomain = React.useMemo(
     () =>
@@ -647,7 +668,10 @@ const ReferenceChartBody = ({
     [isMobileViewport],
   );
 
-  const tooltipContent = React.useMemo(() => <ChartTooltip />, []);
+  const tooltipContent = React.useMemo(
+    () => <ChartTooltip unit={unit} />,
+    [unit],
+  );
   const chartMargin = React.useMemo(
     () => getChartMargin({ isMobileViewport, showLegend }),
     [isMobileViewport, showLegend],
@@ -718,6 +742,23 @@ const ReferenceChartBody = ({
   );
 };
 
+const convertForecastData = (
+  forecastData: TrendForecastData | undefined,
+  unit: TemperatureUnit,
+): TrendForecastData | undefined =>
+  forecastData && {
+    forecastValues: forecastData.forecastValues.map((value) =>
+      convertFromFahrenheit(value, unit),
+    ),
+    forecastYears: forecastData.forecastYears,
+    lowerBound10: forecastData.lowerBound10.map((value) =>
+      convertFromFahrenheit(value, unit),
+    ),
+    upperBound90: forecastData.upperBound90.map((value) =>
+      convertFromFahrenheit(value, unit),
+    ),
+  };
+
 export const GenerateTrendGraph = ({
   forecastData,
   increasePerYear,
@@ -726,6 +767,7 @@ export const GenerateTrendGraph = ({
   season = DEFAULT_GRAPH_SEASON,
   showLegend = true,
   trendlineWetbulbs,
+  unit = DEFAULT_TEMPERATURE_UNIT,
   useCompactDesktopHeight = false,
   yearWetbulbs,
   years,
@@ -743,33 +785,37 @@ export const GenerateTrendGraph = ({
     );
   }
 
+  const convertedForecastData = convertForecastData(forecastData, unit);
   const chartData = buildTrendChartData(
     years,
-    yearWetbulbs,
-    trendlineWetbulbs,
-    forecastData,
+    yearWetbulbs.map((value) => convertFromFahrenheit(value, unit)),
+    trendlineWetbulbs.map((value) => convertFromFahrenheit(value, unit)),
+    convertedForecastData,
   );
 
   const graphType = getTrendGraphType(option);
   const startYear = years.at(0) ?? GRAPH_CONFIG.YEAR_RANGE.START;
   const endYear = years.at(-1) ?? GRAPH_CONFIG.YEAR_RANGE.END;
-  const increaseText = formatIncreasePerYearText(increasePerYear);
+  const increasePerYearInUnit =
+    unit === "C" ? fahrenheitDeltaToCelsius(increasePerYear) : increasePerYear;
+  const increaseText = formatIncreasePerYearText(increasePerYearInUnit);
 
   return (
     <ChartShell
       emptyState="No data available for the selected parameters."
-      subtitle={`${startYear}–${endYear} · Increase per year: ${increaseText}°F`}
+      subtitle={`${startYear}–${endYear} · Increase per year: ${increaseText}°${unit}`}
       title={`${graphType} ${season} Wetbulb`}
       useCompactDesktopHeight={useCompactDesktopHeight}
     >
       <TrendChartBody
         chartData={chartData}
-        forecastData={forecastData}
+        forecastData={convertedForecastData}
         graphType={graphType}
         isMobileViewport={isMobileViewport}
         season={season}
         shouldAnimate={shouldAnimate}
         showLegend={showLegend}
+        unit={unit}
       />
     </ChartShell>
   );
@@ -784,6 +830,7 @@ export const GenerateReferenceGraph = ({
   referenceYear,
   season = DEFAULT_GRAPH_SEASON,
   showLegend = true,
+  unit = DEFAULT_TEMPERATURE_UNIT,
 }: GenerateReferenceGraphOptions): React.ReactElement => {
   const shouldAnimate = useInitialChartAnimation();
 
@@ -797,7 +844,11 @@ export const GenerateReferenceGraph = ({
     );
   }
 
-  const chartData = buildReferenceChartData(dates, currentWetbulbs, referenceWetbulbs);
+  const chartData = buildReferenceChartData(
+    dates,
+    currentWetbulbs.map((value) => convertFromFahrenheit(value, unit)),
+    referenceWetbulbs.map((value) => convertFromFahrenheit(value, unit)),
+  );
 
   return (
     <ChartShell
@@ -812,6 +863,7 @@ export const GenerateReferenceGraph = ({
         season={season}
         shouldAnimate={shouldAnimate}
         showLegend={showLegend}
+        unit={unit}
       />
     </ChartShell>
   );

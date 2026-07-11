@@ -1,6 +1,7 @@
 "use client";
 
 import { ChartSkeleton } from "@/components/app/chart-skeleton";
+import { useTemperatureUnit } from "@/components/app/unit-provider";
 import { ErrorGraphDisplay } from "@/features/home/components/error-graph-display";
 import { useIsMobileViewport } from "@/hooks/use-is-mobile-viewport";
 import { getReferenceGraphQueryOptions } from "@/lib/api/query-client";
@@ -54,6 +55,7 @@ const ReferenceDataComponent: React.FC<ReferenceDataProperties> = ({
   );
   const isMobileViewport = useIsMobileViewport();
   const [isMobileLegendOpen, setIsMobileLegendOpen] = React.useState(false);
+  const { unit } = useTemperatureUnit();
 
   const showReferenceLegend = !isMobileViewport || isMobileLegendOpen;
 
@@ -174,6 +176,7 @@ const ReferenceDataComponent: React.FC<ReferenceDataProperties> = ({
                         referenceYear={referenceYear}
                         season={DEFAULT_GRAPH_SEASON}
                         showLegend={showReferenceLegend}
+                        unit={unit}
                       />
                     </div>
                   </div>

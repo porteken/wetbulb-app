@@ -293,6 +293,15 @@
         "vitest/no-importing-vitest-globals": "off",
         "vitest/prefer-importing-vitest-globals": "off"
       }
+    },
+    {
+      "files": [
+        "src/components/app/unit-provider.tsx",
+        "src/components/app/__tests__/unit-provider.test.tsx"
+      ],
+      "rules": {
+        "unicorn/no-document-cookie": "off"
+      }
     }
   ]
 }

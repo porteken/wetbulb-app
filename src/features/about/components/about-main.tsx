@@ -2,6 +2,7 @@
 
 import { PageShell } from "@/components/app/page-shell";
 import { APP_CONFIG } from "@/lib/constants";
+import { getWetbulbRangeLabel, WETBULB_INDEX_LEGEND_ITEMS } from "@/lib/utils/wetbulb-index";
 import Link from "next/link";
 import React from "react";
 
@@ -49,21 +50,42 @@ const About: FC<AboutProperties> = ({ LocationOptions }: AboutProperties) => (
           high humidity, sweat can't evaporate efficiently no matter how hot
           it feels, and the body starts to lose its ability to cool down.
         </p>
+
+        <div className="mt-6 max-w-3xl overflow-x-auto">
+          <table className="w-full text-left text-sm">
+            <thead>
+              <tr className="border-b border-border/70 text-xs font-medium tracking-[0.12em] text-muted-foreground uppercase">
+                <th className="py-2 pr-4">Level</th>
+                <th className="py-2">Range</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-border/50">
+              {WETBULB_INDEX_LEGEND_ITEMS.map((item) => (
+                <tr key={item.level}>
+                  <td className={`py-2 pr-4 font-medium ${item.colorClass}`}>
+                    {item.level}
+                  </td>
+                  <td className="py-2 text-muted-foreground">
+                    {getWetbulbRangeLabel(item, "F")} (
+                    {getWetbulbRangeLabel(item, "C")})
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
         <p className="mt-4 max-w-3xl text-base/7 text-muted-foreground">
-          At wet-bulb temperatures between 68°F and 76°F (20°C–24°C),
-          heat-related illness risk is generally considered low, though
-          sustained physical exertion still warrants caution, as discussed
-          in{" "}
+          The 68–76°F (20–24°C) low-risk range is based on{" "}
           <Link
             className="text-primary underline underline-offset-4 transition hover:text-primary/80"
             href={APP_CONFIG.WETBULB_LOW_RISK_URL}
           >
             this research
           </Link>
-          . Between roughly 77°F and 94°F (25°C–34°C), risk climbs through
-          moderate, high, and extreme categories as the body's ability to
-          cool itself through sweat becomes increasingly limited —
-          thresholds outlined in{" "}
+          . The 77–94°F (25–34°C) moderate-through-extreme thresholds, where
+          the body's ability to cool itself through sweat becomes
+          increasingly limited, are based on{" "}
           <Link
             className="text-primary underline underline-offset-4 transition hover:text-primary/80"
             href={APP_CONFIG.WETBULB_EXERCISE_SAFETY_URL}

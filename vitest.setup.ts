@@ -4,6 +4,13 @@ import { mockFn } from "@/testing/mock-fn";
 import { server } from "@/testing/server";
 import { afterAll, afterEach, beforeAll, vi } from "vitest";
 
+import type { ReactNode } from "react";
+
+vi.mock("@/components/app/unit-provider", () => ({
+  UnitProvider: ({ children }: { children: ReactNode }) => children,
+  useTemperatureUnit: () => ({ setUnit: mockFn(), unit: "F" as const }),
+}));
+
 vi.mock("next/font/google", () =>
   Object.fromEntries([
     [

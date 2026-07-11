@@ -121,6 +121,7 @@ const defaultProps: React.ComponentProps<typeof GraphSection> = {
     year_wetbulbs: [20, 22, 24],
     years: [2020, 2021, 2022],
   },
+  unit: "F",
 };
 
 describe("graphSection", () => {

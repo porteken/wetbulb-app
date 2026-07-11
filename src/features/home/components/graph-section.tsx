@@ -1,7 +1,11 @@
 import { ForecastControls } from "@/components/app/forecast-controls";
 import { Button } from "@/components/ui/button";
 import { Select } from "@/components/ui/select";
-import { type GraphSeason, normalizeGraphSeason } from "@/lib/constants";
+import {
+  type GraphSeason,
+  normalizeGraphSeason,
+  type TemperatureUnit,
+} from "@/lib/constants";
 import { Loader2 } from "lucide-react";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
@@ -36,6 +40,7 @@ interface GraphSectionProperties {
   seasonOptions: Array<{ label: string; value: GraphSeason }>;
   selectOptions: Array<{ label: string; value: string }>;
   trendGraphSnapshot?: TrendGraphSnapshot;
+  unit: TemperatureUnit;
 }
 
 interface GraphContentProperties {
@@ -44,6 +49,7 @@ interface GraphContentProperties {
   isMobileViewport: boolean;
   showTrendLegend: boolean;
   trendGraphSnapshot?: TrendGraphSnapshot;
+  unit: TemperatureUnit;
 }
 
 interface GraphControlsPanelProperties {
@@ -109,6 +115,7 @@ const GraphContent = ({
   isMobileViewport,
   showTrendLegend,
   trendGraphSnapshot,
+  unit,
 }: GraphContentProperties): React.ReactElement => {
   if (graphLoading) {
     return <GraphLoadingState />;
@@ -131,6 +138,7 @@ const GraphContent = ({
       season={trendGraphSnapshot.season}
       showLegend={showTrendLegend}
       trendlineWetbulbs={trendGraphSnapshot.trendline_wetbulbs}
+      unit={unit}
       yearWetbulbs={trendGraphSnapshot.year_wetbulbs}
       years={trendGraphSnapshot.years}
     />
@@ -312,6 +320,7 @@ export const GraphSection = memo<GraphSectionProperties>(
     seasonOptions,
     selectOptions,
     trendGraphSnapshot,
+    unit,
   }) => {
     const router = useRouter();
     const showTrendLegend = !isMobileViewport || isMobileGraphLegendOpen;
@@ -349,6 +358,7 @@ export const GraphSection = memo<GraphSectionProperties>(
               isMobileViewport={isMobileViewport}
               showTrendLegend={showTrendLegend}
               trendGraphSnapshot={trendGraphSnapshot}
+              unit={unit}
             />
           </div>
         </div>
