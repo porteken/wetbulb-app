@@ -1,0 +1,54 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+/node_modules
+/.pnp
+.pnp.js
+.yarn/install-state.gz
+
+# testing
+/coverage
+
+# Playwright
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+/.claude/
+
+# next.js
+/.next/
+/out/
+.claude/
+# production
+/build
+
+# misc
+.DS_Store
+*.pem
+
+# debug
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# local env files
+.env*.local
+!README.md
+*.md
+# vercel
+.vercel
+/.idea
+public
+.vitest-reports
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+tsconfig.*.json
+certificates
+# Sentry Config File
+# Sonar Scanner
+.scannerwork
+
+.env*

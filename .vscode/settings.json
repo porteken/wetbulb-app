@@ -1,0 +1,42 @@
+{
+  "playwright.env": {
+    "NODE_ENV": "test"
+  },
+  "tailwindCSS.experimental.classRegex": [
+    ["className\\s*:\\s*['\"]([^'\"]*)['\"]"]
+  ],
+  "javascript.updateImportsOnFileMove.enabled": "always",
+  "typescript.updateImportsOnFileMove.enabled": "always",
+  "[json]": {
+    "editor.defaultFormatter": "vscode.json-language-features"
+  },
+  "[jsonc]": {
+    "editor.defaultFormatter": "vscode.json-language-features"
+  },
+  "git.rebaseWhenSync": false,
+  "git.autofetch": true,
+  "git.enableSmartCommit": true,
+  "oxc.requireConfig": true,
+  "editor.defaultFormatter": "oxc.oxc-vscode",
+  "editor.formatOnSave": true,
+  "editor.codeActionsOnSave": {
+    "source.fixAll": "always",
+    "source.fixAll.eslint": "always",
+    "source.organizeImports": "never"
+  },
+  "oxc.enable.oxfmt": true,
+  "oxc.trace.server": "off",
+  "oxc.validate": [
+    "javascript",
+    "javascriptreact",
+    "typescript",
+    "typescriptreact"
+  ],
+  "oxc.format.enable": true,
+  "npm.packageManager": "pnpm",
+  "css.lint.unknownAtRules": "ignore",
+  "sonarlint.connectedMode.project": {
+    "connectionId": "porteken",
+    "projectKey": "porteken_wetbulb-app"
+  }
+}

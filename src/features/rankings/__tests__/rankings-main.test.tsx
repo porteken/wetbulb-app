@@ -1,0 +1,933 @@
+import "@testing-library/jest-dom";
+
+import {
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+  within,
+} from "@testing-library/react";
+import React from "react";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+
+const mockPush = mockFn();
+const { mockHeaderBar } = vi.hoisted(() => ({
+  mockHeaderBar: vi.fn<
+    (properties: {
+      compact?: boolean;
+      LocationOptions?: unknown[];
+    }) => React.ReactElement
+  >(
+    ({
+      compact,
+      LocationOptions,
+    }: {
+      compact?: boolean;
+      LocationOptions?: unknown[];
+    }) => (
+      <div
+        data-compact={compact === true ? "true" : "false"}
+        data-testid="header-bar"
+      >
+        HeaderBar {compact === true ? "compact" : "full"} with{" "}
+        {LocationOptions?.length ?? 0} locations
+      </div>
+    ),
+  ),
+}));
+
+class MockSelectControl extends React.PureComponent<{
+  data: Array<{ label: string; value: string }>;
+  disabled?: boolean;
+  label?: string;
+  onChange?: (value: string) => void;
+  placeholder?: string;
+  value?: string;
+}> {
+  private readonly handleChange = (
+    event: React.ChangeEvent<HTMLSelectElement>,
+  ) => {
+    this.props.onChange?.(event.target.value);
+  };
+
+  public render(): React.ReactNode {
+    const { data, disabled, label, placeholder, value } = this.props;
+    const testId = `${label?.toLowerCase().replaceAll(/\s/gu, "-") ?? "select"}-select`;
+
+    return (
+      <div>
+        {label && <label htmlFor={testId}>{label}</label>}
+        <select
+          data-testid={testId}
+          disabled={disabled}
+          id={testId}
+          onChange={this.handleChange}
+          value={value}
+        >
+          {placeholder && <option value="">{placeholder}</option>}
+          {data.map((option) => (
+            <option key={option.value} value={option.value}>
+              {option.label}
+            </option>
+          ))}
+        </select>
+      </div>
+    );
+  }
+}
+
+class MockPaginationControl extends React.PureComponent<{
+  onChange: (value: number) => void;
+  total: number;
+  value: number;
+}> {
+  private readonly handleNext = () => {
+    this.props.onChange(Math.min(this.props.total, this.props.value + 1));
+  };
+
+  private readonly handlePrevious = () => {
+    this.props.onChange(Math.max(1, this.props.value - 1));
+  };
+
+  public render(): React.ReactNode {
+    const { total, value } = this.props;
+
+    return (
+      <div data-testid="pagination">
+        <button
+          data-testid="prev-page"
+          disabled={value <= 1}
+          onClick={this.handlePrevious}
+          type="button"
+        >
+          Previous
+        </button>
+        <span data-testid="current-page">{value}</span>
+        <span data-testid="total-pages">{total}</span>
+        <button
+          data-testid="next-page"
+          disabled={value >= total}
+          onClick={this.handleNext}
+          type="button"
+        >
+          Next
+        </button>
+      </div>
+    );
+  }
+}
+
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({
+    push: mockPush,
+  }),
+  useSearchParams: () => ({
+    get: mockFn(),
+    toString: () => "",
+  }),
+}));
+
+vi.mock("@/lib/actions/actions", () => ({
+  setRankingsWetbulbLevel: mockFn(),
+  setRankingsSeason: mockFn(),
+  setRankingsState: mockFn(),
+  setRankingsYear: mockFn(),
+}));
+
+const { mockToast } = vi.hoisted(() => ({ mockToast: mockFn() }));
+
+vi.mock("@/components/ui/toast", () => ({
+  useToast: () => ({ toast: mockToast }),
+}));
+
+vi.mock("@/features/header-bar", () => ({
+  HeaderBar: mockHeaderBar,
+}));
+
+vi.mock("@/components/ui/select", () => ({
+  Select: mockFn((props: React.ComponentProps<typeof MockSelectControl>) => (
+    <MockSelectControl {...props} />
+  )),
+}));
+
+vi.mock("@/components/ui/pagination", () => ({
+  Pagination: mockFn(
+    (props: React.ComponentProps<typeof MockPaginationControl>) => (
+      <MockPaginationControl {...props} />
+    ),
+  ),
+}));
+
+import { RankingsMain } from "@/features/rankings";
+import {
+  setRankingsWetbulbLevel,
+  setRankingsSeason,
+  setRankingsYear,
+} from "@/lib/actions/actions";
+
+const mockLocationOptions = [
+  {
+    items: [
+      { key: 1, title: "New York, NY" },
+      { key: 2, title: "Los Angeles, CA" },
+    ],
+    title: "Major Cities",
+  },
+];
+
+const createMockRankingItem = (overrides = {}) => ({
+  avg_wetbulb: 74,
+  changeFrom2000: 0.5,
+  city: "Test City",
+  FutureValueLower: 78,
+  FutureValueUpper: 88,
+  location_id: 1,
+  max_wetbulb: 82,
+  p10: 68,
+  p90: 78,
+  rank: 1,
+  state: "TX",
+  ...overrides,
+});
+
+const mockRankings = [
+  createMockRankingItem({
+    avg_wetbulb: 72.5,
+    city: "Austin",
+    location_id: 1,
+    max_wetbulb: 80.5,
+    rank: 1,
+    state: "TX",
+  }),
+  createMockRankingItem({
+    avg_wetbulb: 76,
+    city: "Dallas",
+    location_id: 2,
+    max_wetbulb: 84,
+    rank: 2,
+    state: "TX",
+  }),
+  createMockRankingItem({
+    avg_wetbulb: 80,
+    city: "Houston",
+    location_id: 3,
+    max_wetbulb: 88,
+    rank: 3,
+    state: "TX",
+  }),
+  createMockRankingItem({
+    avg_wetbulb: 85,
+    city: "Phoenix",
+    location_id: 4,
+    max_wetbulb: 93,
+    rank: 4,
+    state: "AZ",
+  }),
+  createMockRankingItem({
+    avg_wetbulb: 87,
+    city: "Tucson",
+    location_id: 5,
+    max_wetbulb: 95,
+    rank: 5,
+    state: "AZ",
+  }),
+  createMockRankingItem({
+    avg_wetbulb: 90,
+    city: "Miami",
+    location_id: 6,
+    max_wetbulb: 98,
+    rank: 6,
+    state: "FL",
+  }),
+  createMockRankingItem({
+    avg_wetbulb: 88.5,
+    city: "Orlando",
+    location_id: 7,
+    max_wetbulb: 96.5,
+    rank: 7,
+    state: "FL",
+  }),
+  createMockRankingItem({
+    avg_wetbulb: 67,
+    city: "Denver",
+    location_id: 8,
+    max_wetbulb: 75,
+    rank: 8,
+    state: "CO",
+  }),
+  createMockRankingItem({
+    avg_wetbulb: 65,
+    city: "Boulder",
+    location_id: 9,
+    max_wetbulb: 73,
+    rank: 9,
+    state: "CO",
+  }),
+  createMockRankingItem({
+    avg_wetbulb: 72.5,
+    city: "Chicago",
+    location_id: 10,
+    max_wetbulb: 80.5,
+    rank: 10,
+    state: "IL",
+  }),
+  createMockRankingItem({
+    avg_wetbulb: 70.5,
+    city: "Springfield",
+    location_id: 11,
+    max_wetbulb: 78.5,
+    rank: 11,
+    state: "IL",
+  }),
+  createMockRankingItem({
+    avg_wetbulb: 61.5,
+    city: "Seattle",
+    location_id: 12,
+    max_wetbulb: 69.5,
+    rank: 12,
+    state: "WA",
+  }),
+  createMockRankingItem({
+    avg_wetbulb: 63.5,
+    city: "Spokane",
+    location_id: 13,
+    max_wetbulb: 71.5,
+    rank: 13,
+    state: "WA",
+  }),
+  createMockRankingItem({
+    avg_wetbulb: 62.5,
+    city: "Portland",
+    location_id: 14,
+    max_wetbulb: 70.5,
+    rank: 14,
+    state: "OR",
+  }),
+  createMockRankingItem({
+    avg_wetbulb: 60.5,
+    city: "Eugene",
+    location_id: 15,
+    max_wetbulb: 68.5,
+    rank: 15,
+    state: "OR",
+  }),
+  createMockRankingItem({
+    avg_wetbulb: 69,
+    city: "Boston",
+    location_id: 16,
+    max_wetbulb: 77,
+    rank: 16,
+    state: "MA",
+  }),
+  createMockRankingItem({
+    avg_wetbulb: 70,
+    city: "Cambridge",
+    location_id: 17,
+    max_wetbulb: 78,
+    rank: 17,
+    state: "MA",
+  }),
+  createMockRankingItem({
+    avg_wetbulb: 74,
+    city: "New York",
+    location_id: 18,
+    max_wetbulb: 82,
+    rank: 18,
+    state: "NY",
+  }),
+  createMockRankingItem({
+    avg_wetbulb: 71.5,
+    city: "Buffalo",
+    location_id: 19,
+    max_wetbulb: 79.5,
+    rank: 19,
+    state: "NY",
+  }),
+  createMockRankingItem({
+    avg_wetbulb: 78,
+    city: "Los Angeles",
+    location_id: 20,
+    max_wetbulb: 86,
+    rank: 20,
+    state: "CA",
+  }),
+  createMockRankingItem({
+    avg_wetbulb: 73,
+    city: "San Francisco",
+    location_id: 21,
+    max_wetbulb: 81,
+    rank: 21,
+    state: "CA",
+  }),
+  createMockRankingItem({
+    avg_wetbulb: 77,
+    city: "San Diego",
+    location_id: 22,
+    max_wetbulb: 85,
+    rank: 22,
+    state: "CA",
+  }),
+];
+
+const hotCityRankings = [
+  createMockRankingItem({ changeFrom2000: 1.5, city: "Hot City" }),
+];
+
+const coolCityRankings = [
+  createMockRankingItem({ changeFrom2000: -0.5, city: "Cool City" }),
+];
+
+const noDataCityRankings = [
+  createMockRankingItem({ changeFrom2000: undefined, city: "No Data City" }),
+];
+
+const rangeCityRankings = [
+  createMockRankingItem({ city: "Range City", p10: 64.5, p90: 78.5 }),
+];
+
+const futureCityRankings = [
+  createMockRankingItem({
+    city: "Future City",
+    FutureValueLower: 80,
+    FutureValueUpper: 90,
+  }),
+];
+
+const noFutureCityRankings = [
+  createMockRankingItem({
+    city: "No Future City",
+    FutureValueLower: undefined,
+    FutureValueUpper: undefined,
+  }),
+];
+
+const stableCityRankings = [
+  createMockRankingItem({ changeFrom2000: 0, city: "Stable City" }),
+];
+
+const extremeHeatCityRankings = [
+  createMockRankingItem({
+    avg_wetbulb: 98,
+    city: "Extreme Heat City",
+    location_id: 23,
+    max_wetbulb: 104,
+  }),
+];
+
+const mockRankingsWithExtremeHeat = [
+  ...mockRankings,
+  ...extremeHeatCityRankings,
+];
+
+const emptyRankings: Array<ReturnType<typeof createMockRankingItem>> = [];
+const topFiveRankings = mockRankings.slice(0, 5);
+
+const defaultProps = {
+  initialWetbulbLevel: "",
+  initialSeason: "Annual" as const,
+  initialState: "",
+  initialYear: 2020,
+  LocationOptions: mockLocationOptions,
+  rankings: mockRankings,
+  shouldPersistInitialSeason: false,
+};
+
+const requireElement = <T extends Element>(element: null | T): T => {
+  expect(element).not.toBeNull();
+  return element as T;
+};
+
+describe("rankingsMain", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockPush.mockReset();
+  });
+
+  describe("basic Rendering", () => {
+    it("should render the component", () => {
+      render(<RankingsMain {...defaultProps} />);
+
+      expect(screen.getByTestId("header-bar")).toBeInTheDocument();
+      expect(
+        screen.getByText("Cities ranked by Average Wetbulb"),
+      ).toBeInTheDocument();
+    });
+
+    it("should use the full header layout so the city selector remains visible", () => {
+      render(<RankingsMain {...defaultProps} />);
+
+      expect(screen.getByTestId("header-bar")).toHaveAttribute(
+        "data-compact",
+        "false",
+      );
+    });
+
+    it("should render the year select", () => {
+      render(<RankingsMain {...defaultProps} />);
+
+      expect(screen.getByTestId("year-select")).toBeInTheDocument();
+    });
+
+    it("should render state and wetbulb level filters", () => {
+      render(<RankingsMain {...defaultProps} />);
+
+      expect(screen.getByTestId("season-select")).toBeInTheDocument();
+      expect(screen.getByTestId("state-select")).toBeInTheDocument();
+      expect(
+        screen.getByTestId("avg-wetbulb-level-select"),
+      ).toBeInTheDocument();
+    });
+
+    it("should render the wetbulb index legend", () => {
+      render(<RankingsMain {...defaultProps} />);
+
+      expect(screen.getByText("Wetbulb Index")).toBeInTheDocument();
+      const legendSection = requireElement(
+        screen.getByText("Wetbulb Index").closest("div"),
+      );
+      expect(within(legendSection).getByText("None")).toBeInTheDocument();
+      expect(within(legendSection).getByText("Low Risk")).toBeInTheDocument();
+      expect(
+        within(legendSection).getByText("Moderate Risk"),
+      ).toBeInTheDocument();
+      expect(within(legendSection).getByText("High Risk")).toBeInTheDocument();
+      expect(
+        within(legendSection).getByText("Extreme Risk"),
+      ).toBeInTheDocument();
+      expect(
+        within(legendSection).getByText("Empirical Limit"),
+      ).toBeInTheDocument();
+      expect(
+        within(legendSection).getByText("Theoretical Limit"),
+      ).toBeInTheDocument();
+    });
+
+    it("should render table headers", () => {
+      render(<RankingsMain {...defaultProps} />);
+
+      const table = screen.getByRole("table");
+      expect(within(table).getByText("Rank")).toBeInTheDocument();
+      expect(within(table).getByText("City")).toBeInTheDocument();
+      expect(within(table).getByText("Avg Wetbulb")).toBeInTheDocument();
+      expect(within(table).getByText("Max Wetbulb")).toBeInTheDocument();
+      expect(
+        within(table).getByText("Wetbulb Range (10th-90th percentile)"),
+      ).toBeInTheDocument();
+      expect(within(table).getByText("Change from 2000")).toBeInTheDocument();
+      expect(
+        within(table).getByText("2100 Forecast Range"),
+      ).toBeInTheDocument();
+    });
+
+    it("should render ranking items", () => {
+      render(<RankingsMain {...defaultProps} />);
+
+      expect(screen.getByText("Austin")).toBeInTheDocument();
+      expect(screen.getByText("Dallas")).toBeInTheDocument();
+    });
+  });
+
+  describe("year Selection", () => {
+    it("should initialize with the initial year", () => {
+      render(<RankingsMain {...defaultProps} />);
+
+      const yearSelect = screen.getByTestId("year-select");
+      expect(yearSelect).toHaveValue("2020");
+    });
+
+    it("should call setRankingsYear when year changes", async () => {
+      render(<RankingsMain {...defaultProps} />);
+
+      const yearSelect = screen.getByTestId("year-select");
+      fireEvent.change(yearSelect, { target: { value: "2025" } });
+
+      await waitFor(() => {
+        expect(setRankingsYear).toHaveBeenCalledWith(2025);
+      });
+    });
+
+    it("should call setRankingsSeason when season changes", async () => {
+      render(<RankingsMain {...defaultProps} />);
+
+      const seasonSelect = screen.getByTestId("season-select");
+      fireEvent.change(seasonSelect, { target: { value: "Winter" } });
+
+      await waitFor(() => {
+        expect(setRankingsSeason).toHaveBeenCalledWith("Winter");
+      });
+    });
+
+    it("should persist the default annual season when requested", async () => {
+      render(
+        <RankingsMain
+          {...defaultProps}
+          initialSeason="Annual"
+          shouldPersistInitialSeason
+        />,
+      );
+
+      await waitFor(() => {
+        expect(setRankingsSeason).toHaveBeenCalledWith("Annual");
+      });
+    });
+  });
+
+  describe("state Filtering", () => {
+    it("should show all states in the filter dropdown", () => {
+      render(<RankingsMain {...defaultProps} />);
+
+      expect(screen.getByRole("option", { name: "All states" })).toBeVisible();
+    });
+
+    it("should filter rankings by state", () => {
+      render(<RankingsMain {...defaultProps} />);
+
+      expect(screen.getByText("Austin")).toBeInTheDocument();
+      expect(screen.getByText("Phoenix")).toBeInTheDocument();
+
+      const stateSelect = screen.getByTestId("state-select");
+      fireEvent.change(stateSelect, { target: { value: "TX" } });
+
+      expect(screen.getByText("Austin")).toBeInTheDocument();
+    });
+  });
+
+  describe("wetbulb Level Filtering", () => {
+    it("should include Theoretical Limit level when it exists in average wetbulb rows", () => {
+      render(
+        <RankingsMain
+          {...defaultProps}
+          rankings={mockRankingsWithExtremeHeat}
+        />,
+      );
+
+      const wetbulbLevelSelect = screen.getByTestId(
+        "avg-wetbulb-level-select",
+      );
+
+      expect(
+        within(wetbulbLevelSelect).getByRole("option", {
+          name: "Theoretical Limit",
+        }),
+      ).toBeInTheDocument();
+    });
+
+    it("should filter rankings by wetbulb level", () => {
+      render(<RankingsMain {...defaultProps} />);
+
+      const wetbulbLevelSelect = screen.getByTestId(
+        "avg-wetbulb-level-select",
+      );
+      fireEvent.change(wetbulbLevelSelect, {
+        target: { value: "None" },
+      });
+
+      expect(screen.getByText("Seattle")).toBeInTheDocument();
+    });
+  });
+
+  describe("sorting", () => {
+    it("should sort by rank by default", () => {
+      render(<RankingsMain {...defaultProps} />);
+
+      const rows = screen.getAllByRole("row");
+      expect(rows[1]).toHaveTextContent("Austin");
+    });
+
+    it("should sort by city when city header is clicked", () => {
+      render(<RankingsMain {...defaultProps} />);
+
+      const table = screen.getByRole("table");
+      const cityHeader = requireElement(
+        within(table).getByText("City").closest("th"),
+      );
+      fireEvent.click(cityHeader);
+
+      const rows = screen.getAllByRole("row");
+      expect(rows[1]).toHaveTextContent("Austin");
+    });
+
+    it("should show sort indicator when column is clicked", () => {
+      render(<RankingsMain {...defaultProps} />);
+
+      const table = screen.getByRole("table");
+      const cityHeader = requireElement(
+        within(table).getByText("City").closest("th"),
+      );
+      fireEvent.click(within(cityHeader).getByRole("button"));
+
+      expect(within(cityHeader).getByText("↑")).toBeInTheDocument();
+    });
+
+    it("should sort by avg_wetbulb when Avg Wetbulb header is clicked", () => {
+      render(<RankingsMain {...defaultProps} />);
+
+      const table = screen.getByRole("table");
+      const avgWetbulbHeader = requireElement(
+        within(table).getByText("Avg Wetbulb").closest("th"),
+      );
+      fireEvent.click(within(avgWetbulbHeader).getByRole("button"));
+
+      const rows = screen.getAllByRole("row");
+      expect(rows[1]).toHaveTextContent("Eugene");
+    });
+
+    it("should sort by state when State header is clicked", () => {
+      render(<RankingsMain {...defaultProps} />);
+
+      const table = screen.getByRole("table");
+      const stateHeader = requireElement(
+        within(table).getByText("State").closest("th"),
+      );
+      fireEvent.click(within(stateHeader).getByRole("button"));
+
+      const rows = screen.getAllByRole("row");
+      expect(rows[1]).toHaveTextContent("AZ");
+    });
+
+    it("should sort by change when Change from 2000 header is clicked", () => {
+      render(<RankingsMain {...defaultProps} />);
+
+      const table = screen.getByRole("table");
+      const changeHeader = requireElement(
+        within(table).getByText("Change from 2000").closest("th"),
+      );
+      fireEvent.click(changeHeader);
+
+      expect(changeHeader).toBeInTheDocument();
+    });
+  });
+
+  describe("pagination", () => {
+    it("should display pagination when there are multiple pages", () => {
+      render(<RankingsMain {...defaultProps} rankings={mockRankings} />);
+
+      expect(screen.getByTestId("pagination")).toBeInTheDocument();
+    });
+
+    it("should not display pagination when there is only one page", () => {
+      render(
+        <RankingsMain {...defaultProps} rankings={mockRankings.slice(0, 10)} />,
+      );
+
+      expect(screen.queryByTestId("pagination")).not.toBeInTheDocument();
+    });
+
+    it("should change page when pagination is used", () => {
+      render(<RankingsMain {...defaultProps} rankings={mockRankings} />);
+
+      fireEvent.click(screen.getByTestId("next-page"));
+
+      expect(screen.getByTestId("current-page")).toHaveTextContent("2");
+    });
+
+    it("should display showing text with correct counts", () => {
+      render(<RankingsMain {...defaultProps} rankings={mockRankings} />);
+
+      expect(screen.getByText(/Showing/u)).toBeInTheDocument();
+      expect(screen.getByText(/of 22 cities/u)).toBeInTheDocument();
+    });
+
+    it("should reset to page 1 when filters change", () => {
+      render(<RankingsMain {...defaultProps} rankings={mockRankings} />);
+
+      fireEvent.click(screen.getByTestId("next-page"));
+      expect(screen.getByTestId("current-page")).toHaveTextContent("2");
+
+      const wetbulbLevelSelect = screen.getByTestId(
+        "avg-wetbulb-level-select",
+      );
+      fireEvent.change(wetbulbLevelSelect, {
+        target: { value: "Empirical Limit" },
+      });
+
+      expect(screen.getByText(/Showing/u)).toBeInTheDocument();
+    });
+  });
+
+  describe("row Click Navigation", () => {
+    it("should navigate to location page when row is clicked", () => {
+      render(<RankingsMain {...defaultProps} />);
+
+      const row = requireElement(screen.getByText("Austin").closest("tr"));
+      fireEvent.click(row);
+
+      expect(mockPush).toHaveBeenCalledWith("/1");
+    });
+  });
+
+  describe("data Display", () => {
+    it("should display change from 2000 with positive indicator", () => {
+      render(<RankingsMain {...defaultProps} rankings={hotCityRankings} />);
+
+      expect(screen.getByText("+1.5°F")).toBeInTheDocument();
+    });
+
+    it("should display change from 2000 with negative indicator", () => {
+      render(<RankingsMain {...defaultProps} rankings={coolCityRankings} />);
+
+      expect(screen.getByText("-0.5°F")).toBeInTheDocument();
+    });
+
+    it("should display N/A for undefined change from 2000", () => {
+      render(<RankingsMain {...defaultProps} rankings={noDataCityRankings} />);
+
+      const naElements = screen.getAllByText("N/A");
+      expect(naElements.length).toBeGreaterThan(0);
+    });
+
+    it("should display WETBULB range correctly", () => {
+      render(<RankingsMain {...defaultProps} rankings={rangeCityRankings} />);
+
+      expect(screen.getByText("64.5-78.5°F")).toBeInTheDocument();
+    });
+
+    it("should display 2100 forecast range when available", () => {
+      render(<RankingsMain {...defaultProps} rankings={futureCityRankings} />);
+
+      expect(screen.getByText("80.0")).toBeInTheDocument();
+      expect(screen.getByText("90.0°F")).toBeInTheDocument();
+    });
+
+    it("should display N/A for undefined 2100 forecast", () => {
+      render(
+        <RankingsMain {...defaultProps} rankings={noFutureCityRankings} />,
+      );
+
+      const naElements = screen.getAllByText("N/A");
+      expect(naElements.length).toBeGreaterThan(0);
+    });
+  });
+
+  describe("empty State", () => {
+    it("should handle empty rankings array", () => {
+      render(<RankingsMain {...defaultProps} rankings={emptyRankings} />);
+
+      expect(
+        screen.getByText("Cities ranked by Average Wetbulb"),
+      ).toBeInTheDocument();
+      expect(screen.getByText(/Showing 0/u)).toBeInTheDocument();
+    });
+
+    it("should show no results message when filter excludes all", () => {
+      render(<RankingsMain {...defaultProps} rankings={topFiveRankings} />);
+
+      expect(screen.getByText(/Showing 1-5 of 5 cities/u)).toBeInTheDocument();
+    });
+  });
+
+  describe("helper Functions", () => {
+    it("should apply correct color for positive change values", () => {
+      render(<RankingsMain {...defaultProps} rankings={hotCityRankings} />);
+
+      const changeCell = screen.getByText("+1.5°F");
+      expect(changeCell).toHaveClass("text-red-600");
+    });
+
+    it("should apply correct color for negative change values", () => {
+      render(<RankingsMain {...defaultProps} rankings={coolCityRankings} />);
+
+      const changeCell = screen.getByText("-0.5°F");
+      expect(changeCell).toHaveClass("text-blue-600");
+    });
+
+    it("should apply correct color for zero change values", () => {
+      render(<RankingsMain {...defaultProps} rankings={stableCityRankings} />);
+
+      const changeCell = screen.getByText("0.0°F");
+      expect(changeCell).toHaveClass("text-muted-foreground");
+    });
+  });
+
+  describe("filter Combination", () => {
+    it("should apply state filter correctly", () => {
+      render(<RankingsMain {...defaultProps} />);
+
+      const stateSelect = screen.getByTestId("state-select");
+      fireEvent.change(stateSelect, { target: { value: "AZ" } });
+
+      expect(screen.getByText("Phoenix")).toBeInTheDocument();
+      expect(screen.queryByText("Austin")).not.toBeInTheDocument();
+    });
+  });
+
+  describe("filter Reset", () => {
+    it("should clear the wetbulb level filter when season changes", async () => {
+      render(
+        <RankingsMain
+          {...defaultProps}
+          initialWetbulbLevel="None"
+          initialState="TX"
+          rankings={mockRankings}
+        />,
+      );
+
+      const stateSelect = screen.getByTestId("state-select");
+      const seasonSelect = screen.getByTestId("season-select");
+
+      expect(
+        screen.getByText("No cities match the current filters."),
+      ).toBeInTheDocument();
+
+      fireEvent.change(seasonSelect, { target: { value: "Winter" } });
+
+      await waitFor(() => {
+        expect(setRankingsWetbulbLevel).toHaveBeenCalledWith("");
+        expect(setRankingsSeason).toHaveBeenCalledWith("Winter");
+      });
+
+      expect(stateSelect).toHaveValue("TX");
+      expect(screen.getByText("Austin")).toBeInTheDocument();
+      expect(
+        screen.queryByText("No cities match the current filters."),
+      ).not.toBeInTheDocument();
+    });
+
+    it("should clear the wetbulb level filter when year changes", async () => {
+      render(
+        <RankingsMain
+          {...defaultProps}
+          initialWetbulbLevel="None"
+          initialState="TX"
+          rankings={mockRankings}
+        />,
+      );
+
+      const stateSelect = screen.getByTestId("state-select");
+      const yearSelect = screen.getByTestId("year-select");
+
+      expect(
+        screen.getByText("No cities match the current filters."),
+      ).toBeInTheDocument();
+
+      fireEvent.change(yearSelect, { target: { value: "2025" } });
+
+      await waitFor(() => {
+        expect(setRankingsWetbulbLevel).toHaveBeenCalledWith("");
+        expect(setRankingsYear).toHaveBeenCalledWith(2025);
+      });
+
+      expect(stateSelect).toHaveValue("TX");
+      expect(yearSelect).toHaveValue("2025");
+      expect(screen.getByText("Austin")).toBeInTheDocument();
+      expect(
+        screen.queryByText("No cities match the current filters."),
+      ).not.toBeInTheDocument();
+    });
+
+    it("should reset page to 1 when sort column changes", () => {
+      render(<RankingsMain {...defaultProps} rankings={mockRankings} />);
+
+      fireEvent.click(screen.getByTestId("next-page"));
+      expect(screen.getByTestId("current-page")).toHaveTextContent("2");
+
+      const table = screen.getByRole("table");
+      const cityHeader = requireElement(
+        within(table).getByText("City").closest("th"),
+      );
+      fireEvent.click(within(cityHeader).getByRole("button"));
+
+      expect(screen.getByTestId("current-page")).toHaveTextContent("1");
+    });
+  });
+});

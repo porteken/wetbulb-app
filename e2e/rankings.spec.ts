@@ -1,0 +1,190 @@
+import { expect, test } from "@playwright/test";
+
+import {
+  getOpenCustomSelectOptions,
+  openCustomSelect,
+  selectCustomOption,
+} from "./utils/custom-select";
+import { waitForLocationDetailsPage } from "./utils/map-page";
+
+test.describe("Rankings Page", () => {
+  test("should display rankings table with data", async ({ page }) => {
+    await page.goto("/rankings");
+
+    await expect(
+      page.getByRole("heading", { name: "Cities ranked by Average Wetbulb" }),
+    ).toBeVisible({
+      timeout: 10_000,
+    });
+
+    await expect(page.locator("table")).toBeVisible();
+
+    const rows = page.locator("table tbody tr");
+    await expect(rows.first()).toBeVisible({ timeout: 10_000 });
+
+    const rowCount = await rows.count();
+    expect(rowCount).toBeGreaterThan(0);
+  });
+
+  test("should display year selector and filter controls", async ({ page }) => {
+    await page.goto("/rankings");
+
+    await expect(
+      page.getByRole("heading", { name: "Cities ranked by Average Wetbulb" }),
+    ).toBeVisible({
+      timeout: 10_000,
+    });
+
+    await expect(page.getByTestId("rankings-year-filter")).toBeVisible();
+    await expect(page.getByTestId("rankings-state-filter")).toBeVisible();
+    await expect(page.getByTestId("rankings-wetbulb-level-filter")).toBeVisible();
+  });
+
+  test("should show the city selector in the header", async ({ page }) => {
+    await page.goto("/rankings");
+
+    await expect(
+      page.getByRole("link", { name: "Historical Wetbulb App" }),
+    ).toBeVisible({ timeout: 10_000 });
+    await expect(page.getByTestId("city-selector")).toBeVisible({
+      timeout: 10_000,
+    });
+    await expect(page.getByTestId("city-selector")).toContainText(
+      "Select City",
+    );
+  });
+
+  test("should display wetbulb index legend", async ({ page }) => {
+    await page.goto("/rankings");
+
+    await expect(page.getByText("Wetbulb Index")).toBeVisible({
+      timeout: 10_000,
+    });
+
+    const legendSection = page
+      .locator("div")
+      .filter({ has: page.getByText("Wetbulb Index") })
+      .first();
+
+    await expect(legendSection).toContainText("None");
+    await expect(legendSection).toContainText("Low Risk");
+    await expect(legendSection).toContainText("Extreme Risk");
+    await expect(legendSection).toContainText("Theoretical Limit");
+  });
+
+  test("should change year and update rankings", async ({ page }) => {
+    await page.goto("/rankings");
+
+    await expect(
+      page.getByRole("heading", { name: "Cities ranked by Average Wetbulb" }),
+    ).toBeVisible({
+      timeout: 10_000,
+    });
+
+    await expect(page.getByTestId("rankings-year-filter")).toBeVisible({
+      timeout: 10_000,
+    });
+
+    const yearSelect = page.getByTestId("rankings-year-filter");
+    await selectCustomOption(page, yearSelect, /^2010$/u);
+    await expect(yearSelect).toContainText("2010");
+
+    await expect(page.locator("table tbody tr").first()).toBeVisible({
+      timeout: 10_000,
+    });
+  });
+
+  test("should sort table by clicking header", async ({ page }) => {
+    await page.goto("/rankings");
+
+    await expect(
+      page.getByRole("heading", { name: "Cities ranked by Average Wetbulb" }),
+    ).toBeVisible({
+      timeout: 10_000,
+    });
+
+    const tableHeaders = page.locator("table thead th");
+    await expect(tableHeaders.first()).toBeVisible({ timeout: 10_000 });
+
+    const cityHeader = tableHeaders.nth(1);
+    await cityHeader.click();
+
+    await expect(page.locator("table tbody tr").first()).toBeVisible();
+  });
+
+  test("should navigate to location page when row is clicked", async ({
+    page,
+  }) => {
+    await page.goto("/rankings");
+
+    const firstRow = page.locator("table tbody tr").first();
+    await expect(firstRow).toBeVisible({ timeout: 10_000 });
+    await firstRow.scrollIntoViewIfNeeded();
+
+    await Promise.all([
+      page.waitForURL(/\/\d+(?:\?.*)?$/u, { timeout: 15_000 }),
+      firstRow.locator("td").nth(1).click(),
+    ]);
+
+    await waitForLocationDetailsPage(page);
+  });
+
+  test("should filter by state", async ({ page }) => {
+    await page.goto("/rankings", { waitUntil: "domcontentloaded" });
+
+    await expect(
+      page.getByRole("heading", { name: "Cities ranked by Average Wetbulb" }),
+    ).toBeVisible({
+      timeout: 15_000,
+    });
+
+    await expect(page.getByTestId("rankings-state-filter")).toBeVisible({
+      timeout: 10_000,
+    });
+
+    const stateSelect = page.getByTestId("rankings-state-filter");
+    await openCustomSelect(page, stateSelect);
+    const firstStateOption = getOpenCustomSelectOptions(page).first();
+    const firstStateOptionText = await firstStateOption.textContent();
+    const stateLabel = firstStateOptionText?.trim();
+    expect(stateLabel).toBeTruthy();
+    await firstStateOption.click();
+
+    await expect(stateSelect).toContainText(stateLabel ?? "");
+
+    await expect(page.locator("table tbody tr").first()).toBeVisible({
+      timeout: 10_000,
+    });
+    await expect(
+      page.locator("table tbody tr").first().locator("td").nth(2),
+    ).toContainText(stateLabel ?? "");
+  });
+
+  test("should filter by wetbulb level", async ({ page }) => {
+    await page.goto("/rankings", { waitUntil: "domcontentloaded" });
+
+    await expect(
+      page.getByRole("heading", { name: "Cities ranked by Average Wetbulb" }),
+    ).toBeVisible({
+      timeout: 15_000,
+    });
+
+    await expect(page.getByTestId("rankings-wetbulb-level-filter")).toBeVisible({
+      timeout: 10_000,
+    });
+
+    const wetbulbLevelSelect = page.getByTestId("rankings-wetbulb-level-filter");
+    await openCustomSelect(page, wetbulbLevelSelect);
+    const firstOption = getOpenCustomSelectOptions(page).first();
+    const firstOptionText = await firstOption.textContent();
+    const optionLabel = firstOptionText?.trim();
+    expect(optionLabel).toBeTruthy();
+    await firstOption.click();
+
+    await expect(wetbulbLevelSelect).toContainText(optionLabel ?? "");
+
+    await expect(page.locator("table tbody tr").first()).toBeVisible({
+      timeout: 15_000,
+    });
+  });
+});

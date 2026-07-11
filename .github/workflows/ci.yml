@@ -1,0 +1,309 @@
+name: CI and Deploy
+
+on:
+  push:
+    branches:
+      - dev
+      - prd
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NODE_VERSION: 22
+
+jobs:
+  quality-checks:
+    name: Lint and Typecheck
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+      - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320
+        with:
+          run_install: false
+      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+
+      - name: Install Dependencies
+        run: pnpm install --frozen-lockfile --prefer-offline --ignore-scripts
+
+      - run: pnpm run format:check
+      - run: pnpm run lint
+      - run: pnpm run tsc
+      - run: pnpm run knip
+
+  vitest:
+    name: Vitest (shard ${{ matrix.shard_index }}/5)
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        shard_index: [1, 2, 3, 4, 5]
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+      - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320
+        with:
+          run_install: false
+      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+
+      - name: Install Dependencies
+        run: pnpm install --frozen-lockfile --prefer-offline --ignore-scripts
+
+      - run: pnpm exec vitest run --reporter=blob --outputFile=./vitest-blob-${{ matrix.shard_index }}-of-5.json --shard=${{ matrix.shard_index }}/5
+
+      - name: Upload Vitest blob report
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: vitest-blob-${{ matrix.shard_index }}
+          path: vitest-blob-${{ matrix.shard_index }}-of-5.json
+          retention-days: 1
+
+  merge-vitest:
+    name: Merge Vitest Reports
+    needs: vitest
+    if: ${{ !cancelled() }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+      - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320
+        with:
+          run_install: false
+      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+
+      - name: Install Dependencies
+        run: pnpm install --frozen-lockfile --prefer-offline --ignore-scripts
+
+      - name: Download Vitest blob reports
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c
+        with:
+          path: all-vitest-blob-reports
+          pattern: vitest-blob-*
+          merge-multiple: true
+
+      - name: Check for downloaded Vitest blob reports
+        id: vitest_blob_reports
+        run: |
+          mkdir -p ./all-vitest-blob-reports
+
+          if find ./all-vitest-blob-reports -maxdepth 1 -type f -name '*.json' | grep -q .; then
+            echo "found=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "found=false" >> "$GITHUB_OUTPUT"
+            echo "No Vitest blob reports were downloaded; skipping merge."
+          fi
+
+      - name: Merge Vitest reports
+        if: steps.vitest_blob_reports.outputs.found == 'true'
+        run: pnpm exec vitest run --merge-reports=./all-vitest-blob-reports --reporter=junit
+
+      - name: Fail when Vitest blob reports are unexpectedly missing
+        if: steps.vitest_blob_reports.outputs.found != 'true' && needs.vitest.result == 'success'
+        run: |
+          echo "Expected Vitest blob reports, but none were downloaded."
+          exit 1
+
+  vitest-db:
+    name: Vitest DB Integration
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+      - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320
+        with:
+          run_install: false
+      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+
+      - name: Install Dependencies
+        run: pnpm install --frozen-lockfile --prefer-offline --ignore-scripts
+
+      - run: pnpm run test:db
+
+  playwright-e2e:
+    name: Playwright E2E (shard ${{ matrix.shard_index }}/5)
+    runs-on: ubuntu-latest
+    env:
+      E2E_USE_RUNTIME_MOCKS: "false"
+      NEXT_PUBLIC_E2E_TEST: "true"
+
+    strategy:
+      fail-fast: false
+      matrix:
+        shard_index: [1, 2, 3, 4, 5]
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+      - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320
+        with:
+          run_install: false
+      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+
+      - name: Install Node Dependencies
+        run: pnpm install --frozen-lockfile --prefer-offline --ignore-scripts
+
+      - name: Get Playwright Version
+        id: playwright-version
+        run: echo "version=$(pnpm exec playwright --version | awk '{print $2}')" >> "$GITHUB_OUTPUT"
+
+      - name: Cache Playwright Browsers
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae
+        id: cache-playwright
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-${{ steps.playwright-version.outputs.version }}
+
+      - name: Install Playwright Browsers & OS Deps
+        if: steps.cache-playwright.outputs.cache-hit != 'true'
+        run: pnpm exec playwright install --with-deps
+
+      - name: Install Playwright OS Dependencies (Cache Hit)
+        if: steps.cache-playwright.outputs.cache-hit == 'true'
+        run: pnpm exec playwright install-deps
+
+      - name: Run Playwright Shard
+        run: pnpm run test:e2e:ci -- --shard=${{ matrix.shard_index }}/5 --reporter=list,blob
+
+      - name: Upload Playwright Blob
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: playwright-blob-${{ matrix.shard_index }}
+          path: blob-report/*.zip
+          retention-days: 1
+
+  merge-playwright:
+    name: Merge Playwright Reports
+    needs: playwright-e2e
+    if: ${{ !cancelled() }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+      - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320
+        with:
+          run_install: false
+      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+
+      - name: Install Dependencies
+        run: pnpm install --frozen-lockfile --prefer-offline --ignore-scripts
+
+      - name: Download All Playwright Blobs
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c
+        with:
+          path: playwright-blobs
+          pattern: playwright-blob-*
+          merge-multiple: true
+
+      - name: Merge Playwright Reports
+        run: pnpm exec playwright merge-reports --reporter=line,html ./playwright-blobs
+        shell: bash
+
+      - name: Upload Playwright HTML Report
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: playwright-html-report
+          path: playwright-report/
+          retention-days: 14
+
+      - name: Check for test failures
+        if: needs.playwright-e2e.result == 'failure'
+        run: |
+          echo "Playwright tests failed in the e2e job. Failing the merge job."
+          exit 1
+
+  vitest-coverage:
+    name: Vitest Coverage
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+      - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320
+        with:
+          run_install: false
+      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+
+      - name: Install Dependencies
+        run: pnpm install --frozen-lockfile --prefer-offline --ignore-scripts
+
+      - name: Run Vitest with coverage
+        run: |
+          if pnpm run | grep -q "test:coverage"; then
+            pnpm run test:coverage
+          else
+            pnpm run test --coverage
+          fi
+
+      - name: Upload coverage report for SonarQube
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: vitest-coverage
+          path: coverage/lcov.info
+          if-no-files-found: error
+          retention-days: 1
+
+  sonarqube:
+    name: SonarQube
+    needs: vitest-coverage
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+        with:
+          fetch-depth: 0
+
+      - name: Download Vitest coverage
+        if: github.ref_name != 'prd'
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c
+        with:
+          name: vitest-coverage
+          path: coverage
+
+      - name: SonarQube Scan
+        if: github.ref_name != 'prd'
+        uses: SonarSource/sonarqube-scan-action@fd88b7d7ccbaefd23d8f36f73b59db7a3d246602
+        with:
+          args: >
+            -Dsonar.scm.revision=${{ github.sha }}
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+  deploy:
+    name: Deploy to Vercel
+    if: github.event_name == 'push' && (github.ref_name == 'dev' || github.ref_name == 'prd')
+    needs: [quality-checks, vitest, vitest-db, playwright-e2e, sonarqube]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Vercel Deploy Hook
+        shell: bash
+        env:
+          VERCEL_DEPLOY_HOOK: ${{ github.ref_name == 'prd' && secrets.VERCEL_DEPLOY_HOOK_PRD || secrets.VERCEL_DEPLOY_HOOK_DEV }}
+        run: |
+          if [ -z "$VERCEL_DEPLOY_HOOK" ]; then
+            echo "Error: VERCEL_DEPLOY_HOOK for ${{ github.ref_name }} is not set in Repository Secrets."
+            exit 1
+          fi
+
+          echo "Triggering Vercel deployment for branch: ${{ github.ref_name }}"
+          curl -X POST "$VERCEL_DEPLOY_HOOK"

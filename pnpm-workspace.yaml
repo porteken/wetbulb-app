@@ -1,0 +1,28 @@
+packages:
+  - "."
+allowBuilds:
+  "@sentry/cli": true
+  cpu-features: true
+  esbuild: true
+  msw: true
+  protobufjs: true
+  sharp: true
+  ssh2: true
+minimumReleaseAgeExclude:
+  - "@sentry-internal/browser-utils@10.55.0"
+  - "@sentry-internal/feedback@10.55.0"
+  - "@sentry-internal/replay-canvas@10.55.0"
+  - "@sentry-internal/replay@10.55.0"
+  - "@sentry/browser@10.55.0"
+  - "@sentry/core@10.55.0"
+  - "@sentry/nextjs@10.55.0"
+  - "@sentry/node-core@10.55.0"
+  - "@sentry/node@10.55.0"
+  - "@sentry/opentelemetry@10.55.0"
+  - "@sentry/react@10.55.0"
+  - "@sentry/vercel-edge@10.55.0"
+  - lucide-react@1.17.0 || 1.22.0
+  - "@tanstack/query-core@5.101.2"
+  - "@tanstack/react-query@5.101.2"
+  - knip@6.23.0
+  - postcss@8.5.16

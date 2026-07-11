@@ -1,0 +1,7 @@
+#!/usr/bin/env sh
+
+echo "Running pre-push checks..."
+
+pnpm test
+
+echo "Pre-push checks passed!"

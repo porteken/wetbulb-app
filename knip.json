@@ -1,0 +1,4 @@
+{
+  "ignoreDependencies": ["lint-staged", "shadcn"],
+  "ignore": ["src/components/ui/**/*"]
+}
