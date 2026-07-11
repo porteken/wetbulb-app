@@ -169,7 +169,7 @@ jobs:
 
       - name: Install Playwright Browsers & OS Deps
         if: steps.cache-playwright.outputs.cache-hit != 'true'
-        run: pnpm exec --ignore-scripts -- playwright install --with-deps
+        run: pnpm exec playwright install --with-deps
 
       - name: Install Playwright OS Dependencies (Cache Hit)
         if: steps.cache-playwright.outputs.cache-hit == 'true'
