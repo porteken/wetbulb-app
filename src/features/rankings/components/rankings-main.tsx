@@ -127,7 +127,9 @@ function compareRankingItems(
       return (a.max_wetbulb ?? 0) - (b.max_wetbulb ?? 0);
     }
     case "rank": {
-      return a.rank - b.rank;
+      // Rank is derived from Avg Wetbulb (desc) over the shown data, so ranking
+      // ascending is equivalent to ordering by Avg Wetbulb descending.
+      return b.avg_wetbulb - a.avg_wetbulb;
     }
     case "state": {
       return a.state.localeCompare(b.state);
@@ -468,10 +470,11 @@ SortHeader.displayName = "SortHeader";
 interface RankingRowProperties {
   item: RankingItem;
   push: (href: string) => void;
+  rank: number;
   unit: TemperatureUnit;
 }
 
-const RankingRow = memo(({ item, push, unit }: RankingRowProperties) => {
+const RankingRow = memo(({ item, push, rank, unit }: RankingRowProperties) => {
   const {
     avg_wetbulb,
     changeFrom2000,
@@ -482,7 +485,6 @@ const RankingRow = memo(({ item, push, unit }: RankingRowProperties) => {
     max_wetbulb,
     p10,
     p90,
-    rank,
     state,
   } = item;
 
@@ -685,6 +687,19 @@ export function RankingsMain({
     });
   }, [rankings, stateFilter, wetbulbLevelFilter, sortColumn, sortDirection]);
 
+  // Derive ranks from the filtered data so the numbers reflect what is shown:
+  // rank 1 is the highest Avg Wetbulb within the current filters.
+  const rankByLocation = useMemo(() => {
+    const map = new Map<number, number>();
+    const sortedByWetbulb = filteredAndSortedRankings.toSorted(
+      (a, b) => b.avg_wetbulb - a.avg_wetbulb,
+    );
+    for (const [index, item] of sortedByWetbulb.entries()) {
+      map.set(item.location_id, index + 1);
+    }
+    return map;
+  }, [filteredAndSortedRankings]);
+
   const paginatedRankings = useMemo(() => {
     const startIndex = (currentPage - 1) * itemsPerPage;
     const endIndex = startIndex + itemsPerPage;
@@ -834,6 +849,7 @@ export function RankingsMain({
                         item={item}
                         key={item.location_id}
                         push={handlePush}
+                        rank={rankByLocation.get(item.location_id) ?? item.rank}
                         unit={unit}
                       />
                     ))
