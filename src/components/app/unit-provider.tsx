@@ -18,7 +18,7 @@ const UnitContext = React.createContext<UnitContextValue | undefined>(
   undefined,
 );
 
-const readCookieUnit = (): TemperatureUnit => {
+export const readCookieUnit = (): TemperatureUnit => {
   if (typeof document === "undefined") {
     return DEFAULT_TEMPERATURE_UNIT;
   }
@@ -28,8 +28,10 @@ const readCookieUnit = (): TemperatureUnit => {
     "u",
   ).exec(document.cookie);
 
+  const rawValue = match?.[1];
+
   return normalizeTemperatureUnit(
-    match ? decodeURIComponent(match[1] ?? "") : undefined,
+    rawValue ? decodeURIComponent(rawValue) : undefined,
   );
 };
 
