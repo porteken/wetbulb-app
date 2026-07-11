@@ -21,15 +21,15 @@ A comprehensive web application that visualizes wet-bulb temperature data for th
 
 This app classifies wet-bulb temperature into the following risk levels:
 
-| Level | Range (°F) | Range (°C) |
-| --- | --- | --- |
-| None | < 68°F | < 20°C |
-| Low Risk | 68–76°F | 20–24°C |
-| Moderate Risk | 77–80°F | 25–26°C |
-| High Risk | 81–83°F | 27–28°C |
-| Extreme Risk | 84–87°F | 29–30°C |
-| Empirical Limit | 88–94°F | 31–34°C |
-| Theoretical Limit | ≥ 95°F | ≥ 35°C |
+| Level             | Range (°F) | Range (°C) |
+| ----------------- | ---------- | ---------- |
+| None              | < 68°F     | < 20°C     |
+| Low Risk          | 68–76°F    | 20–24°C    |
+| Moderate Risk     | 77–80°F    | 25–26°C    |
+| High Risk         | 81–83°F    | 27–28°C    |
+| Extreme Risk      | 84–87°F    | 29–30°C    |
+| Empirical Limit   | 88–94°F    | 31–34°C    |
+| Theoretical Limit | ≥ 95°F     | ≥ 35°C     |
 
 - The 68–76°F (20–24°C) low-risk range is based on [this research](https://escholarship.org/content/qt2xz601d0/qt2xz601d0.pdf).
 - The 77–94°F (25–34°C) moderate-through-extreme thresholds are based on [this exercise-safety guidance](https://www.princetonmedicine.com/blog/wet-bulb-temperature-and-exercise-safety-what-you-need-to-know).

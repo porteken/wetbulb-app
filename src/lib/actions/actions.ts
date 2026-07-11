@@ -17,8 +17,8 @@ import {
   RANKINGS_YEAR_COOKIE_NAME,
 } from "@/lib/constants";
 import { isSecureCookieEnvironment } from "@/lib/utils/server-cookies";
-import { WETBULB_INDEX_LEGEND_ITEMS } from "@/lib/utils/wetbulb-index";
 import { validateTrendOption } from "@/lib/utils/validation";
+import { WETBULB_INDEX_LEGEND_ITEMS } from "@/lib/utils/wetbulb-index";
 import { revalidatePath } from "next/cache";
 import { cookies } from "next/headers";
 

@@ -241,7 +241,11 @@ export async function fetchTrendGraphRows(
   const buildQuery = (selectedSeason?: GraphSeason) => {
     let query = getDb()
       .selectFrom("wetbulb_year_stats")
-      .select(({ ref }) => ["location_id", "year", ref(metricColumn).as("wetbulb")])
+      .select(({ ref }) => [
+        "location_id",
+        "year",
+        ref(metricColumn).as("wetbulb"),
+      ])
       .where("location_id", "=", locationId);
 
     if (selectedSeason !== undefined) {

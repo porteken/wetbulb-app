@@ -115,9 +115,7 @@ describe("aboutMain", () => {
     expect(within(table).getByText("None")).toBeInTheDocument();
     expect(within(table).getByText("< 68°F (< 20°C)")).toBeInTheDocument();
     expect(within(table).getByText("Low Risk")).toBeInTheDocument();
-    expect(
-      within(table).getByText("68–76°F (20–24°C)"),
-    ).toBeInTheDocument();
+    expect(within(table).getByText("68–76°F (20–24°C)")).toBeInTheDocument();
     expect(within(table).getByText("Theoretical Limit")).toBeInTheDocument();
     expect(within(table).getByText("≥ 95°F (≥ 35°C)")).toBeInTheDocument();
   });

@@ -2,7 +2,10 @@
 
 import { PageShell } from "@/components/app/page-shell";
 import { APP_CONFIG } from "@/lib/constants";
-import { getWetbulbRangeLabel, WETBULB_INDEX_LEGEND_ITEMS } from "@/lib/utils/wetbulb-index";
+import {
+  getWetbulbRangeLabel,
+  WETBULB_INDEX_LEGEND_ITEMS,
+} from "@/lib/utils/wetbulb-index";
 import Link from "next/link";
 import React from "react";
 
@@ -26,8 +29,8 @@ const About: FC<AboutProperties> = ({ LocationOptions }: AboutProperties) => (
         been trending upward across much of the United States, and because
         wet-bulb temperature captures the combined effect of the two, it has
         been rising even faster than dry-bulb air temperature alone in many
-        locations. Tracking that shift year over year makes it possible to
-        see where heat stress risk is growing fastest.
+        locations. Tracking that shift year over year makes it possible to see
+        where heat stress risk is growing fastest.
       </p>
     </section>
 
@@ -42,13 +45,13 @@ const About: FC<AboutProperties> = ({ LocationOptions }: AboutProperties) => (
           settles at as water evaporates from its surface. It combines the
           effects of heat and humidity into a single number: the lower the
           humidity, the more evaporation can cool the bulb, so wet-bulb
-          temperature sits closer to the dry-bulb (regular) air temperature
-          when it's dry, and closer to the air temperature itself when the air
-          is already saturated with moisture. The human body relies on the
-          same evaporative process — sweating — to shed heat, which is why
-          wet-bulb temperature is such a useful measure of heat stress: at
-          high humidity, sweat can't evaporate efficiently no matter how hot
-          it feels, and the body starts to lose its ability to cool down.
+          temperature sits closer to the dry-bulb (regular) air temperature when
+          it's dry, and closer to the air temperature itself when the air is
+          already saturated with moisture. The human body relies on the same
+          evaporative process — sweating — to shed heat, which is why wet-bulb
+          temperature is such a useful measure of heat stress: at high humidity,
+          sweat can't evaporate efficiently no matter how hot it feels, and the
+          body starts to lose its ability to cool down.
         </p>
 
         <div className="mt-6 max-w-3xl overflow-x-auto">
@@ -83,28 +86,27 @@ const About: FC<AboutProperties> = ({ LocationOptions }: AboutProperties) => (
           >
             this research
           </Link>
-          . The 77–94°F (25–34°C) moderate-through-extreme thresholds, where
-          the body's ability to cool itself through sweat becomes
-          increasingly limited, are based on{" "}
+          . The 77–94°F (25–34°C) moderate-through-extreme thresholds, where the
+          body's ability to cool itself through sweat becomes increasingly
+          limited, are based on{" "}
           <Link
             className="text-primary underline underline-offset-4 transition hover:text-primary/80"
             href={APP_CONFIG.WETBULB_EXERCISE_SAFETY_URL}
           >
             this exercise-safety guidance
           </Link>
-          . Long thought to be the theoretical survivability limit for a
-          healthy person at rest, a wet-bulb temperature of 95°F (35°C) is
-          the point at which the body can no longer shed heat through
-          sweating at all. However,{" "}
+          . Long thought to be the theoretical survivability limit for a healthy
+          person at rest, a wet-bulb temperature of 95°F (35°C) is the point at
+          which the body can no longer shed heat through sweating at all.
+          However,{" "}
           <Link
             className="text-primary underline underline-offset-4 transition hover:text-primary/80"
             href={APP_CONFIG.WETBULB_LIMIT_URL}
           >
             recent research
           </Link>{" "}
-          found that this empirical limit is actually lower — closer to
-          88°F (31°C) — for young, healthy adults under real-world
-          conditions.
+          found that this empirical limit is actually lower — closer to 88°F
+          (31°C) — for young, healthy adults under real-world conditions.
         </p>
       </article>
     </section>

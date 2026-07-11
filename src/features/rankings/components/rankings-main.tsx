@@ -100,7 +100,13 @@ interface RankingItem {
   state: string;
 }
 
-type SortColumn = "avg_wetbulb" | "change" | "city" | "max_wetbulb" | "rank" | "state";
+type SortColumn =
+  | "avg_wetbulb"
+  | "change"
+  | "city"
+  | "max_wetbulb"
+  | "rank"
+  | "state";
 
 function compareRankingItems(
   a: RankingItem,
@@ -239,7 +245,11 @@ function rankingsReducer(
       return { ...state, currentPage: 1, stateFilter: action.state };
     }
     case "SET_WETBULB_LEVEL_FILTER": {
-      return { ...state, currentPage: 1, wetbulbLevelFilter: action.wetbulbLevel };
+      return {
+        ...state,
+        currentPage: 1,
+        wetbulbLevelFilter: action.wetbulbLevel,
+      };
     }
     case "SET_SORT": {
       if (state.sortColumn === action.column) {
@@ -301,7 +311,9 @@ const RankingsFilters = memo(
 
         dispatch({ type: "SET_YEAR", year });
         persist(
-          ...(shouldResetWetbulbLevel ? [() => setRankingsWetbulbLevel("")] : []),
+          ...(shouldResetWetbulbLevel
+            ? [() => setRankingsWetbulbLevel("")]
+            : []),
           () => setRankingsYear(year),
         );
       },
@@ -315,7 +327,9 @@ const RankingsFilters = memo(
 
         dispatch({ season, type: "SET_SEASON" });
         persist(
-          ...(shouldResetWetbulbLevel ? [() => setRankingsWetbulbLevel("")] : []),
+          ...(shouldResetWetbulbLevel
+            ? [() => setRankingsWetbulbLevel("")]
+            : []),
           () => setRankingsSeason(season),
         );
       },
@@ -520,7 +534,9 @@ const RankingRow = memo(({ item, push, unit }: RankingRowProperties) => {
         {max_wetbulb === undefined ? (
           <span className="text-muted-foreground">N/A</span>
         ) : (
-          <span className={`font-semibold ${getWetbulbInfo(max_wetbulb).color}`}>
+          <span
+            className={`font-semibold ${getWetbulbInfo(max_wetbulb).color}`}
+          >
             {formatWetbulbValue(max_wetbulb, unit)}
           </span>
         )}
@@ -536,7 +552,9 @@ const RankingRow = memo(({ item, push, unit }: RankingRowProperties) => {
         {changeFrom2000InUnit === undefined ? (
           <span className="text-muted-foreground">N/A</span>
         ) : (
-          <span className={`font-semibold ${colorMapping(changeFrom2000InUnit)}`}>
+          <span
+            className={`font-semibold ${colorMapping(changeFrom2000InUnit)}`}
+          >
             {changeFrom2000InUnit > 0 ? "+" : ""}
             {changeFrom2000InUnit.toFixed(1)}°{unit}
           </span>

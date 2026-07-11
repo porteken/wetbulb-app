@@ -287,14 +287,18 @@ const TrendAnalysisComponent: React.FC<TrendAnalysisProperties> = ({
           <div className="mb-5 rounded-2xl p-4 glass-panel-muted">
             <p className="text-sm font-medium text-foreground">
               {currentWetbulbDescription.prefix}{" "}
-              <span className={`font-bold ${currentWetbulbDescription.colorClass}`}>
+              <span
+                className={`font-bold ${currentWetbulbDescription.colorClass}`}
+              >
                 {currentWetbulbDescription.value}
               </span>
             </p>
             {forecastEnabled && forecastWetbulbLevel && (
               <p className="mt-2 text-sm font-medium text-foreground">
                 {forecastWetbulbLevel.prefix}{" "}
-                <span className={`font-bold ${forecastWetbulbLevel.colorClass}`}>
+                <span
+                  className={`font-bold ${forecastWetbulbLevel.colorClass}`}
+                >
                   {forecastWetbulbLevel.value}
                 </span>
                 {forecastWetbulbLevel.confidenceRange && (

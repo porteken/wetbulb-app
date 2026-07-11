@@ -113,7 +113,8 @@ const resolveTrendGraphData = (
 ) => ({
   increase_per_year:
     trendData?.increase_per_year ?? emptyGraphData.increase_per_year,
-  trendline_wetbulbs: trendData?.trendline_wetbulbs ?? emptyGraphData.trendline_wetbulbs,
+  trendline_wetbulbs:
+    trendData?.trendline_wetbulbs ?? emptyGraphData.trendline_wetbulbs,
   year_wetbulbs: trendData?.year_wetbulbs ?? emptyGraphData.year_wetbulbs,
   years: trendData?.years ?? emptyGraphData.years,
 });

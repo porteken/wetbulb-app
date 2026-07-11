@@ -77,7 +77,9 @@ describe("unitProvider", () => {
   });
 
   it("should throw when used outside of a UnitProvider", () => {
-    const consoleError = vi.spyOn(console, "error").mockImplementation(() => {});
+    const consoleError = vi
+      .spyOn(console, "error")
+      .mockImplementation(() => {});
 
     expect(() => renderHook(() => useTemperatureUnit())).toThrow(
       "useTemperatureUnit must be used within a UnitProvider",

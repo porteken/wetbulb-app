@@ -5,7 +5,8 @@ export const APP_CONFIG = {
     "https://www.princetonmedicine.com/blog/wet-bulb-temperature-and-exercise-safety-what-you-need-to-know",
   WETBULB_LIMIT_URL:
     "https://www.psu.edu/news/research/story/humans-cant-endure-temperatures-and-humidities-high-previously-thought",
-  WETBULB_LOW_RISK_URL: "https://escholarship.org/content/qt2xz601d0/qt2xz601d0.pdf",
+  WETBULB_LOW_RISK_URL:
+    "https://escholarship.org/content/qt2xz601d0/qt2xz601d0.pdf",
 } as const;
 
 export const TEMPERATURE_UNIT_COOKIE_NAME = "temperature-unit" as const;
@@ -29,7 +30,8 @@ export const normalizeTemperatureUnit = (
 export const GRAPH_MEASURE_COOKIE_NAME = "graph-measure" as const;
 export const GRAPH_SEASON_COOKIE_NAME = "graph-season" as const;
 export const REFERENCE_YEAR_COOKIE_NAME = "reference-year" as const;
-export const RANKINGS_WETBULB_LEVEL_COOKIE_NAME = "rankings-wetbulb-level" as const;
+export const RANKINGS_WETBULB_LEVEL_COOKIE_NAME =
+  "rankings-wetbulb-level" as const;
 export const RANKINGS_SEASON_COOKIE_NAME = "rankings-season" as const;
 export const RANKINGS_STATE_COOKIE_NAME = "rankings-state" as const;
 export const RANKINGS_YEAR_COOKIE_NAME = "rankings-year" as const;

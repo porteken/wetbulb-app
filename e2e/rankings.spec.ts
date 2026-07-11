@@ -37,7 +37,9 @@ test.describe("Rankings Page", () => {
 
     await expect(page.getByTestId("rankings-year-filter")).toBeVisible();
     await expect(page.getByTestId("rankings-state-filter")).toBeVisible();
-    await expect(page.getByTestId("rankings-wetbulb-level-filter")).toBeVisible();
+    await expect(
+      page.getByTestId("rankings-wetbulb-level-filter"),
+    ).toBeVisible();
   });
 
   test("should show the city selector in the header", async ({ page }) => {
@@ -169,11 +171,15 @@ test.describe("Rankings Page", () => {
       timeout: 15_000,
     });
 
-    await expect(page.getByTestId("rankings-wetbulb-level-filter")).toBeVisible({
-      timeout: 10_000,
-    });
+    await expect(page.getByTestId("rankings-wetbulb-level-filter")).toBeVisible(
+      {
+        timeout: 10_000,
+      },
+    );
 
-    const wetbulbLevelSelect = page.getByTestId("rankings-wetbulb-level-filter");
+    const wetbulbLevelSelect = page.getByTestId(
+      "rankings-wetbulb-level-filter",
+    );
     await openCustomSelect(page, wetbulbLevelSelect);
     const firstOption = getOpenCustomSelectOptions(page).first();
     const firstOptionText = await firstOption.textContent();

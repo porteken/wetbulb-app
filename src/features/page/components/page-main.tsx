@@ -127,9 +127,7 @@ const Main: FC<PageProperties> = ({
               onClick={handleToggleLegend}
               type="button"
             >
-              {isLegendOpen
-                ? "Hide Wetbulb Index"
-                : "Show Wetbulb Index"}
+              {isLegendOpen ? "Hide Wetbulb Index" : "Show Wetbulb Index"}
             </button>
           </div>
         </div>

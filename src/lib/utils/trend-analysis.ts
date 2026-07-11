@@ -82,9 +82,13 @@ export const deriveTrendAnalysis = (
   trendData: TrendGraphDataProperties,
   forecastData: ForecastGraphData | undefined,
   option: string,
-  { season = DEFAULT_GRAPH_SEASON, unit = DEFAULT_TEMPERATURE_UNIT }: DeriveTrendAnalysisOptions = {},
+  {
+    season = DEFAULT_GRAPH_SEASON,
+    unit = DEFAULT_TEMPERATURE_UNIT,
+  }: DeriveTrendAnalysisOptions = {},
 ): TrendAnalysisResult => {
-  const { increase_per_year, trendline_wetbulbs, year_wetbulbs, years } = trendData;
+  const { increase_per_year, trendline_wetbulbs, year_wetbulbs, years } =
+    trendData;
   const snapshot: TrendGraphSnapshot = {
     forecastData,
     increase_per_year,

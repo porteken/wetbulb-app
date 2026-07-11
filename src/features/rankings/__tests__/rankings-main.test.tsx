@@ -601,9 +601,7 @@ describe("rankingsMain", () => {
         />,
       );
 
-      const wetbulbLevelSelect = screen.getByTestId(
-        "avg-wetbulb-level-select",
-      );
+      const wetbulbLevelSelect = screen.getByTestId("avg-wetbulb-level-select");
 
       expect(
         within(wetbulbLevelSelect).getByRole("option", {
@@ -615,9 +613,7 @@ describe("rankingsMain", () => {
     it("should filter rankings by wetbulb level", () => {
       render(<RankingsMain {...defaultProps} />);
 
-      const wetbulbLevelSelect = screen.getByTestId(
-        "avg-wetbulb-level-select",
-      );
+      const wetbulbLevelSelect = screen.getByTestId("avg-wetbulb-level-select");
       fireEvent.change(wetbulbLevelSelect, {
         target: { value: "None" },
       });
@@ -734,9 +730,7 @@ describe("rankingsMain", () => {
       fireEvent.click(screen.getByTestId("next-page"));
       expect(screen.getByTestId("current-page")).toHaveTextContent("2");
 
-      const wetbulbLevelSelect = screen.getByTestId(
-        "avg-wetbulb-level-select",
-      );
+      const wetbulbLevelSelect = screen.getByTestId("avg-wetbulb-level-select");
       fireEvent.change(wetbulbLevelSelect, {
         target: { value: "Empirical Limit" },
       });

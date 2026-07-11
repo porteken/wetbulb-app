@@ -195,9 +195,7 @@ describe("graphSection", () => {
     });
 
     it("should not display thermal stress section when not provided", () => {
-      render(
-        <GraphSection {...defaultProps} wetbulbDescription={undefined} />,
-      );
+      render(<GraphSection {...defaultProps} wetbulbDescription={undefined} />);
 
       expect(
         screen.queryByText("Current thermal stress:"),

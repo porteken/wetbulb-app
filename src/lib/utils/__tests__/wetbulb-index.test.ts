@@ -159,7 +159,10 @@ describe("wetbulb-index", () => {
 
   describe("getWetbulbDescription", () => {
     it("should return description for average measure type", () => {
-      const result = getWetbulbDescription(26, "avg", { unit: "C", year: 2024 });
+      const result = getWetbulbDescription(26, "avg", {
+        unit: "C",
+        year: 2024,
+      });
       expect(result.prefix).toBe(
         "The 2024 annual average wetbulb temperature is",
       );
@@ -169,7 +172,10 @@ describe("wetbulb-index", () => {
     });
 
     it("should return description for max measure type", () => {
-      const result = getWetbulbDescription(28, "max", { unit: "C", year: 2023 });
+      const result = getWetbulbDescription(28, "max", {
+        unit: "C",
+        year: 2023,
+      });
       expect(result.prefix).toBe("The 2023 annual max wetbulb temperature is");
       expect(result.value).toBe("28.0°C");
       expect(result.colorClass).toBe("text-orange-600");
@@ -183,13 +189,19 @@ describe("wetbulb-index", () => {
     });
 
     it("should handle None level", () => {
-      const result = getWetbulbDescription(16, "avg", { unit: "C", year: 2024 });
+      const result = getWetbulbDescription(16, "avg", {
+        unit: "C",
+        year: 2024,
+      });
       expect(result.colorClass).toBe("text-green-600");
       expect(result.value).toBe("16.0°C");
     });
 
     it("should handle Theoretical Limit level", () => {
-      const result = getWetbulbDescription(36, "max", { unit: "C", year: 2024 });
+      const result = getWetbulbDescription(36, "max", {
+        unit: "C",
+        year: 2024,
+      });
       expect(result.colorClass).toBe("text-purple-800");
       expect(result.value).toBe("36.0°C");
     });

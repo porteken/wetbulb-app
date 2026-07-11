@@ -13,8 +13,8 @@ import React, { memo, useCallback } from "react";
 
 import { ErrorGraphDisplay } from "./error-graph-display";
 
-import type { WetbulbDescription } from "@/lib/utils/wetbulb-index";
 import type { TrendGraphSnapshot } from "@/lib/utils/trend-analysis";
+import type { WetbulbDescription } from "@/lib/utils/wetbulb-index";
 
 interface GraphSectionProperties {
   forecastEnabled: boolean;
@@ -191,7 +191,9 @@ const GraphWetbulbSummary = ({
       {visibleForecastWetbulbLevel && (
         <p className="mt-2 text-sm font-medium text-foreground">
           {visibleForecastWetbulbLevel.prefix}{" "}
-          <span className={`font-bold ${visibleForecastWetbulbLevel.colorClass}`}>
+          <span
+            className={`font-bold ${visibleForecastWetbulbLevel.colorClass}`}
+          >
             {visibleForecastWetbulbLevel.value}
           </span>
           {visibleForecastWetbulbLevel.confidenceRange && (

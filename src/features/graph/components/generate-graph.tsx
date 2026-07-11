@@ -327,7 +327,9 @@ const hasReferenceGraphData = (
   currentWetbulbs: number[],
   referenceWetbulbs: number[],
 ): boolean =>
-  dates.length > 0 && referenceWetbulbs.length > 0 && currentWetbulbs.length > 0;
+  dates.length > 0 &&
+  referenceWetbulbs.length > 0 &&
+  currentWetbulbs.length > 0;
 
 const roundDownToStep = (value: number, step: number): number =>
   Math.floor(value / step) * step;
@@ -653,7 +655,10 @@ const ReferenceChartBody = ({
   const yAxisDomain = React.useMemo(
     () =>
       getYAxisDomain(
-        chartData.flatMap((point) => [point.currentWetbulb, point.referenceWetbulb]),
+        chartData.flatMap((point) => [
+          point.currentWetbulb,
+          point.referenceWetbulb,
+        ]),
       ),
     [chartData],
   );

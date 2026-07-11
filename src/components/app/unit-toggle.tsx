@@ -1,7 +1,7 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
 import { useTemperatureUnit } from "@/components/app/unit-provider";
+import { Button } from "@/components/ui/button";
 import * as React from "react";
 
 export const UnitToggle = () => {
