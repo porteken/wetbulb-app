@@ -389,6 +389,9 @@ describe("trendAnalysis", () => {
     });
 
     it("should ignore onMeasureChange persistence errors", async () => {
+      const consoleWarn = vi
+        .spyOn(console, "warn")
+        .mockImplementation(() => {});
       const onMeasureChange = mockFn().mockRejectedValue(
         new Error("Server error"),
       );
@@ -405,6 +408,8 @@ describe("trendAnalysis", () => {
       });
 
       expect(select).toHaveValue("max");
+
+      consoleWarn.mockRestore();
     });
 
     it("should ignore stale graph responses when measure changes quickly", async () => {
@@ -542,6 +547,9 @@ describe("trendAnalysis", () => {
     });
 
     it("should ignore forecast preference persistence errors", async () => {
+      const consoleWarn = vi
+        .spyOn(console, "warn")
+        .mockImplementation(() => {});
       vi.mocked(setForecastPreferences).mockRejectedValueOnce(
         new Error("Cookie write failed"),
       );
@@ -557,6 +565,8 @@ describe("trendAnalysis", () => {
       await waitFor(() => {
         expect(setForecastPreferences).toHaveBeenCalledWith(true, 10);
       });
+
+      consoleWarn.mockRestore();
     });
 
     it("should call GenerateTrendGraph with forecast data when enabled", async () => {
