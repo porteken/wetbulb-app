@@ -4,6 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "prepare": "husky",
     "dev": "next dev --turbopack",
     "build": "node --no-deprecation ./node_modules/next/dist/bin/next build --turbopack",
     "postbuild": "mkdir -p .next/standalone/.next && rm -rf .next/standalone/.next/static .next/standalone/public && cp -R .next/static .next/standalone/.next/static && if [ -d public ]; then cp -R public .next/standalone/public; fi",
@@ -70,6 +71,7 @@
     "eslint-plugin-oxlint": "^1.73.0",
     "eslint-plugin-playwright": "^2.10.5",
     "globals": "^17.7.0",
+    "husky": "^9.1.7",
     "jsdom": "^29.1.1",
     "knip": "^6.26.0",
     "lint-staged": "^17.0.8",
