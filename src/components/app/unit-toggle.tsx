@@ -16,7 +16,7 @@ export const UnitToggle = () => {
 
   const handleToggle = React.useCallback(() => {
     setUnit(nextUnit);
-    ignorePersistenceError(setTemperatureUnit(nextUnit));
+    void ignorePersistenceError(setTemperatureUnit(nextUnit));
   }, [setUnit, nextUnit, ignorePersistenceError]);
 
   return (

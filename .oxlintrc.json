@@ -166,18 +166,6 @@
     "promise/prefer-await-to-callbacks": "off",
     "typescript/unbound-method": "off",
     "typescript/no-misused-promises": "error",
-    "typescript/no-floating-promises": [
-      "error",
-      {
-        "allowForKnownSafeCalls": [
-          {
-            "from": "file",
-            "name": "IgnorePersistenceError",
-            "path": "./src/hooks/use-ignore-persistence-error.ts"
-          }
-        ]
-      }
-    ],
     "typescript/switch-exhaustiveness-check": "error",
     "typescript/prefer-nullish-coalescing": "error",
     "typescript/no-confusing-void-expression": "error",
