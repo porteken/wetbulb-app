@@ -9,12 +9,14 @@ import {
   MAX_FORECAST_YEARS_AHEAD,
   MIN_FORECAST_YEARS_AHEAD,
   normalizeGraphSeason,
+  normalizeTemperatureUnit,
   PREFERENCE_COOKIE_MAX_AGE_MS,
   type GraphSeason,
   RANKINGS_WETBULB_LEVEL_COOKIE_NAME,
   RANKINGS_SEASON_COOKIE_NAME,
   RANKINGS_STATE_COOKIE_NAME,
   RANKINGS_YEAR_COOKIE_NAME,
+  TEMPERATURE_UNIT_COOKIE_NAME,
 } from "@/lib/constants";
 import { isSecureCookieEnvironment } from "@/lib/utils/server-cookies";
 import { validateTrendOption } from "@/lib/utils/validation";
@@ -95,6 +97,19 @@ export async function setGraphSeason(season: string) {
 
   const cookieStore = await cookies();
   cookieStore.set(GRAPH_SEASON_COOKIE_NAME, season, PREFERENCE_COOKIE_OPTIONS);
+}
+
+export async function setTemperatureUnit(unit: string) {
+  if (normalizeTemperatureUnit(unit) !== unit) {
+    return;
+  }
+
+  const cookieStore = await cookies();
+  // Not httpOnly: UnitProvider reads this cookie client-side (see readCookieUnit).
+  cookieStore.set(TEMPERATURE_UNIT_COOKIE_NAME, unit, {
+    ...PREFERENCE_COOKIE_OPTIONS,
+    httpOnly: false,
+  });
 }
 
 export const setRankingsWetbulbLevel = async (wetbulbLevel: string) => {

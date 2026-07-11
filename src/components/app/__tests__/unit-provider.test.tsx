@@ -11,6 +11,16 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 vi.unmock("@/components/app/unit-provider");
 
+const { setTemperatureUnitMock } = vi.hoisted(() => ({
+  setTemperatureUnitMock: vi.fn<() => Promise<void>>(() => Promise.resolve()),
+}));
+
+vi.mock("@/lib/actions/actions", () => ({
+  setTemperatureUnit: setTemperatureUnitMock,
+}));
+
+import { ToastProvider } from "@/components/ui/toast";
+
 import {
   readCookieUnit,
   UnitProvider,
@@ -18,18 +28,25 @@ import {
 } from "../unit-provider";
 import { UnitToggle } from "../unit-toggle";
 
+let cookieValue = "";
+
 const setCookie = (value: string) => {
-  document.cookie = `temperature-unit=${value}; path=/`;
+  cookieValue = `temperature-unit=${value}`;
 };
 
-const clearCookie = () => {
-  document.cookie = "temperature-unit=; path=/; max-age=0";
+// Override document.cookie with a controllable getter so tests can seed a
+// value without assigning to document.cookie directly.
+const resetCookie = () => {
+  cookieValue = "";
+  setTemperatureUnitMock.mockClear();
+  Object.defineProperty(document, "cookie", {
+    configurable: true,
+    get: () => cookieValue,
+  });
 };
 
 describe("unitProvider", () => {
-  beforeEach(() => {
-    clearCookie();
-  });
+  beforeEach(resetCookie);
 
   it("should default to Fahrenheit when no cookie is set", async () => {
     const { result } = renderHook(() => useTemperatureUnit(), {
@@ -67,7 +84,7 @@ describe("unitProvider", () => {
     expect(result.current.unit).toBe("F");
   });
 
-  it("should update state and persist the cookie when setUnit is called", () => {
+  it("should update state when setUnit is called", () => {
     const { result } = renderHook(() => useTemperatureUnit(), {
       wrapper: UnitProvider,
     });
@@ -77,7 +94,6 @@ describe("unitProvider", () => {
     });
 
     expect(result.current.unit).toBe("C");
-    expect(document.cookie).toContain("temperature-unit=C");
   });
 
   it("should throw when used outside of a UnitProvider", () => {
@@ -94,9 +110,7 @@ describe("unitProvider", () => {
 });
 
 describe("readCookieUnit", () => {
-  beforeEach(() => {
-    clearCookie();
-  });
+  beforeEach(resetCookie);
 
   it("returns the default unit when document is unavailable", () => {
     const originalDocument = globalThis.document;
@@ -111,15 +125,15 @@ describe("readCookieUnit", () => {
 });
 
 describe("unitToggle", () => {
-  beforeEach(() => {
-    clearCookie();
-  });
+  beforeEach(resetCookie);
 
-  it("should render the current unit and toggle to the other unit on click", () => {
+  it("should toggle the unit and persist the preference on click", () => {
     render(
-      <UnitProvider>
-        <UnitToggle />
-      </UnitProvider>,
+      <ToastProvider>
+        <UnitProvider>
+          <UnitToggle />
+        </UnitProvider>
+      </ToastProvider>,
     );
 
     const button = screen.getByRole("button", { name: "Switch to °C" });
@@ -130,6 +144,6 @@ describe("unitToggle", () => {
     expect(
       screen.getByRole("button", { name: "Switch to °F" }),
     ).toHaveTextContent("°C");
-    expect(document.cookie).toContain("temperature-unit=C");
+    expect(setTemperatureUnitMock).toHaveBeenCalledWith("C");
   });
 });

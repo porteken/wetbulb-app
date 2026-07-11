@@ -3,7 +3,6 @@
 import {
   DEFAULT_TEMPERATURE_UNIT,
   normalizeTemperatureUnit,
-  PREFERENCE_COOKIE_MAX_AGE_MS,
   TEMPERATURE_UNIT_COOKIE_NAME,
   type TemperatureUnit,
 } from "@/lib/constants";
@@ -35,14 +34,6 @@ export const readCookieUnit = (): TemperatureUnit => {
   );
 };
 
-// The CookieStore API isn't supported in every browser this app targets
-// (notably Firefox and Safari), so this preference cookie is written
-// directly; see the .oxlintrc.json override for this file.
-const writeCookieUnit = (unit: TemperatureUnit): void => {
-  const maxAgeSeconds = Math.floor(PREFERENCE_COOKIE_MAX_AGE_MS / 1000);
-  document.cookie = `${TEMPERATURE_UNIT_COOKIE_NAME}=${unit}; path=/; max-age=${maxAgeSeconds}; samesite=lax`;
-};
-
 export function UnitProvider({
   children,
 }: Readonly<{
@@ -56,14 +47,9 @@ export function UnitProvider({
     setUnit(readCookieUnit());
   }, []);
 
-  const updateUnit = React.useCallback((nextUnit: TemperatureUnit) => {
-    setUnit(nextUnit);
-    writeCookieUnit(nextUnit);
-  }, []);
-
   const contextValue = React.useMemo(
-    () => ({ setUnit: updateUnit, unit }),
-    [updateUnit, unit],
+    () => ({ setUnit, unit }),
+    [setUnit, unit],
   );
 
   return (

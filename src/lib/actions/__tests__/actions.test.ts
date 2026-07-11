@@ -8,6 +8,7 @@ import {
   setRankingsSeason,
   setRankingsState,
   setRankingsYear,
+  setTemperatureUnit,
 } from "../actions";
 
 import type { GraphSeason } from "@/lib/constants";
@@ -113,6 +114,39 @@ describe("setGraphSeason", () => {
 
   it("ignores an invalid graph season without setting a cookie", async () => {
     await setGraphSeason("Not A Season");
+
+    expect(mockSet).not.toHaveBeenCalled();
+  });
+});
+
+describe("setTemperatureUnit", () => {
+  let mockSet: ReturnType<typeof vi.fn>;
+
+  beforeEach(async () => {
+    vi.clearAllMocks();
+
+    const { cookies } = await import("next/headers");
+    const cookiesResult = await cookies();
+    mockSet = vi.mocked(cookiesResult.set);
+  });
+
+  it("sets a client-readable temperature-unit cookie", async () => {
+    await setTemperatureUnit("C");
+
+    expect(mockSet).toHaveBeenCalledWith(
+      "temperature-unit",
+      "C",
+      expect.objectContaining({
+        expires: expect.any(Date),
+        httpOnly: false,
+        path: "/",
+        secure: false,
+      }),
+    );
+  });
+
+  it("ignores an invalid unit without setting a cookie", async () => {
+    await setTemperatureUnit("kelvin");
 
     expect(mockSet).not.toHaveBeenCalled();
   });

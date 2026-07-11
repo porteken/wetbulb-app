@@ -88,6 +88,12 @@ vi.mock("next/navigation", () => ({
   useSearchParams: () => mockUseSearchParameters(),
 }));
 
+// UnitToggle has its own test and pulls in ToastProvider via
+// useIgnorePersistenceError; stub it out so these HeaderBar tests stay focused.
+vi.mock("@/components/app/unit-toggle", () => ({
+  UnitToggle: () => null,
+}));
+
 describe("headerBar", () => {
   beforeAll(() => {
     Object.defineProperty(globalThis, "matchMedia", {
