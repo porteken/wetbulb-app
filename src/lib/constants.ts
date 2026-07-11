@@ -10,7 +10,7 @@ export const APP_CONFIG = {
 } as const;
 
 export const TEMPERATURE_UNIT_COOKIE_NAME = "temperature-unit" as const;
-export const TEMPERATURE_UNITS = ["F", "C"] as const;
+const TEMPERATURE_UNITS = ["F", "C"] as const;
 export type TemperatureUnit = (typeof TEMPERATURE_UNITS)[number];
 export const DEFAULT_TEMPERATURE_UNIT: TemperatureUnit = "F";
 
