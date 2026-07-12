@@ -51,6 +51,8 @@ vi.mock("@/lib/utils/errors", () => {
 const mockFetch = mockFn();
 globalThis.fetch = mockFetch;
 
+const identity = (data: unknown) => data;
+
 const createMockResponse = ({
   jsonError,
   jsonResult,
@@ -99,7 +101,7 @@ describe("aPI Interceptor", () => {
         ok: true,
       });
 
-      const result = await handleApiResponse(mockResponse as any);
+      const result = await handleApiResponse(mockResponse as any, identity);
 
       expect(result).toStrictEqual(mockData);
       expect(mockResponse.json).toHaveBeenCalled();
@@ -115,9 +117,9 @@ describe("aPI Interceptor", () => {
 
       mockCreateError.mockReturnValue(new Error("Custom error"));
 
-      await expect(handleApiResponse(mockResponse as any)).rejects.toThrow(
-        "Custom error",
-      );
+      await expect(
+        handleApiResponse(mockResponse as any, identity),
+      ).rejects.toThrow("Custom error");
 
       expect(mockCreateError).toHaveBeenCalledWith(
         errorMessage,
@@ -140,7 +142,7 @@ describe("aPI Interceptor", () => {
       mockCreateError.mockReturnValue(new Error("Custom error"));
 
       await expect(
-        handleApiResponse(mockResponse as any, context),
+        handleApiResponse(mockResponse as any, identity, context),
       ).rejects.toThrow("Custom error");
 
       expect(mockCreateError).toHaveBeenCalledWith(
@@ -160,9 +162,9 @@ describe("aPI Interceptor", () => {
         ok: true,
       });
 
-      await expect(handleApiResponse(mockResponse as any)).rejects.toThrow(
-        "Failed to parse server response",
-      );
+      await expect(
+        handleApiResponse(mockResponse as any, identity),
+      ).rejects.toThrow("Failed to parse server response");
 
       expect(MockedNetworkError).toHaveBeenCalledWith(
         "Failed to parse server response",
@@ -182,9 +184,9 @@ describe("aPI Interceptor", () => {
 
       mockCreateError.mockReturnValue(new Error("Custom error"));
 
-      await expect(handleApiResponse(mockResponse as any)).rejects.toThrow(
-        "Custom error",
-      );
+      await expect(
+        handleApiResponse(mockResponse as any, identity),
+      ).rejects.toThrow("Custom error");
 
       expect(mockCreateError).toHaveBeenCalledWith(
         errorMessage,
@@ -204,9 +206,9 @@ describe("aPI Interceptor", () => {
 
       mockCreateError.mockReturnValue(new Error("Custom error"));
 
-      await expect(handleApiResponse(mockResponse as any)).rejects.toThrow(
-        "Custom error",
-      );
+      await expect(
+        handleApiResponse(mockResponse as any, identity),
+      ).rejects.toThrow("Custom error");
 
       expect(mockCreateError).toHaveBeenCalledWith(
         errorMessage,
@@ -226,9 +228,9 @@ describe("aPI Interceptor", () => {
 
       mockCreateError.mockReturnValue(new Error("Custom error"));
 
-      await expect(handleApiResponse(mockResponse as any)).rejects.toThrow(
-        "Custom error",
-      );
+      await expect(
+        handleApiResponse(mockResponse as any, identity),
+      ).rejects.toThrow("Custom error");
 
       expect(mockCreateError).toHaveBeenCalledWith(
         errorMessage,
@@ -248,9 +250,9 @@ describe("aPI Interceptor", () => {
 
       mockCreateError.mockReturnValue(new Error("Custom error"));
 
-      await expect(handleApiResponse(mockResponse as any)).rejects.toThrow(
-        "Custom error",
-      );
+      await expect(
+        handleApiResponse(mockResponse as any, identity),
+      ).rejects.toThrow("Custom error");
 
       expect(mockCreateError).toHaveBeenCalledWith(
         errorMessage,
@@ -269,9 +271,9 @@ describe("aPI Interceptor", () => {
 
       mockCreateError.mockReturnValue(new Error("Custom error"));
 
-      await expect(handleApiResponse(mockResponse as any)).rejects.toThrow(
-        "Custom error",
-      );
+      await expect(
+        handleApiResponse(mockResponse as any, identity),
+      ).rejects.toThrow("Custom error");
 
       expect(mockCreateError).toHaveBeenCalledWith(
         "Validation failed. Please check your input.",
@@ -289,9 +291,9 @@ describe("aPI Interceptor", () => {
 
       mockCreateError.mockReturnValue(new Error("Custom error"));
 
-      await expect(handleApiResponse(mockResponse as any)).rejects.toThrow(
-        "Custom error",
-      );
+      await expect(
+        handleApiResponse(mockResponse as any, identity),
+      ).rejects.toThrow("Custom error");
 
       expect(mockCreateError).toHaveBeenCalledWith(
         `Request failed with status 654`,
@@ -309,9 +311,9 @@ describe("aPI Interceptor", () => {
 
       mockCreateError.mockReturnValue(new Error("Custom error"));
 
-      await expect(handleApiResponse(mockResponse as any)).rejects.toThrow(
-        "Custom error",
-      );
+      await expect(
+        handleApiResponse(mockResponse as any, identity),
+      ).rejects.toThrow("Custom error");
 
       expect(mockCreateError).toHaveBeenCalledWith(
         `Service unavailable. Please try again later.`,
@@ -329,9 +331,9 @@ describe("aPI Interceptor", () => {
 
       mockCreateError.mockReturnValue(new Error("Custom error"));
 
-      await expect(handleApiResponse(mockResponse as any)).rejects.toThrow(
-        "Custom error",
-      );
+      await expect(
+        handleApiResponse(mockResponse as any, identity),
+      ).rejects.toThrow("Custom error");
 
       expect(mockCreateError).toHaveBeenCalledWith(
         `Bad gateway. The server is temporarily unavailable.`,
@@ -349,9 +351,9 @@ describe("aPI Interceptor", () => {
 
       mockCreateError.mockReturnValue(new Error("Custom error"));
 
-      await expect(handleApiResponse(mockResponse as any)).rejects.toThrow(
-        "Custom error",
-      );
+      await expect(
+        handleApiResponse(mockResponse as any, identity),
+      ).rejects.toThrow("Custom error");
 
       expect(mockCreateError).toHaveBeenCalledWith(
         `Internal server error. Please try again later.`,
@@ -369,9 +371,9 @@ describe("aPI Interceptor", () => {
 
       mockCreateError.mockReturnValue(new Error("Custom error"));
 
-      await expect(handleApiResponse(mockResponse as any)).rejects.toThrow(
-        "Custom error",
-      );
+      await expect(
+        handleApiResponse(mockResponse as any, identity),
+      ).rejects.toThrow("Custom error");
 
       expect(mockCreateError).toHaveBeenCalledWith(
         `The requested resource was not found.`,
@@ -389,9 +391,9 @@ describe("aPI Interceptor", () => {
 
       mockCreateError.mockReturnValue(new Error("Custom error"));
 
-      await expect(handleApiResponse(mockResponse as any)).rejects.toThrow(
-        "Custom error",
-      );
+      await expect(
+        handleApiResponse(mockResponse as any, identity),
+      ).rejects.toThrow("Custom error");
 
       expect(mockCreateError).toHaveBeenCalledWith(
         `Access denied. You don't have permission to perform this action.`,
@@ -409,9 +411,9 @@ describe("aPI Interceptor", () => {
 
       mockCreateError.mockReturnValue(new Error("Custom error"));
 
-      await expect(handleApiResponse(mockResponse as any)).rejects.toThrow(
-        "Custom error",
-      );
+      await expect(
+        handleApiResponse(mockResponse as any, identity),
+      ).rejects.toThrow("Custom error");
 
       expect(mockCreateError).toHaveBeenCalledWith(
         `Authentication required. Please log in.`,
@@ -429,9 +431,9 @@ describe("aPI Interceptor", () => {
 
       mockCreateError.mockReturnValue(new Error("Custom error"));
 
-      await expect(handleApiResponse(mockResponse as any)).rejects.toThrow(
-        "Custom error",
-      );
+      await expect(
+        handleApiResponse(mockResponse as any, identity),
+      ).rejects.toThrow("Custom error");
 
       expect(mockCreateError).toHaveBeenCalledWith(
         `Invalid request. Please check your input.`,
@@ -450,9 +452,9 @@ describe("aPI Interceptor", () => {
 
       mockCreateError.mockReturnValue(new Error("Custom error"));
 
-      await expect(handleApiResponse(mockResponse as any)).rejects.toThrow(
-        "Custom error",
-      );
+      await expect(
+        handleApiResponse(mockResponse as any, identity),
+      ).rejects.toThrow("Custom error");
 
       expect(mockCreateError).toHaveBeenCalledWith(
         "Too many requests. Please try again later.",
@@ -483,7 +485,7 @@ describe("aPI Interceptor", () => {
 
       mockFetch.mockResolvedValue(mockResponse);
 
-      const result = await apiRequest("https://api.example.com/test");
+      const result = await apiRequest("https://api.example.com/test", identity);
 
       expect(result).toStrictEqual(mockData);
       expect(mockFetch).toHaveBeenCalledWith(
@@ -512,7 +514,7 @@ describe("aPI Interceptor", () => {
         },
       };
 
-      await apiRequest("https://api.example.com/test", options);
+      await apiRequest("https://api.example.com/test", identity, options);
 
       expect(mockFetch).toHaveBeenCalledWith(
         "https://api.example.com/test",
@@ -539,7 +541,12 @@ describe("aPI Interceptor", () => {
       const context = { userId: 123 };
 
       await expect(
-        apiRequest("https://api.example.com/test", { method: "POST" }, context),
+        apiRequest(
+          "https://api.example.com/test",
+          identity,
+          { method: "POST" },
+          context,
+        ),
       ).rejects.toThrow("Custom error");
 
       expect(mockCreateError).toHaveBeenCalledWith(
@@ -558,9 +565,9 @@ describe("aPI Interceptor", () => {
       const networkError = new TypeError("fetch failed");
       mockFetch.mockRejectedValue(networkError);
 
-      await expect(apiRequest("https://api.example.com/test")).rejects.toThrow(
-        "Network connection failed",
-      );
+      await expect(
+        apiRequest("https://api.example.com/test", identity),
+      ).rejects.toThrow("Network connection failed");
 
       expect(MockedNetworkError).toHaveBeenCalledWith(
         "Network connection failed",
@@ -574,9 +581,9 @@ describe("aPI Interceptor", () => {
       const customError = new Error("Custom error");
       mockFetch.mockRejectedValue(customError);
 
-      await expect(apiRequest("https://api.example.com/test")).rejects.toThrow(
-        customError,
-      );
+      await expect(
+        apiRequest("https://api.example.com/test", identity),
+      ).rejects.toThrow(customError);
     });
   });
 
@@ -605,7 +612,10 @@ describe("aPI Interceptor", () => {
 
       mockFetch.mockResolvedValue(mockResponse);
 
-      const result = await apiRequestWithRetry("https://api.example.com/test");
+      const result = await apiRequestWithRetry(
+        "https://api.example.com/test",
+        identity,
+      );
 
       expect(result).toStrictEqual(mockData);
       expect(mockFetch).toHaveBeenCalledTimes(1);
@@ -635,8 +645,9 @@ describe("aPI Interceptor", () => {
 
       const promise = apiRequestWithRetry(
         "https://api.example.com/test",
+        identity,
         {},
-        3,
+        { retries: 3 },
       );
 
       await vi.runAllTimersAsync();
@@ -663,7 +674,7 @@ describe("aPI Interceptor", () => {
       mockCreateError.mockReturnValue(mockError);
 
       await expect(
-        apiRequestWithRetry("https://api.example.com/test"),
+        apiRequestWithRetry("https://api.example.com/test", identity),
       ).rejects.toThrow("Bad request");
 
       expect(mockFetch).toHaveBeenCalledTimes(1);
@@ -690,7 +701,10 @@ describe("aPI Interceptor", () => {
       (mockError as any).statusCode = 429;
       mockCreateError.mockReturnValue(mockError);
 
-      const promise = apiRequestWithRetry("https://api.example.com/test");
+      const promise = apiRequestWithRetry(
+        "https://api.example.com/test",
+        identity,
+      );
 
       await vi.runAllTimersAsync();
 

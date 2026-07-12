@@ -73,6 +73,7 @@ const extractErrorMessage = async (response: Response): Promise<string> => {
 
 export const handleApiResponse = async <T>(
   response: Response,
+  parse: (data: unknown) => T,
   context?: ErrorContext,
 ): Promise<T> => {
   if (!response.ok) {
@@ -85,9 +86,7 @@ export const handleApiResponse = async <T>(
 
   try {
     const data: unknown = await response.json();
-    // Generic deserialization boundary; callers validate the shape with zod schemas.
-    // oxlint-disable-next-line typescript/no-unsafe-type-assertion
-    return data as T;
+    return parse(data);
   } catch (parseError) {
     throw new NetworkError(
       "Failed to parse server response",
@@ -100,6 +99,7 @@ export const handleApiResponse = async <T>(
 
 export const apiRequest = async <T>(
   url: string,
+  parse: (data: unknown) => T,
   options: RequestInit = {},
   context?: ErrorContext,
 ): Promise<T> => {
@@ -121,7 +121,7 @@ export const apiRequest = async <T>(
       headers,
     });
 
-    return await handleApiResponse<T>(response, {
+    return await handleApiResponse(response, parse, {
       ...context,
       method: options.method ?? "GET",
     });
@@ -136,15 +136,16 @@ export const apiRequest = async <T>(
 
 export const apiRequestWithRetry = async <T>(
   url: string,
+  parse: (data: unknown) => T,
   options: RequestInit = {},
-  retries: number = 3,
-  context?: ErrorContext,
+  retryConfig: { context?: ErrorContext; retries?: number } = {},
 ): Promise<T> => {
+  const { context, retries = 3 } = retryConfig;
   let lastError: Error | undefined;
 
   for (let attempt = 1; attempt <= retries; attempt++) {
     try {
-      return await apiRequest<T>(url, options, { ...context, attempt });
+      return await apiRequest(url, parse, options, { ...context, attempt });
     } catch (error) {
       lastError = error instanceof Error ? error : new Error(String(error));
 
