@@ -1,7 +1,5 @@
 "use client";
 
-const RANK_THREE = 3;
-
 import { PageShell } from "@/components/app/page-shell";
 import { useTemperatureUnit } from "@/components/app/unit-provider";
 import { WetbulbIndexLegend } from "@/components/app/wetbulb-index-legend";
@@ -35,6 +33,8 @@ import { useRouter } from "next/navigation";
 import React, { memo, useCallback, useMemo, useTransition } from "react";
 
 import type { LocationOptionSection } from "@/types/types";
+
+const RANK_THREE = 3;
 
 const formatWetbulbValue = (value: number, unit: TemperatureUnit): string =>
   `${convertFromCelsius(value, unit).toFixed(1)}°${unit}`;

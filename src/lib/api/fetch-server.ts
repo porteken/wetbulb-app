@@ -64,6 +64,25 @@ interface LocationQueryRow {
   state: unknown;
 }
 
+const parseWithDatabaseError = <T>(
+  resource: string,
+  parser: (payload: unknown) => T,
+  payload: unknown,
+): T => {
+  try {
+    return parser(payload);
+  } catch (error) {
+    if (isSchemaValidationError(error)) {
+      throw new DatabaseError(
+        formatSchemaValidationError(resource, error),
+        error,
+      );
+    }
+
+    throw error;
+  }
+};
+
 async function fetchCityRankingsUncached(
   year: number,
   season: GraphSeason = DEFAULT_GRAPH_SEASON,
@@ -385,22 +404,3 @@ function filterRowsWithNonNegativeLocationId<
     return Number.isInteger(locationId) && locationId >= 0;
   });
 }
-
-const parseWithDatabaseError = <T>(
-  resource: string,
-  parser: (payload: unknown) => T,
-  payload: unknown,
-): T => {
-  try {
-    return parser(payload);
-  } catch (error) {
-    if (isSchemaValidationError(error)) {
-      throw new DatabaseError(
-        formatSchemaValidationError(resource, error),
-        error,
-      );
-    }
-
-    throw error;
-  }
-};

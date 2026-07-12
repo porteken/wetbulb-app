@@ -1,57 +1,11 @@
-const RETRY_DELAY_BASE = 1000;
-const RETRY_DELAY_MAX = 5000;
 import {
   createError,
   type ErrorContext,
   NetworkError,
 } from "@/lib/utils/errors";
 
-export const handleApiResponse = async <T>(
-  response: Response,
-  context?: ErrorContext,
-): Promise<T> => {
-  if (!response.ok) {
-    const errorMessage = await extractErrorMessage(response);
-    throw createError(errorMessage, response.status, undefined, {
-      ...context,
-      url: response.url,
-    });
-  }
-
-  try {
-    return await response.json();
-  } catch (parseError) {
-    throw new NetworkError(
-      "Failed to parse server response",
-      500,
-      parseError,
-      context,
-    );
-  }
-};
-
-const extractErrorMessage = async (response: Response): Promise<string> => {
-  try {
-    const errorData = await response.json();
-
-    if (errorData.message) {
-      return errorData.message;
-    }
-    if (errorData.error) {
-      return errorData.error;
-    }
-    if (errorData.detail) {
-      return errorData.detail;
-    }
-    if (typeof errorData === "string") {
-      return errorData;
-    }
-
-    return getDefaultErrorMessage(response.status);
-  } catch {
-    return getDefaultErrorMessage(response.status);
-  }
-};
+const RETRY_DELAY_BASE = 1000;
+const RETRY_DELAY_MAX = 5000;
 
 const getDefaultErrorMessage = (statusCode: number): string => {
   switch (statusCode) {
@@ -85,6 +39,62 @@ const getDefaultErrorMessage = (statusCode: number): string => {
     default: {
       return `Request failed with status ${statusCode}`;
     }
+  }
+};
+
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === "object" && value !== null && !Array.isArray(value);
+
+const extractErrorMessage = async (response: Response): Promise<string> => {
+  try {
+    const errorData: unknown = await response.json();
+
+    if (typeof errorData === "string") {
+      return errorData;
+    }
+
+    if (isRecord(errorData)) {
+      if (typeof errorData.message === "string") {
+        return errorData.message;
+      }
+      if (typeof errorData.error === "string") {
+        return errorData.error;
+      }
+      if (typeof errorData.detail === "string") {
+        return errorData.detail;
+      }
+    }
+
+    return getDefaultErrorMessage(response.status);
+  } catch {
+    return getDefaultErrorMessage(response.status);
+  }
+};
+
+export const handleApiResponse = async <T>(
+  response: Response,
+  context?: ErrorContext,
+): Promise<T> => {
+  if (!response.ok) {
+    const errorMessage = await extractErrorMessage(response);
+    throw createError(errorMessage, response.status, undefined, {
+      ...context,
+      url: response.url,
+    });
+  }
+
+  try {
+    const data: unknown = await response.json();
+    // Generic deserialization boundary; callers validate the shape with zod schemas.
+    // oxlint-disable-next-line typescript/no-unsafe-type-assertion
+    return data as T;
+  } catch (parseError) {
+    throw new NetworkError(
+      "Failed to parse server response",
+      500,
+      parseError,
+      context,
+    );
   }
 };
 

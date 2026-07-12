@@ -1,6 +1,7 @@
+import { z, ZodError } from "zod";
+
 const MIN_YEAR = 1900;
 const MAX_YEAR = 2200;
-import { z, ZodError } from "zod";
 
 const finiteNumberSchema = z.coerce
   .number()

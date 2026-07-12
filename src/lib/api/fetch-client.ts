@@ -24,6 +24,22 @@ const buildQueryString = (params: Record<string, number | string>) =>
     Object.entries(params).map(([key, value]) => [key, String(value)]),
   ).toString();
 
+const parseWithFetchError = <T>(
+  resource: string,
+  parser: (payload: unknown) => T,
+  payload: unknown,
+): T => {
+  try {
+    return parser(payload);
+  } catch (error) {
+    if (isSchemaValidationError(error)) {
+      throw new FetchError(formatSchemaValidationError(resource, error), error);
+    }
+
+    throw error;
+  }
+};
+
 export async function FetchForecastData(
   locationId: number,
   yearsAhead: number,
@@ -125,19 +141,3 @@ export async function FetchTrendGraphData(
 }
 
 export { FetchReferenceGraphData } from "./reference-graph-data";
-
-const parseWithFetchError = <T>(
-  resource: string,
-  parser: (payload: unknown) => T,
-  payload: unknown,
-): T => {
-  try {
-    return parser(payload);
-  } catch (error) {
-    if (isSchemaValidationError(error)) {
-      throw new FetchError(formatSchemaValidationError(resource, error), error);
-    }
-
-    throw error;
-  }
-};

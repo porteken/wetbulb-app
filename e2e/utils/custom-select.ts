@@ -15,7 +15,7 @@ export function getOpenCustomSelectOptions(page: Page): Locator {
   );
 }
 
-async function isCustomSelectOpen(page: Page): Promise<boolean> {
+function isCustomSelectOpen(page: Page): Promise<boolean> {
   const content = getOpenCustomSelectContent(page);
 
   return content.isVisible().catch(() => false);
