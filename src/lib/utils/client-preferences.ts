@@ -9,7 +9,7 @@ interface GraphPreferencesPayload {
 const persistGraphPreferences = async (
   payload: GraphPreferencesPayload,
 ): Promise<void> => {
-  if (typeof globalThis.fetch === "undefined") {
+  if (!("fetch" in globalThis)) {
     return;
   }
 
