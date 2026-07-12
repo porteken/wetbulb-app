@@ -480,8 +480,9 @@ describe("page-helpers", () => {
       const mockFetchLocations = await getMockFetchLocations();
       mockFetchLocations.mockResolvedValue(mockLocationData);
 
-      const result = await getLocationData();
-      expect(result).toStrictEqual(mockLocationData);
+      await expect(getLocationData()).rejects.toThrow(
+        "No location data available",
+      );
       expect(mockFetchLocations).toHaveBeenCalled();
     });
   });

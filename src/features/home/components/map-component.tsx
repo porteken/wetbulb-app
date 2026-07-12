@@ -33,7 +33,6 @@ const DARK_TILE_ATTRIBUTION =
   '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>';
 const MAP_SOURCE_ID = "basemap";
 const MAP_LAYER_ID = "basemap-raster";
-const E2E_MAP_LAYER_ID = "e2e-background";
 const IS_E2E_TEST_ENVIRONMENT = process.env.NEXT_PUBLIC_E2E_TEST === "true";
 
 interface Location {
@@ -133,34 +132,6 @@ const DARK_MAP_STYLE = {
       type: "raster",
     },
   },
-  version: 8,
-} satisfies StyleSpecification;
-
-const E2E_LIGHT_MAP_STYLE = {
-  layers: [
-    {
-      id: E2E_MAP_LAYER_ID,
-      paint: {
-        "background-color": "#e2e8f0",
-      },
-      type: "background",
-    },
-  ],
-  sources: {},
-  version: 8,
-} satisfies StyleSpecification;
-
-const E2E_DARK_MAP_STYLE = {
-  layers: [
-    {
-      id: E2E_MAP_LAYER_ID,
-      paint: {
-        "background-color": "#0f172a",
-      },
-      type: "background",
-    },
-  ],
-  sources: {},
   version: 8,
 } satisfies StyleSpecification;
 
@@ -378,7 +349,7 @@ export const MapComponent = memo<MapComponentProperties>(
     }, []);
 
     const markers = useMemo(() => {
-      if (!locations || locations.length === 0) {
+      if (locations.length === 0) {
         return null;
       }
 
@@ -400,7 +371,7 @@ export const MapComponent = memo<MapComponentProperties>(
       return <PageLoader />;
     }
 
-    if (!locations || locations.length === 0) {
+    if (locations.length === 0) {
       return (
         <div className="flex h-full items-center justify-center bg-background/30 px-4">
           <div className="mx-auto max-w-md p-6 text-center">
@@ -460,11 +431,7 @@ export const MapComponent = memo<MapComponentProperties>(
       );
     }
 
-    const standardMapStyle = isDarkTheme ? DARK_MAP_STYLE : LIGHT_MAP_STYLE;
-    const e2eMapStyle = isDarkTheme ? E2E_DARK_MAP_STYLE : E2E_LIGHT_MAP_STYLE;
-    const mapStyleDefinition = IS_E2E_TEST_ENVIRONMENT
-      ? e2eMapStyle
-      : standardMapStyle;
+    const mapStyleDefinition = isDarkTheme ? DARK_MAP_STYLE : LIGHT_MAP_STYLE;
 
     return (
       <div className="relative size-full">

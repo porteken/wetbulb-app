@@ -269,15 +269,12 @@ export async function fetchTrendGraphRows(
   }
 }
 
-export async function fetchReferenceGraphRows(
-  locationId: number,
-  year: string,
-) {
+export function fetchReferenceGraphRows(locationId: number, year: string) {
   if (shouldUseRuntimeDbMocks()) {
-    return getRuntimeReferenceRows(locationId, year);
+    return Promise.resolve(getRuntimeReferenceRows(locationId, year));
   }
 
-  return await withDbRetry(() =>
+  return withDbRetry(() =>
     getDb()
       .selectFrom("wetbulb")
       .select(({ ref }) => [

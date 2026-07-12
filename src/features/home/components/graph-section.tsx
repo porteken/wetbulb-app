@@ -288,7 +288,7 @@ const GraphControlsPanel = memo(
           forecastWetbulbLevel={forecastWetbulbLevel}
           wetbulbDescription={wetbulbDescription}
         />
-        {showMobileLegendToggle && onToggleMobileGraphLegend && (
+        {showMobileLegendToggle && (
           <MobileLegendToggle
             isMobileGraphLegendOpen={isMobileGraphLegendOpen}
             onToggleMobileGraphLegend={onToggleMobileGraphLegend}

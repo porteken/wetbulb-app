@@ -56,7 +56,7 @@ export class SimpleLinearRegression {
 
     const tValue = T_VALUE_MAP[confidenceLevel] ?? DEFAULT_T_VALUE;
 
-    const margin = (tValue ?? DEFAULT_T_VALUE) * predictionError;
+    const margin = tValue * predictionError;
 
     return {
       lowerBound: prediction - margin,

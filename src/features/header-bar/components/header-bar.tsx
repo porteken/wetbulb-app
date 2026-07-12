@@ -84,7 +84,7 @@ const HeaderBarComponent = ({
     const options = Array.isArray(LocationOptions) ? LocationOptions : [];
 
     const allCities = options.flatMap((section) =>
-      [...(section.items || [])].map((item) => ({
+      (Array.isArray(section.items) ? section.items : []).map((item) => ({
         key: item.key,
         state: section.title,
         title: item.title,

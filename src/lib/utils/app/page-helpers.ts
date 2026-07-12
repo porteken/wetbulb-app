@@ -67,7 +67,7 @@ export const getForecastPreferencesFromCookies = async (): Promise<{
 export const getLocationData = async () => {
   const { LocationOptions, locations } = await FetchLocations();
 
-  if (!locations || locations.length === 0) {
+  if (!Array.isArray(locations) || locations.length === 0) {
     throw new Error(ERROR_MESSAGES.NO_DATA);
   }
 

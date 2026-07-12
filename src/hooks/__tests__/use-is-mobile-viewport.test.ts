@@ -51,7 +51,6 @@ describe("useIsMobileViewport", () => {
   });
 
   it("returns false if matchMedia is not supported", () => {
-    // @ts-ignore - Testing missing browser API
     delete (globalThis as any).matchMedia;
 
     const { result } = renderHook(() => useIsMobileViewport());

@@ -15,7 +15,7 @@ vi.mock("@/features/header-bar", () => ({
     ({ LocationOptions }: { LocationOptions: unknown[] }) => React.ReactNode
   >(({ LocationOptions }: { LocationOptions: unknown[] }) => (
     <div data-testid="header-bar">
-      HeaderBar with {LocationOptions?.length || 0} locations
+      HeaderBar with {LocationOptions.length} locations
     </div>
   )),
 }));

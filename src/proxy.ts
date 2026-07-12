@@ -28,7 +28,7 @@ export default function proxy(request: NextRequest) {
       return new NextResponse(undefined, { status: 404 });
     }
 
-    if (Number.isNaN(Number.parseInt(idPart, 10))) {
+    if (Number.isNaN(Math.trunc(Number(idPart)))) {
       return new NextResponse(undefined, { status: 404 });
     }
   }

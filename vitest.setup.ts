@@ -4,11 +4,15 @@ import { mockFn } from "@/testing/mock-fn";
 import { server } from "@/testing/server";
 import { afterAll, afterEach, beforeAll, vi } from "vitest";
 
+import type { TemperatureUnit } from "@/lib/constants";
 import type { ReactNode } from "react";
 
 vi.mock("@/components/app/unit-provider", () => ({
   UnitProvider: ({ children }: { children: ReactNode }) => children,
-  useTemperatureUnit: () => ({ setUnit: mockFn(), unit: "F" as const }),
+  useTemperatureUnit: () => ({
+    setUnit: vi.fn<(unit: TemperatureUnit) => void>(),
+    unit: "F" as const,
+  }),
 }));
 
 vi.mock("next/font/google", () =>
@@ -71,34 +75,32 @@ afterAll(() => {
   server.close();
 });
 
-if (typeof globalThis !== "undefined" && globalThis.HTMLElement) {
-  if (!globalThis.HTMLElement.prototype.hasPointerCapture) {
-    globalThis.HTMLElement.prototype.hasPointerCapture = () => false;
-  }
-  if (!globalThis.HTMLElement.prototype.releasePointerCapture) {
-    globalThis.HTMLElement.prototype.releasePointerCapture = () => {};
-  }
-  if (!globalThis.HTMLElement.prototype.setPointerCapture) {
-    globalThis.HTMLElement.prototype.setPointerCapture = () => {};
-  }
-  if (!globalThis.HTMLElement.prototype.scrollIntoView) {
-    globalThis.HTMLElement.prototype.scrollIntoView = () => {};
-  }
-
-  vi.spyOn(
-    globalThis.HTMLElement.prototype,
-    "hasPointerCapture",
-  ).mockReturnValue(false);
-  vi.spyOn(
-    globalThis.HTMLElement.prototype,
-    "releasePointerCapture",
-  ).mockImplementation(() => {});
-  vi.spyOn(
-    globalThis.HTMLElement.prototype,
-    "setPointerCapture",
-  ).mockImplementation(() => {});
-  vi.spyOn(
-    globalThis.HTMLElement.prototype,
-    "scrollIntoView",
-  ).mockImplementation(() => {});
+if (typeof globalThis.HTMLElement.prototype.hasPointerCapture !== "function") {
+  globalThis.HTMLElement.prototype.hasPointerCapture = () => false;
 }
+if (
+  typeof globalThis.HTMLElement.prototype.releasePointerCapture !== "function"
+) {
+  globalThis.HTMLElement.prototype.releasePointerCapture = () => {};
+}
+if (typeof globalThis.HTMLElement.prototype.setPointerCapture !== "function") {
+  globalThis.HTMLElement.prototype.setPointerCapture = () => {};
+}
+if (typeof globalThis.HTMLElement.prototype.scrollIntoView !== "function") {
+  globalThis.HTMLElement.prototype.scrollIntoView = () => {};
+}
+
+vi.spyOn(globalThis.HTMLElement.prototype, "hasPointerCapture").mockReturnValue(
+  false,
+);
+vi.spyOn(
+  globalThis.HTMLElement.prototype,
+  "releasePointerCapture",
+).mockImplementation(() => {});
+vi.spyOn(
+  globalThis.HTMLElement.prototype,
+  "setPointerCapture",
+).mockImplementation(() => {});
+vi.spyOn(globalThis.HTMLElement.prototype, "scrollIntoView").mockImplementation(
+  () => {},
+);

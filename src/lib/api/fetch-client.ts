@@ -62,7 +62,7 @@ export async function FetchForecastData(
     throw new FetchError(`Invalid trend option: ${option}`);
   }
 
-  if (globalThis.window === undefined) {
+  if (typeof globalThis.window === "undefined") {
     throw new TypeError(
       "FetchForecastData can only be called in browser environment",
     );
