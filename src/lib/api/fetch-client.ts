@@ -1,6 +1,4 @@
 import {
-  formatSchemaValidationError,
-  isSchemaValidationError,
   parseForecastDataResponse,
   parseTrendGraphDataResponse,
 } from "@/lib/api/schemas";
@@ -15,30 +13,15 @@ import {
   validateTrendOption,
 } from "@/lib/utils/validation";
 
-import { apiRequest, fetchApiJson, hasError } from "./api-client";
+import {
+  apiRequest,
+  buildQueryString,
+  fetchApiJson,
+  hasError,
+  parseWithFetchError,
+} from "./api-client";
 
 import type { TrendGraphDataProperties } from "@/types/types";
-
-const buildQueryString = (params: Record<string, number | string>) =>
-  new URLSearchParams(
-    Object.entries(params).map(([key, value]) => [key, String(value)]),
-  ).toString();
-
-const parseWithFetchError = <T>(
-  resource: string,
-  parser: (payload: unknown) => T,
-  payload: unknown,
-): T => {
-  try {
-    return parser(payload);
-  } catch (error) {
-    if (isSchemaValidationError(error)) {
-      throw new FetchError(formatSchemaValidationError(resource, error), error);
-    }
-
-    throw error;
-  }
-};
 
 export async function FetchForecastData(
   locationId: number,

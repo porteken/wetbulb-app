@@ -1,3 +1,7 @@
+import {
+  formatSchemaValidationError,
+  isSchemaValidationError,
+} from "@/lib/api/schemas";
 import { FetchError } from "@/lib/utils/errors";
 import * as Sentry from "@sentry/nextjs";
 
@@ -44,6 +48,27 @@ export async function apiRequest<T>(
     };
   }
 }
+
+export const buildQueryString = (params: Record<string, number | string>) =>
+  new URLSearchParams(
+    Object.entries(params).map(([key, value]) => [key, String(value)]),
+  ).toString();
+
+export const parseWithFetchError = <T>(
+  resource: string,
+  parser: (payload: unknown) => T,
+  payload: unknown,
+): T => {
+  try {
+    return parser(payload);
+  } catch (error) {
+    if (isSchemaValidationError(error)) {
+      throw new FetchError(formatSchemaValidationError(resource, error), error);
+    }
+
+    throw error;
+  }
+};
 
 export function hasError<T>(response: ApiResponse<T>): response is {
   data: undefined;
