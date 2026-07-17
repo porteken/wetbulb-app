@@ -1,6 +1,6 @@
 # Historical Wetbulb App
 
-A comprehensive web application that visualizes wet-bulb temperature data for the top 500 largest cities in the Contiguous United States from 2000 to 2025.
+A comprehensive web application hosted [here](https://wetbulb-app.vercel.app/) that visualizes wet-bulb temperature data for the top 500 largest cities in the Contiguous United States from 2000 to 2025. The data pipeline for getting the data is [here](https://github.com/porteken/pet-data).
 
 ## Features
 
@@ -33,7 +33,7 @@ This app classifies wet-bulb temperature into the following risk levels:
 
 - The 68–76°F (20–24°C) low-risk range is based on [this research](https://escholarship.org/content/qt2xz601d0/qt2xz601d0.pdf).
 - The 77–94°F (25–34°C) moderate-through-extreme thresholds are based on [this exercise-safety guidance](https://www.princetonmedicine.com/blog/wet-bulb-temperature-and-exercise-safety-what-you-need-to-know).
-- The ~88°F (31°C) empirical survivability limit — lower than the long-assumed 95°F (35°C) theoretical limit — is based on [this study](https://www.psu.edu/news/research/story/humans-cant-endure-temperatures-and-humidities-high-previously-thought).
+- The ~88°F (31°C) empirical survivability limit, lower than the long-assumed 95°F (35°C) theoretical limit, is based on [this study](https://www.psu.edu/news/research/story/humans-cant-endure-temperatures-and-humidities-high-previously-thought).
 
 ## Tech Stack
 

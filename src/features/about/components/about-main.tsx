@@ -25,12 +25,7 @@ const About: FC<AboutProperties> = ({ LocationOptions }: AboutProperties) => (
       <p className="mt-4 max-w-3xl text-base/7 text-muted-foreground">
         This app combines interactive maps, city-level rankings, and detailed
         historical comparisons so you can see how wet-bulb temperature has
-        shifted over time. As the climate warms, both heat and humidity have
-        been trending upward across much of the United States, and because
-        wet-bulb temperature captures the combined effect of the two, it has
-        been rising even faster than dry-bulb air temperature alone in many
-        locations. Tracking that shift year over year makes it possible to see
-        where heat stress risk is growing fastest.
+        shifted over time.
       </p>
     </section>
 
@@ -40,18 +35,13 @@ const About: FC<AboutProperties> = ({ LocationOptions }: AboutProperties) => (
           What is Wetbulb?
         </h2>
         <p className="mt-4 max-w-3xl text-base/7 text-muted-foreground">
-          Wet-bulb temperature is the lowest temperature air can reach through
-          evaporative cooling alone — the temperature a wet thermometer bulb
-          settles at as water evaporates from its surface. It combines the
-          effects of heat and humidity into a single number: the lower the
-          humidity, the more evaporation can cool the bulb, so wet-bulb
-          temperature sits closer to the dry-bulb (regular) air temperature when
-          it's dry, and closer to the air temperature itself when the air is
-          already saturated with moisture. The human body relies on the same
-          evaporative process — sweating — to shed heat, which is why wet-bulb
-          temperature is such a useful measure of heat stress: at high humidity,
-          sweat can't evaporate efficiently no matter how hot it feels, and the
-          body starts to lose its ability to cool down.
+          Wet-bulb temperature is the temperature a wet thermometer bulb settles
+          at as water evaporates from its surface. It combines the effects of
+          heat and humidity into a single number. The human body relies on the
+          same sweating to shed heat, which is why wet-bulb temperature is such
+          a useful measure of heat stress. At high humidity, sweat can't
+          evaporate efficiently, no matter how hot it feels, and the body starts
+          to lose its ability to cool down.
         </p>
 
         <div className="mt-6 max-w-3xl overflow-x-auto">
@@ -93,20 +83,19 @@ const About: FC<AboutProperties> = ({ LocationOptions }: AboutProperties) => (
             className="text-primary underline underline-offset-4 transition hover:text-primary/80"
             href={APP_CONFIG.WETBULB_EXERCISE_SAFETY_URL}
           >
-            this exercise-safety guidance
+            these excercise guidelines
           </Link>
-          . Long thought to be the theoretical survivability limit for a healthy
-          person at rest, a wet-bulb temperature of 95°F (35°C) is the point at
-          which the body can no longer shed heat through sweating at all.
-          However,{" "}
+          . A wet-bulb temperature of 95°F (35°C) has long been the
+          theoretically limit at which the body can no longer shed heat through
+          sweating at all. However,{" "}
           <Link
             className="text-primary underline underline-offset-4 transition hover:text-primary/80"
             href={APP_CONFIG.WETBULB_LIMIT_URL}
           >
             recent research
           </Link>{" "}
-          found that this empirical limit is actually lower — closer to 88°F
-          (31°C) — for young, healthy adults under real-world conditions.
+          found that this empirical limit is actually closer to 88°F (31°C) for
+          young, healthy adults under real-world conditions.
         </p>
       </article>
     </section>
