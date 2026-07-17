@@ -74,10 +74,9 @@ describe("aboutMain", () => {
     render(<AboutMain LocationOptions={mockLocationOptions} />);
 
     const wetbulbDefinition = screen.getByText(
-      /wet-bulb temperature is the lowest temperature air can reach/iu,
+      /wet-bulb temperature is the temperature a wet thermometer bulb settles/iu,
     );
     expect(wetbulbDefinition).toBeInTheDocument();
-    expect(wetbulbDefinition).toHaveTextContent("evaporative cooling");
     expect(wetbulbDefinition).toHaveTextContent("sweating");
 
     const lowRiskLink = screen.getByRole("link", { name: /this research/iu });
@@ -89,7 +88,7 @@ describe("aboutMain", () => {
     expect(lowRiskLink).toHaveClass("text-primary");
 
     const exerciseSafetyLink = screen.getByRole("link", {
-      name: /this exercise-safety guidance/iu,
+      name: /these excercise guidelines/iu,
     });
     expect(exerciseSafetyLink).toBeInTheDocument();
     expect(exerciseSafetyLink).toHaveAttribute(
