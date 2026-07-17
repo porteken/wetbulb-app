@@ -84,8 +84,9 @@ const createEmptyGraphData = (): GraphData => ({
   years: [],
 });
 
-const getFulfilledValue = <T>(result: PromiseSettledResult<T>): T | undefined =>
-  result.status === "fulfilled" ? result.value : undefined;
+const getFulfilledValue = <T>(
+  result: PromiseSettledResult<T>,
+): T | undefined => (result.status === "fulfilled" ? result.value : undefined);
 
 const resolveReferenceGraphData = (
   currentData: ReferenceGraphDataProperties | undefined,
