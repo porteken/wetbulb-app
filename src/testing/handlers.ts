@@ -11,7 +11,7 @@ import { http, HttpResponse } from "msw";
 type RuntimeTrendOption = "avg" | "max";
 
 const getTrendMetricColumn = (option: RuntimeTrendOption) =>
-  option === "max" ? "max_wetbulb" : "avg_wetbulb";
+  option === "max" ? "max_wetbulb" : "avg_wetbulb_avg";
 
 const getRuntimeTrendRows = (
   locationId: number,

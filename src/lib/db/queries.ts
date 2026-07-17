@@ -56,7 +56,7 @@ const isMissingColumnError = (
 };
 
 const getTrendMetricColumn = (option: TrendMetricOption) =>
-  option === "max" ? "max_wetbulb" : "avg_wetbulb";
+  option === "max" ? "max_wetbulb" : "avg_wetbulb_avg";
 
 const getRuntimeCityRankingsRows = (year: number, season?: GraphSeason) => {
   const rows = getRuntimeMockTableRows("wetbulb_city_rankings_view");
@@ -173,22 +173,26 @@ export async function fetchCityRankingsRows(
     return getRuntimeCityRankingsRows(year, season);
   }
 
-  const buildQuery = (selectedSeason?: GraphSeason) => {
+  const buildQuery = (
+    selectedSeason?: GraphSeason,
+    useLegacyBounds = false,
+  ) => {
     let query = getDb()
       .selectFrom("wetbulb_city_rankings_view")
       .select([
-        "avg_wetbulb",
+        "avg_wetbulb_avg as avg_wetbulb",
         "change_from_2000",
         "city",
         "future_lower",
         "future_upper",
         "location_id",
         "max_wetbulb",
-        "p10",
-        "p90",
         "state",
         "year",
       ])
+      .select(
+        useLegacyBounds ? ["p10", "p90"] : ["p10_avg as p10", "p90_avg as p90"],
+      )
       .where("year", "=", year);
 
     if (selectedSeason !== undefined) {
@@ -198,6 +202,10 @@ export async function fetchCityRankingsRows(
     return query;
   };
 
+  const isMissingBoundsColumnError = (error: unknown) =>
+    isMissingColumnError(error, "wetbulb_city_rankings_view", "p10_avg") ||
+    isMissingColumnError(error, "wetbulb_city_rankings_view", "p90_avg");
+
   try {
     return await withDbRetry(() => buildQuery(season).execute());
   } catch (error) {
@@ -206,6 +214,11 @@ export async function fetchCityRankingsRows(
       isMissingColumnError(error, "wetbulb_city_rankings_view", "season")
     ) {
       return buildQuery().execute();
+    }
+
+    if (isMissingBoundsColumnError(error)) {
+      // The deployed view predates the p10_avg/p90_avg columns.
+      return buildQuery(season, true).execute();
     }
 
     throw classifyDbError(error);

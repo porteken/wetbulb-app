@@ -175,6 +175,7 @@ const MOCK_TABLES: RuntimeMockTables = {
         );
         return {
           avg_wetbulb: avg,
+          avg_wetbulb_avg: avg,
           change_from_2000: round((year - 2000) * location.trendPerYear),
           city: location.city,
           future_lower: round(forecastWetbulb - 1.2),
@@ -185,7 +186,9 @@ const MOCK_TABLES: RuntimeMockTables = {
               SEASONAL_MAX_OFFSETS[season],
           ),
           p10: round(avg - 1.4),
+          p10_avg: round(avg - 1.4),
           p90: round(avg + 1.4),
+          p90_avg: round(avg + 1.4),
           season,
           state: location.state,
           year,
@@ -275,10 +278,13 @@ const MOCK_TABLES: RuntimeMockTables = {
         const avg = getAverageWetbulb(location.location_id, year);
         return {
           avg_wetbulb: round(avg + SEASONAL_AVG_OFFSETS[season]),
+          avg_wetbulb_avg: round(avg + SEASONAL_AVG_OFFSETS[season]),
           location_id: location.location_id,
           max_wetbulb: round(avg + SEASONAL_MAX_OFFSETS[season]),
           p10: round(avg - 1.4),
+          p10_avg: round(avg - 1.4),
           p90: round(avg + 1.4),
+          p90_avg: round(avg + 1.4),
           season,
           year,
         };

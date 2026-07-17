@@ -128,7 +128,7 @@ const Home: FC<MapProperties> = ({
 
       const result = deriveTrendAnalysis(
         trendQuery.data,
-        forecastQuery.data,
+        forecastQuery.data ?? undefined,
         selectedGraphMeasure,
         { season: selectedGraphSeason, unit },
       );

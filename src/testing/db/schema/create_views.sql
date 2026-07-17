@@ -589,11 +589,16 @@ location_id::integer AS location_id,
 year::smallint AS year,
 season,
 ROUND (AVG (wetbulb)::numeric, 1)::real AS avg_wetbulb,
+ROUND (AVG (wetbulb)::numeric, 1)::real AS avg_wetbulb_avg,
 ROUND (MAX (wetbulb)::numeric, 1)::real AS max_wetbulb,
 ROUND ((PERCENTILE_CONT (0.1) WITHIN GROUP (ORDER BY wetbulb))::numeric,
 1)::real AS p10,
 ROUND ((PERCENTILE_CONT (0.9) WITHIN GROUP (ORDER BY wetbulb))::numeric,
-1)::real AS p90
+1)::real AS p90,
+ROUND ((PERCENTILE_CONT (0.1) WITHIN GROUP (ORDER BY wetbulb))::numeric,
+1)::real AS p10_avg,
+ROUND ((PERCENTILE_CONT (0.9) WITHIN GROUP (ORDER BY wetbulb))::numeric,
+1)::real AS p90_avg
 FROM wetbulb_with_seasons
 GROUP BY
 location_id,
@@ -656,7 +661,7 @@ y.year::smallint AS year,
 y.season,
 y.wetbulb::real AS wetbulb
 FROM yearly_wetbulb AS y
-WHERE y.days_present = CASE
+WHERE y.days_present >= 0.95 * CASE
 WHEN y.season = public.wetbulb_annual_season () THEN CASE
 WHEN MOD (y.year, 4) = 0
 AND (MOD (y.year, 100) <> 0 OR MOD (y.year, 400) = 0) THEN 366
@@ -755,7 +760,7 @@ y.year::smallint AS year,
 y.season,
 y.wetbulb::real AS wetbulb
 FROM yearly_wetbulb AS y
-WHERE y.days_present = CASE
+WHERE y.days_present >= 0.95 * CASE
 WHEN y.season = public.wetbulb_annual_season () THEN CASE
 WHEN MOD (y.year, 4) = 0
 AND (MOD (y.year, 100) <> 0 OR MOD (y.year, 400) = 0) THEN 366
@@ -852,11 +857,14 @@ s.location_id::smallint,
 s.year::smallint,
 s.season,
 s.avg_wetbulb::real AS avg_wetbulb,
+s.avg_wetbulb_avg::real AS avg_wetbulb_avg,
 s.max_wetbulb::real AS max_wetbulb,
 l.city,
 l.state,
 s.p10::real,
 s.p90::real,
+s.p10_avg::real,
+s.p90_avg::real,
 f.lower::real AS future_lower,
 f.upper::real AS future_upper,
 ROUND ((s.avg_wetbulb - y2k.wetbulb)::numeric, 2)::real AS change_from_2000

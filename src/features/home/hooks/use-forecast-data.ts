@@ -30,7 +30,16 @@ export const useForecastData = ({
     initialData,
     queryFn: async () => {
       const { FetchForecastData } = await import("@/lib/api/fetch-client");
-      return FetchForecastData(resolvedLocationId, yearsAhead, season, option);
+      const data = await FetchForecastData(
+        resolvedLocationId,
+        yearsAhead,
+        season,
+        option,
+      );
+
+      // React Query forbids resolving undefined; null marks "no forecast
+      // available" (e.g. locations without enough complete years of data).
+      return data ?? null;
     },
     queryKey: queryKeys.forecast(
       resolvedLocationId,
