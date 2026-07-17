@@ -1,5 +1,6 @@
 "use client";
 
+import { useWetbulbBasis } from "@/components/app/basis-provider";
 import { ChartSkeleton } from "@/components/app/chart-skeleton";
 import { ForecastControls } from "@/components/app/forecast-controls";
 import { useTemperatureUnit } from "@/components/app/unit-provider";
@@ -9,7 +10,11 @@ import { useTrendGraphData } from "@/features/home/hooks/use-trend-graph-data";
 import { useIgnorePersistenceError } from "@/hooks/use-ignore-persistence-error";
 import { useIsMobileViewport } from "@/hooks/use-is-mobile-viewport";
 import { setForecastPreferences } from "@/lib/actions/actions";
-import { normalizeGraphSeason, type GraphSeason } from "@/lib/constants";
+import {
+  normalizeGraphSeason,
+  type GraphSeason,
+  type WetbulbBasis,
+} from "@/lib/constants";
 import {
   deriveTrendAnalysis,
   type ForecastGraphData,
@@ -29,6 +34,7 @@ interface TrendAnalysisProperties {
   initialGraphSeason: GraphSeason;
   initialIncreasePerYear?: number;
   initialTrendlineWetbulbs?: number[];
+  initialWetbulbBasis: WetbulbBasis;
   initialYearWetbulbs?: number[];
   initialYears?: number[];
   onMeasureChange: (measure: string) => Promise<void>;
@@ -81,6 +87,7 @@ const TrendAnalysisComponent: React.FC<TrendAnalysisProperties> = ({
   initialGraphSeason,
   initialIncreasePerYear = 0,
   initialTrendlineWetbulbs = DEFAULT_INITIAL_TRENDLINE_WETBULBS,
+  initialWetbulbBasis,
   initialYearWetbulbs = DEFAULT_INITIAL_YEAR_WETBULBS,
   initialYears = DEFAULT_INITIAL_YEARS,
   onMeasureChange,
@@ -120,20 +127,24 @@ const TrendAnalysisComponent: React.FC<TrendAnalysisProperties> = ({
   const [isMobileLegendOpen, setIsMobileLegendOpen] = React.useState(false);
   const ignorePersistenceError = useIgnorePersistenceError();
   const { unit } = useTemperatureUnit();
+  const { basis } = useWetbulbBasis();
 
   const showTrendLegend = !isMobileViewport || isMobileLegendOpen;
 
   const matchesInitialGraphSelection =
     selectedGraphMeasure === initialGraphMeasure &&
-    graphSeason === initialGraphSeason;
+    graphSeason === initialGraphSeason &&
+    basis === initialWetbulbBasis;
 
   const trendQuery = useTrendGraphData({
+    basis,
     initialData: matchesInitialGraphSelection ? initialTrendData : undefined,
     locationId: id,
     option: selectedGraphMeasure,
     season: graphSeason,
   });
   const forecastQuery = useForecastData({
+    basis,
     enabled: forecastEnabled,
     initialData: matchesInitialForecastSelection({
       forecastEnabled,

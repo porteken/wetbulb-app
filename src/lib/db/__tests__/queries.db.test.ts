@@ -52,7 +52,23 @@ describe("db queries", () => {
 
   it("fetches forecast rows for location", async () => {
     const queryWindow = { lastHistoricalYear: 2025, targetYear: 2100 };
-    const rows = await fetchForecastRows(1, queryWindow, "Annual", "avg");
+    const rows = await fetchForecastRows(1, queryWindow, {
+      option: "avg",
+      season: "Annual",
+    });
+    expect(rows).toBeInstanceOf(Array);
+  });
+
+  it("returns different wetbulb values for the avg vs max basis", async () => {
+    const maxBasisRows = await fetchTrendGraphRows(1, "max", "Annual", "max");
+    const avgBasisRows = await fetchTrendGraphRows(1, "max", "Annual", "avg");
+    expect(maxBasisRows.length).toBeGreaterThan(0);
+    expect(avgBasisRows.length).toBeGreaterThan(0);
+    expect(avgBasisRows[0]).not.toStrictEqual(maxBasisRows[0]);
+  });
+
+  it("fetches rankings with the avg basis without error", async () => {
+    const rows = await fetchCityRankingsRows(2024, "Summer", "avg");
     expect(rows).toBeInstanceOf(Array);
   });
 });

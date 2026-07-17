@@ -1,5 +1,10 @@
 import { queryKeys } from "@/lib/api/query-client";
-import { DEFAULT_GRAPH_SEASON, type GraphSeason } from "@/lib/constants";
+import {
+  DEFAULT_GRAPH_SEASON,
+  DEFAULT_WETBULB_BASIS,
+  type GraphSeason,
+  type WetbulbBasis,
+} from "@/lib/constants";
 import { useQuery } from "@tanstack/react-query";
 
 import type { TrendGraphDataProperties } from "@/types/types";
@@ -7,6 +12,7 @@ import type { TrendGraphDataProperties } from "@/types/types";
 const STALE_TIME_MS = 1000 * 60 * 5;
 
 interface UseTrendGraphDataOptions {
+  basis?: WetbulbBasis;
   enabled?: boolean;
   initialData?: TrendGraphDataProperties;
   locationId: number | undefined;
@@ -15,6 +21,7 @@ interface UseTrendGraphDataOptions {
 }
 
 export const useTrendGraphData = ({
+  basis = DEFAULT_WETBULB_BASIS,
   enabled = true,
   initialData,
   locationId,
@@ -28,9 +35,9 @@ export const useTrendGraphData = ({
     initialData,
     queryFn: async () => {
       const { FetchTrendGraphData } = await import("@/lib/api/fetch-client");
-      return FetchTrendGraphData(option, resolvedLocationId, season);
+      return FetchTrendGraphData(option, resolvedLocationId, season, basis);
     },
-    queryKey: queryKeys.trendGraph(resolvedLocationId, option, season),
+    queryKey: queryKeys.trendGraph(resolvedLocationId, option, season, basis),
     staleTime: STALE_TIME_MS,
   });
 };

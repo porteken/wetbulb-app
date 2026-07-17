@@ -52,7 +52,7 @@ describe("fetchTrendGraphData", () => {
     const result = await FetchTrendGraphData("avg", 1);
 
     expect(fetchMock).toHaveBeenCalledWith(
-      "/api/data/trend?locationId=1&option=avg&season=Annual",
+      "/api/data/trend?basis=max&locationId=1&option=avg&season=Annual",
       expect.objectContaining({
         headers: {
           accept: "application/json",
@@ -80,7 +80,7 @@ describe("fetchTrendGraphData", () => {
     await FetchTrendGraphData("max", 1, "Winter");
 
     expect(fetchMock).toHaveBeenCalledWith(
-      "/api/data/trend?locationId=1&option=max&season=Winter",
+      "/api/data/trend?basis=max&locationId=1&option=max&season=Winter",
       expect.any(Object),
     );
   });
@@ -184,7 +184,7 @@ describe("fetchForecastData", () => {
     const result = await FetchForecastData(1, 10);
 
     expect(fetchMock).toHaveBeenCalledWith(
-      "/api/data/forecast?locationId=1&option=avg&season=Annual&yearsAhead=10",
+      "/api/data/forecast?basis=max&locationId=1&option=avg&season=Annual&yearsAhead=10",
       expect.any(Object),
     );
     expect(result).toStrictEqual({
@@ -205,10 +205,10 @@ describe("fetchForecastData", () => {
       }),
     );
 
-    await FetchForecastData(1, 10, "Winter");
+    await FetchForecastData(1, 10, { season: "Winter" });
 
     expect(fetchMock).toHaveBeenCalledWith(
-      "/api/data/forecast?locationId=1&option=avg&season=Winter&yearsAhead=10",
+      "/api/data/forecast?basis=max&locationId=1&option=avg&season=Winter&yearsAhead=10",
       expect.any(Object),
     );
   });

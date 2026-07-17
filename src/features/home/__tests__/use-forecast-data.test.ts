@@ -14,9 +14,15 @@ vi.mock("@/lib/api/query-client", () => ({
     forecast: (
       locationId: number,
       yearsAhead: number,
-      season = "Annual",
-      option = "avg",
-    ) => ["forecast", locationId, yearsAhead, season, option],
+      filters: { basis?: string; option?: string; season?: string } = {},
+    ) => [
+      "forecast",
+      locationId,
+      yearsAhead,
+      filters.season ?? "Annual",
+      filters.option ?? "avg",
+      filters.basis ?? "max",
+    ],
   },
 }));
 
@@ -105,12 +111,11 @@ describe("useForecastData", () => {
       expect(result.current.isSuccess).toBe(true);
     });
 
-    expect(mockFetchForecastData).toHaveBeenCalledWith(
-      123,
-      10,
-      "Annual",
-      "avg",
-    );
+    expect(mockFetchForecastData).toHaveBeenCalledWith(123, 10, {
+      basis: "max",
+      option: "avg",
+      season: "Annual",
+    });
     expect(result.current.data).toStrictEqual(mockData);
   });
 
@@ -168,12 +173,11 @@ describe("useForecastData", () => {
       expect(result.current.isSuccess).toBe(true);
     });
 
-    expect(mockFetchForecastData).toHaveBeenCalledWith(
-      123,
-      10,
-      "Annual",
-      "avg",
-    );
+    expect(mockFetchForecastData).toHaveBeenCalledWith(123, 10, {
+      basis: "max",
+      option: "avg",
+      season: "Annual",
+    });
   });
 
   it("updates when yearsAhead changes", async () => {
@@ -216,19 +220,15 @@ describe("useForecastData", () => {
       expect(result.current.data).toStrictEqual(mockData2);
     });
 
-    expect(mockFetchForecastData).toHaveBeenNthCalledWith(
-      1,
-      123,
-      10,
-      "Annual",
-      "avg",
-    );
-    expect(mockFetchForecastData).toHaveBeenNthCalledWith(
-      2,
-      123,
-      25,
-      "Annual",
-      "avg",
-    );
+    expect(mockFetchForecastData).toHaveBeenNthCalledWith(1, 123, 10, {
+      basis: "max",
+      option: "avg",
+      season: "Annual",
+    });
+    expect(mockFetchForecastData).toHaveBeenNthCalledWith(2, 123, 25, {
+      basis: "max",
+      option: "avg",
+      season: "Annual",
+    });
   });
 });

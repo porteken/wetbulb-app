@@ -576,7 +576,8 @@ SELECT
 p.location_id::smallint AS location_id,
 EXTRACT (YEAR FROM p.date)::smallint AS year,
 p_seasons.season,
-p.wetbulb::real AS wetbulb
+p.wetbulb::real AS wetbulb,
+p.wetbulb_avg::real AS wetbulb_avg
 FROM public.wetbulb AS p
 CROSS JOIN LATERAL (
 VALUES
@@ -589,15 +590,16 @@ location_id::integer AS location_id,
 year::smallint AS year,
 season,
 ROUND (AVG (wetbulb)::numeric, 1)::real AS avg_wetbulb,
-ROUND (AVG (wetbulb)::numeric, 1)::real AS avg_wetbulb_avg,
 ROUND (MAX (wetbulb)::numeric, 1)::real AS max_wetbulb,
 ROUND ((PERCENTILE_CONT (0.1) WITHIN GROUP (ORDER BY wetbulb))::numeric,
 1)::real AS p10,
 ROUND ((PERCENTILE_CONT (0.9) WITHIN GROUP (ORDER BY wetbulb))::numeric,
 1)::real AS p90,
-ROUND ((PERCENTILE_CONT (0.1) WITHIN GROUP (ORDER BY wetbulb))::numeric,
+ROUND (AVG (wetbulb_avg)::numeric, 1)::real AS avg_wetbulb_avg,
+ROUND (MAX (wetbulb_avg)::numeric, 1)::real AS max_wetbulb_avg,
+ROUND ((PERCENTILE_CONT (0.1) WITHIN GROUP (ORDER BY wetbulb_avg))::numeric,
 1)::real AS p10_avg,
-ROUND ((PERCENTILE_CONT (0.9) WITHIN GROUP (ORDER BY wetbulb))::numeric,
+ROUND ((PERCENTILE_CONT (0.9) WITHIN GROUP (ORDER BY wetbulb_avg))::numeric,
 1)::real AS p90_avg
 FROM wetbulb_with_seasons
 GROUP BY
@@ -624,7 +626,8 @@ SELECT
 p.location_id::smallint AS location_id,
 p.date,
 p_seasons.season,
-p.wetbulb::real AS wetbulb
+p.wetbulb::real AS wetbulb_from_max,
+p.wetbulb_avg::real AS wetbulb_from_avg
 FROM public.wetbulb AS p
 CROSS JOIN LATERAL (
 VALUES
@@ -636,7 +639,8 @@ SELECT
 p.location_id::smallint AS location_id,
 p.date,
 p.season,
-AVG (p.wetbulb)::real AS wetbulb
+AVG (p.wetbulb_from_max)::real AS wetbulb_from_max,
+AVG (p.wetbulb_from_avg)::real AS wetbulb_from_avg
 FROM wetbulb_with_seasons AS p
 GROUP BY
 p.location_id,
@@ -647,21 +651,26 @@ SELECT
 d.location_id::smallint AS location_id,
 EXTRACT (YEAR FROM d.date)::smallint AS year,
 d.season,
-AVG (d.wetbulb)::real AS wetbulb,
-COUNT (*)::int AS days_present
+AVG (d.wetbulb_from_max)::real AS wetbulb_from_max,
+COUNT (d.wetbulb_from_max)::int AS days_present,
+AVG (d.wetbulb_from_avg)::real AS wetbulb_from_avg,
+COUNT (d.wetbulb_from_avg)::int AS days_present_avg
 FROM daily_wetbulb AS d
 GROUP BY
 d.location_id,
 EXTRACT (YEAR FROM d.date)::smallint,
 d.season
-), complete_yearly_wetbulb AS (
+), yearly_with_required AS (
 SELECT
 y.location_id::smallint AS location_id,
 y.year::smallint AS year,
 y.season,
-y.wetbulb::real AS wetbulb
-FROM yearly_wetbulb AS y
-WHERE y.days_present >= 0.95 * CASE
+y.wetbulb_from_max::real AS wetbulb_from_max,
+y.days_present,
+y.wetbulb_from_avg::real AS wetbulb_from_avg,
+y.days_present_avg,
+-- noqa: disable=LT01
+0.95 * CASE
 WHEN y.season = public.wetbulb_annual_season () THEN CASE
 WHEN MOD (y.year, 4) = 0
 AND (MOD (y.year, 100) <> 0 OR MOD (y.year, 400) = 0) THEN 366
@@ -674,19 +683,33 @@ ELSE 90
 END
 WHEN y.season IN (public.wetbulb_spring (), public.wetbulb_summer ()) THEN 92
 ELSE 91
-END
+END AS required_days
 -- noqa: enable=LT01
-), forecast_inputs AS (
+FROM yearly_wetbulb AS y
+), forecast_inputs_max AS (
 SELECT
 location_id::smallint AS location_id,
 season,
 array_agg (year ORDER BY year) AS years,
-array_agg (wetbulb ORDER BY year) AS wetbulb_values
-FROM complete_yearly_wetbulb
+array_agg (wetbulb_from_max ORDER BY year) AS wetbulb_values
+FROM yearly_with_required
+WHERE days_present >= required_days
 GROUP BY
 location_id,
 season
-)
+), forecast_inputs_avg AS (
+SELECT
+location_id::smallint AS location_id,
+season,
+array_agg (year ORDER BY year) AS years,
+array_agg (wetbulb_from_avg ORDER BY year) AS wetbulb_values
+FROM yearly_with_required
+WHERE wetbulb_from_avg IS NOT NULL
+AND days_present_avg >= required_days
+GROUP BY
+location_id,
+season
+), forecast_max AS (
 SELECT
 forecast.location_id::smallint AS location_id,
 forecast.year::smallint AS year,
@@ -698,12 +721,45 @@ forecast.model_type,
 forecast.full_years_used,
 forecast.warming_rate::real AS warming_rate,
 forecast.acceleration::real AS acceleration
-FROM forecast_inputs AS inputs
+FROM forecast_inputs_max AS inputs
 CROSS JOIN LATERAL public.wetbulb_forecast_for_location (
 inputs.location_id::integer,
 inputs.years,
 inputs.wetbulb_values
-) AS forecast ;
+) AS forecast
+), forecast_avg AS (
+SELECT
+forecast.location_id::smallint AS location_id,
+forecast.year::smallint AS year,
+inputs.season,
+forecast.wetbulb::real AS wetbulb_avg,
+forecast.lower::real AS lower_avg,
+forecast.upper::real AS upper_avg
+FROM forecast_inputs_avg AS inputs
+CROSS JOIN LATERAL public.wetbulb_forecast_for_location (
+inputs.location_id::integer,
+inputs.years,
+inputs.wetbulb_values
+) AS forecast
+)
+SELECT
+m.location_id::smallint AS location_id,
+m.year::smallint AS year,
+m.season,
+m.wetbulb,
+m.lower,
+m.upper,
+a.wetbulb_avg,
+a.lower_avg,
+a.upper_avg,
+m.model_type,
+m.full_years_used,
+m.warming_rate,
+m.acceleration
+FROM forecast_max AS m
+LEFT JOIN forecast_avg AS a ON a.location_id = m.location_id
+AND a.year = m.year
+AND a.season = m.season ;
 
 CREATE UNIQUE INDEX if not exists wetbulb_forecast_location_year_season_uidx
 ON public.wetbulb_forecast (location_id, year, season) ;
@@ -723,7 +779,8 @@ SELECT
 p.location_id::smallint AS location_id,
 p.date,
 p_seasons.season,
-p.wetbulb::real AS wetbulb
+p.wetbulb::real AS wetbulb_from_max,
+p.wetbulb_avg::real AS wetbulb_from_avg
 FROM public.wetbulb AS p
 CROSS JOIN LATERAL (
 VALUES
@@ -735,7 +792,8 @@ SELECT
 p.location_id::smallint AS location_id,
 p.date,
 p.season,
-MAX (p.wetbulb)::real AS wetbulb
+MAX (p.wetbulb_from_max)::real AS wetbulb_from_max,
+MAX (p.wetbulb_from_avg)::real AS wetbulb_from_avg
 FROM wetbulb_with_seasons AS p
 GROUP BY
 p.location_id,
@@ -746,21 +804,25 @@ SELECT
 d.location_id::smallint AS location_id,
 EXTRACT (YEAR FROM d.date)::smallint AS year,
 d.season,
-MAX (d.wetbulb)::real AS wetbulb,
-COUNT (*)::int AS days_present
+MAX (d.wetbulb_from_max)::real AS wetbulb_from_max,
+COUNT (d.wetbulb_from_max)::int AS days_present,
+MAX (d.wetbulb_from_avg)::real AS wetbulb_from_avg,
+COUNT (d.wetbulb_from_avg)::int AS days_present_avg
 FROM daily_wetbulb AS d
 GROUP BY
 d.location_id,
 EXTRACT (YEAR FROM d.date)::smallint,
 d.season
-), complete_yearly_wetbulb AS (
+), yearly_with_required AS (
 SELECT
 y.location_id::smallint AS location_id,
 y.year::smallint AS year,
 y.season,
-y.wetbulb::real AS wetbulb
-FROM yearly_wetbulb AS y
-WHERE y.days_present >= 0.95 * CASE
+y.wetbulb_from_max::real AS wetbulb_from_max,
+y.days_present,
+y.wetbulb_from_avg::real AS wetbulb_from_avg,
+y.days_present_avg,
+0.95 * CASE
 WHEN y.season = public.wetbulb_annual_season () THEN CASE
 WHEN MOD (y.year, 4) = 0
 AND (MOD (y.year, 100) <> 0 OR MOD (y.year, 400) = 0) THEN 366
@@ -773,18 +835,32 @@ ELSE 90
 END
 WHEN y.season IN (public.wetbulb_spring (), public.wetbulb_summer ()) THEN 92
 ELSE 91
-END
-), forecast_inputs AS (
+END AS required_days
+FROM yearly_wetbulb AS y
+), forecast_inputs_max AS (
 SELECT
 location_id::smallint AS location_id,
 season,
 array_agg (year ORDER BY year) AS years,
-array_agg (wetbulb ORDER BY year) AS wetbulb_values
-FROM complete_yearly_wetbulb
+array_agg (wetbulb_from_max ORDER BY year) AS wetbulb_values
+FROM yearly_with_required
+WHERE days_present >= required_days
 GROUP BY
 location_id,
 season
-)
+), forecast_inputs_avg AS (
+SELECT
+location_id::smallint AS location_id,
+season,
+array_agg (year ORDER BY year) AS years,
+array_agg (wetbulb_from_avg ORDER BY year) AS wetbulb_values
+FROM yearly_with_required
+WHERE wetbulb_from_avg IS NOT NULL
+AND days_present_avg >= required_days
+GROUP BY
+location_id,
+season
+), forecast_max AS (
 SELECT
 forecast.location_id::smallint AS location_id,
 forecast.year::smallint AS year,
@@ -796,12 +872,45 @@ forecast.model_type,
 forecast.full_years_used,
 forecast.warming_rate::real AS warming_rate,
 forecast.acceleration::real AS acceleration
-FROM forecast_inputs AS inputs
+FROM forecast_inputs_max AS inputs
 CROSS JOIN LATERAL public.wetbulb_forecast_for_location (
 inputs.location_id::integer,
 inputs.years,
 inputs.wetbulb_values
-) AS forecast ;
+) AS forecast
+), forecast_avg AS (
+SELECT
+forecast.location_id::smallint AS location_id,
+forecast.year::smallint AS year,
+inputs.season,
+forecast.wetbulb::real AS wetbulb_avg,
+forecast.lower::real AS lower_avg,
+forecast.upper::real AS upper_avg
+FROM forecast_inputs_avg AS inputs
+CROSS JOIN LATERAL public.wetbulb_forecast_for_location (
+inputs.location_id::integer,
+inputs.years,
+inputs.wetbulb_values
+) AS forecast
+)
+SELECT
+m.location_id::smallint AS location_id,
+m.year::smallint AS year,
+m.season,
+m.wetbulb,
+m.lower,
+m.upper,
+a.wetbulb_avg,
+a.lower_avg,
+a.upper_avg,
+m.model_type,
+m.full_years_used,
+m.warming_rate,
+m.acceleration
+FROM forecast_max AS m
+LEFT JOIN forecast_avg AS a ON a.location_id = m.location_id
+AND a.year = m.year
+AND a.season = m.season ;
 
 CREATE UNIQUE INDEX if not exists wetbulb_forecast_max_location_year_season_uidx
 ON public.wetbulb_forecast_max (location_id, year, season) ;
@@ -851,14 +960,51 @@ season,
 wetbulb::real AS wetbulb
 FROM deduplicated_yearly_avg
 WHERE year = 2000
+), combined_yearly_avg_of_avg AS (
+SELECT
+a.location_id::smallint AS location_id,
+a.year::smallint AS year,
+a.season,
+a.avg_wetbulb_avg::real AS wetbulb_avg,
+0 AS source_order
+FROM public.wetbulb_year_stats AS a
+UNION ALL
+SELECT
+f.location_id::smallint AS location_id,
+f.year::smallint AS year,
+f.season,
+f.wetbulb_avg::real AS wetbulb_avg,
+1 AS source_order
+FROM public.wetbulb_forecast AS f
+WHERE f.wetbulb_avg IS NOT NULL
+), deduplicated_yearly_avg_of_avg AS (
+SELECT DISTINCT ON (location_id, year, season)
+location_id::smallint AS location_id,
+year::smallint AS year,
+season,
+wetbulb_avg::real AS wetbulb_avg
+FROM combined_yearly_avg_of_avg
+ORDER BY
+location_id,
+year,
+season,
+source_order
+), year_2000_value_avg AS (
+SELECT
+location_id::smallint AS location_id,
+season,
+wetbulb_avg::real AS wetbulb_avg
+FROM deduplicated_yearly_avg_of_avg
+WHERE year = 2000
 )
 SELECT
 s.location_id::smallint,
 s.year::smallint,
 s.season,
 s.avg_wetbulb::real AS avg_wetbulb,
-s.avg_wetbulb_avg::real AS avg_wetbulb_avg,
 s.max_wetbulb::real AS max_wetbulb,
+s.avg_wetbulb_avg::real AS avg_wetbulb_avg,
+s.max_wetbulb_avg::real AS max_wetbulb_avg,
 l.city,
 l.state,
 s.p10::real,
@@ -867,7 +1013,11 @@ s.p10_avg::real,
 s.p90_avg::real,
 f.lower::real AS future_lower,
 f.upper::real AS future_upper,
-ROUND ((s.avg_wetbulb - y2k.wetbulb)::numeric, 2)::real AS change_from_2000
+f.lower_avg::real AS future_lower_avg,
+f.upper_avg::real AS future_upper_avg,
+ROUND ((s.avg_wetbulb - y2k.wetbulb)::numeric, 2)::real AS change_from_2000,
+ROUND ((s.avg_wetbulb_avg - y2k_avg.wetbulb_avg)::numeric,
+2)::real AS change_from_2000_avg
 FROM public.wetbulb_year_stats AS s
 JOIN public.locations AS l ON l.id = s.location_id
 LEFT JOIN public.wetbulb_forecast AS f ON f.location_id = s.location_id
@@ -875,6 +1025,8 @@ AND f.year = 2100::smallint
 AND f.season = s.season
 LEFT JOIN year_2000_value AS y2k ON y2k.location_id = s.location_id
 AND y2k.season = s.season
+LEFT JOIN year_2000_value_avg AS y2k_avg ON y2k_avg.location_id = s.location_id
+AND y2k_avg.season = s.season
 WHERE
 s.location_id > 0 ;
 

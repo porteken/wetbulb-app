@@ -53,10 +53,13 @@ export async function seedTestPostgres(
     for (let i = 0; i < wetbulbs.length; i += chunkSize) {
       const chunk = wetbulbs.slice(i, i + chunkSize);
       const wetbulbValues = chunk
-        .map((p) => `(${p.location_id}, '${p.date}', ${p.wetbulb})`)
+        .map(
+          (p) =>
+            `(${p.location_id}, '${p.date}', ${p.wetbulb}, ${p.wetbulb_avg})`,
+        )
         .join(", ");
       await client.query(
-        `INSERT INTO wetbulb (location_id, date, wetbulb) VALUES ${wetbulbValues};`,
+        `INSERT INTO wetbulb (location_id, date, wetbulb, wetbulb_avg) VALUES ${wetbulbValues};`,
       );
     }
   }

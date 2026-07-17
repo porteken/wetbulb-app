@@ -1,12 +1,15 @@
 import { RankingsMain } from "@/features/rankings";
 import { FetchCityRankings, FetchLocations } from "@/lib/api/fetch-server";
 import {
+  DEFAULT_WETBULB_BASIS,
   GRAPH_CONFIG,
   normalizeGraphSeason,
+  normalizeWetbulbBasis,
   RANKINGS_WETBULB_LEVEL_COOKIE_NAME,
   RANKINGS_SEASON_COOKIE_NAME,
   RANKINGS_STATE_COOKIE_NAME,
   RANKINGS_YEAR_COOKIE_NAME,
+  WETBULB_BASIS_COOKIE_NAME,
 } from "@/lib/constants";
 import { cookies } from "next/headers";
 
@@ -42,13 +45,15 @@ export default async function RankingsPage({
   const seasonFromCookie = cookieStore.get(RANKINGS_SEASON_COOKIE_NAME)?.value;
   const stateFromCookie = cookieStore.get(RANKINGS_STATE_COOKIE_NAME)?.value;
   const yearFromCookie = cookieStore.get(RANKINGS_YEAR_COOKIE_NAME)?.value;
+  const basisFromCookie = cookieStore.get(WETBULB_BASIS_COOKIE_NAME)?.value;
 
   const initialSeason = normalizeGraphSeason(seasonFromCookie);
   const shouldPersistInitialSeason =
     seasonFromCookie !== undefined && seasonFromCookie !== initialSeason;
   const year = yearMapping(parameters.year, yearFromCookie);
+  const basis = normalizeWetbulbBasis(basisFromCookie ?? DEFAULT_WETBULB_BASIS);
   const [rankings, { LocationOptions }] = await Promise.all([
-    FetchCityRankings(year, initialSeason),
+    FetchCityRankings(year, initialSeason, basis),
     FetchLocations(),
   ]);
 

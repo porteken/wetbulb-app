@@ -1,5 +1,6 @@
 "use client";
 
+import { BasisToggle } from "@/components/app/basis-toggle";
 import { ThemeToggle } from "@/components/app/theme-toggle";
 import { UnitToggle } from "@/components/app/unit-toggle";
 import { Button } from "@/components/ui/button";
@@ -44,6 +45,7 @@ const HeaderActions = (): React.ReactElement => (
         <span className="sm:hidden">Code</span>
       </a>
     </Button>
+    <BasisToggle />
     <UnitToggle />
     <ThemeToggle />
   </div>

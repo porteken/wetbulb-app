@@ -90,7 +90,11 @@ describe("get /api/data/forecast", () => {
     expect(response.headers.get("Cache-Control")).toBe(
       "public, s-maxage=3600, stale-while-revalidate=86400",
     );
-    expect(mockFetchForecastData).toHaveBeenCalledWith(7, 12, "Summer", "avg");
+    expect(mockFetchForecastData).toHaveBeenCalledWith(7, 12, {
+      basis: "max",
+      option: "avg",
+      season: "Summer",
+    });
   });
 
   it("normalizes invalid seasons to the default season", async () => {
@@ -104,7 +108,11 @@ describe("get /api/data/forecast", () => {
 
     await expect(response.json()).resolves.toBeNull();
     expect(response.status).toBe(200);
-    expect(mockFetchForecastData).toHaveBeenCalledWith(7, 5, "Annual", "avg");
+    expect(mockFetchForecastData).toHaveBeenCalledWith(7, 5, {
+      basis: "max",
+      option: "avg",
+      season: "Annual",
+    });
   });
 
   it("converts thrown errors into data route responses", async () => {

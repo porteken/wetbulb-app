@@ -159,6 +159,7 @@ describe("pageMain Integration Tests", () => {
       initialGraphMeasure: "avg",
       initialGraphSeason: "Annual",
       initialReferenceYear: "2000",
+      initialWetbulbBasis: "max",
       location,
       LocationOptions: [
         {

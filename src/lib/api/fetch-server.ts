@@ -17,8 +17,11 @@ import {
 } from "@/lib/api/schemas";
 import {
   DEFAULT_GRAPH_SEASON,
+  DEFAULT_WETBULB_BASIS,
   type GraphSeason,
   normalizeGraphSeason,
+  normalizeWetbulbBasis,
+  type WetbulbBasis,
 } from "@/lib/constants";
 import {
   fetchCityRankingsRows,
@@ -86,6 +89,7 @@ const parseWithDatabaseError = <T>(
 async function fetchCityRankingsUncached(
   year: number,
   season: GraphSeason = DEFAULT_GRAPH_SEASON,
+  basis: WetbulbBasis = DEFAULT_WETBULB_BASIS,
 ): Promise<
   Array<{
     avg_wetbulb: number;
@@ -102,6 +106,7 @@ async function fetchCityRankingsUncached(
   }>
 > {
   const resolvedSeason = normalizeGraphSeason(season);
+  const resolvedBasis = normalizeWetbulbBasis(basis);
 
   if (!year || Number.isNaN(year) || year < MIN_YEAR || year > MAX_YEAR) {
     throw new DatabaseError(
@@ -111,7 +116,7 @@ async function fetchCityRankingsUncached(
 
   let rows;
   try {
-    rows = await fetchCityRankingsRows(year, resolvedSeason);
+    rows = await fetchCityRankingsRows(year, resolvedSeason, resolvedBasis);
   } catch (error) {
     throw new DatabaseError(
       "Failed to fetch city rankings from database",
@@ -185,11 +190,16 @@ async function fetchLocationsUncached(): Promise<FetchLocationProperties> {
   return { LocationOptions, locations: validatedLocations };
 }
 
+interface ForecastDataFilters {
+  basis?: WetbulbBasis;
+  option?: string;
+  season?: GraphSeason;
+}
+
 async function fetchForecastDataUncached(
   locationId: number,
   yearsAhead: number,
-  season: GraphSeason = DEFAULT_GRAPH_SEASON,
-  option: string = "avg",
+  filters: ForecastDataFilters = {},
 ): Promise<
   | undefined
   | {
@@ -199,6 +209,12 @@ async function fetchForecastDataUncached(
       upperBound90: number[];
     }
 > {
+  const {
+    basis = DEFAULT_WETBULB_BASIS,
+    option = "avg",
+    season = DEFAULT_GRAPH_SEASON,
+  } = filters;
+
   if (!validateLocationId(locationId)) {
     throw new DatabaseError(`Invalid locationId: ${locationId}`);
   }
@@ -208,6 +224,7 @@ async function fetchForecastDataUncached(
   }
 
   const resolvedSeason = normalizeGraphSeason(season);
+  const resolvedBasis = normalizeWetbulbBasis(basis);
 
   let historicalData;
   try {
@@ -240,12 +257,11 @@ async function fetchForecastDataUncached(
 
   let forecastRows;
   try {
-    forecastRows = await fetchForecastRows(
-      locationId,
-      queryWindow,
-      resolvedSeason,
+    forecastRows = await fetchForecastRows(locationId, queryWindow, {
+      basis: resolvedBasis,
       option,
-    );
+      season: resolvedSeason,
+    });
   } catch (error) {
     throw new DatabaseError(
       "Failed to fetch forecast data from database",
@@ -313,8 +329,10 @@ async function fetchTrendGraphDataUncached(
   option: string,
   locationId: number,
   season: GraphSeason = DEFAULT_GRAPH_SEASON,
+  basis: WetbulbBasis = DEFAULT_WETBULB_BASIS,
 ): Promise<TrendGraphDataProperties> {
   const resolvedSeason = normalizeGraphSeason(season);
+  const resolvedBasis = normalizeWetbulbBasis(basis);
 
   if (!validateLocationId(locationId)) {
     throw new DatabaseError(`Invalid locationId: ${locationId}`);
@@ -328,7 +346,12 @@ async function fetchTrendGraphDataUncached(
 
   let rows;
   try {
-    rows = await fetchTrendGraphRows(locationId, option, resolvedSeason);
+    rows = await fetchTrendGraphRows(
+      locationId,
+      option,
+      resolvedSeason,
+      resolvedBasis,
+    );
   } catch (error) {
     throw new DatabaseError(
       "Failed to fetch trend graph data from database",

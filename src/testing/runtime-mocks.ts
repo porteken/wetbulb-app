@@ -32,6 +32,7 @@ interface RuntimeWetbulbRow extends MockRow {
   date: string;
   location_id: number;
   wetbulb: number;
+  wetbulb_avg: number;
   year: number;
 }
 
@@ -123,6 +124,10 @@ const LOCATIONS = [
 
 const round = (value: number) => Math.round(value * 100) / 100;
 
+// Daily-average-basis mock values are offset from the daily-max-basis
+// values by a flat amount so the two bases are distinguishable in tests.
+const AVG_BASIS_OFFSET = -1.5;
+
 const getAverageWetbulb = (locationId: number, year: number) => {
   const location = LOCATIONS.find((item) => item.location_id === locationId);
   if (location === undefined) {
@@ -149,6 +154,7 @@ const buildWetbulbYearRows = (): RuntimeWetbulbRow[] => {
           date,
           location_id: location.location_id,
           wetbulb,
+          wetbulb_avg: round(wetbulb + AVG_BASIS_OFFSET),
           year,
         });
       }
@@ -168,6 +174,10 @@ const MOCK_TABLES: RuntimeMockTables = {
           getAverageWetbulb(location.location_id, year) +
             SEASONAL_AVG_OFFSETS[season],
         );
+        const max = round(
+          getAverageWetbulb(location.location_id, year) +
+            SEASONAL_MAX_OFFSETS[season],
+        );
         const forecastWetbulb = round(
           getAverageWetbulb(location.location_id, 2025) +
             SEASONAL_AVG_OFFSETS[season] +
@@ -175,20 +185,23 @@ const MOCK_TABLES: RuntimeMockTables = {
         );
         return {
           avg_wetbulb: avg,
-          avg_wetbulb_avg: avg,
+          avg_wetbulb_avg: round(avg + AVG_BASIS_OFFSET),
           change_from_2000: round((year - 2000) * location.trendPerYear),
+          change_from_2000_avg: round(
+            (year - 2000) * location.trendPerYear + AVG_BASIS_OFFSET,
+          ),
           city: location.city,
           future_lower: round(forecastWetbulb - 1.2),
+          future_lower_avg: round(forecastWetbulb - 1.2 + AVG_BASIS_OFFSET),
           future_upper: round(forecastWetbulb + 1.2),
+          future_upper_avg: round(forecastWetbulb + 1.2 + AVG_BASIS_OFFSET),
           location_id: location.location_id,
-          max_wetbulb: round(
-            getAverageWetbulb(location.location_id, year) +
-              SEASONAL_MAX_OFFSETS[season],
-          ),
+          max_wetbulb: max,
+          max_wetbulb_avg: round(max + AVG_BASIS_OFFSET),
           p10: round(avg - 1.4),
-          p10_avg: round(avg - 1.4),
+          p10_avg: round(avg - 1.4 + AVG_BASIS_OFFSET),
           p90: round(avg + 1.4),
-          p90_avg: round(avg + 1.4),
+          p90_avg: round(avg + 1.4 + AVG_BASIS_OFFSET),
           season,
           state: location.state,
           year,
@@ -222,13 +235,17 @@ const MOCK_TABLES: RuntimeMockTables = {
         const forecastWetbulb = round(
           lastHistoricalAvg + yearsAhead * location.trendPerYear,
         );
+        const forecastWetbulbAvg = round(forecastWetbulb + AVG_BASIS_OFFSET);
 
         return {
           location_id: location.location_id,
           lower: round(forecastWetbulb - 1.2),
+          lower_avg: round(forecastWetbulbAvg - 1.2),
           wetbulb: forecastWetbulb,
+          wetbulb_avg: forecastWetbulbAvg,
           season,
           upper: round(forecastWetbulb + 1.2),
+          upper_avg: round(forecastWetbulbAvg + 1.2),
           year,
         };
       });
@@ -248,13 +265,17 @@ const MOCK_TABLES: RuntimeMockTables = {
         const forecastWetbulb = round(
           lastHistoricalMax + yearsAhead * location.trendPerYear,
         );
+        const forecastWetbulbAvg = round(forecastWetbulb + AVG_BASIS_OFFSET);
 
         return {
           location_id: location.location_id,
           lower: round(forecastWetbulb - 1.2),
+          lower_avg: round(forecastWetbulbAvg - 1.2),
           wetbulb: forecastWetbulb,
+          wetbulb_avg: forecastWetbulbAvg,
           season,
           upper: round(forecastWetbulb + 1.2),
+          upper_avg: round(forecastWetbulbAvg + 1.2),
           year,
         };
       });
@@ -276,15 +297,19 @@ const MOCK_TABLES: RuntimeMockTables = {
     YEARS.flatMap((year) =>
       GRAPH_SEASONS.map((season) => {
         const avg = getAverageWetbulb(location.location_id, year);
+        const maxWetbulb = round(avg + SEASONAL_MAX_OFFSETS[season]);
         return {
           avg_wetbulb: round(avg + SEASONAL_AVG_OFFSETS[season]),
-          avg_wetbulb_avg: round(avg + SEASONAL_AVG_OFFSETS[season]),
+          avg_wetbulb_avg: round(
+            avg + SEASONAL_AVG_OFFSETS[season] + AVG_BASIS_OFFSET,
+          ),
           location_id: location.location_id,
-          max_wetbulb: round(avg + SEASONAL_MAX_OFFSETS[season]),
+          max_wetbulb: maxWetbulb,
+          max_wetbulb_avg: round(maxWetbulb + AVG_BASIS_OFFSET),
           p10: round(avg - 1.4),
-          p10_avg: round(avg - 1.4),
+          p10_avg: round(avg - 1.4 + AVG_BASIS_OFFSET),
           p90: round(avg + 1.4),
-          p90_avg: round(avg + 1.4),
+          p90_avg: round(avg + 1.4 + AVG_BASIS_OFFSET),
           season,
           year,
         };

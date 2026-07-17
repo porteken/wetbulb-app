@@ -104,6 +104,7 @@ describe("useTrendGraphData", () => {
       "temperature",
       123,
       "Annual",
+      "max",
     );
     expect(result.current.data).toStrictEqual(mockData);
   });
@@ -127,6 +128,7 @@ describe("useTrendGraphData", () => {
       "temperature",
       123,
       "Annual",
+      "max",
     );
     expect(result.current.data).toStrictEqual(mockData);
   });
@@ -182,12 +184,14 @@ describe("useTrendGraphData", () => {
       "temperature",
       123,
       "Annual",
+      "max",
     );
     expect(mockFetchTrendGraphData).toHaveBeenNthCalledWith(
       2,
       "temperature",
       456,
       "Annual",
+      "max",
     );
   });
 
@@ -223,12 +227,14 @@ describe("useTrendGraphData", () => {
       "temperature",
       123,
       "Annual",
+      "max",
     );
     expect(mockFetchTrendGraphData).toHaveBeenNthCalledWith(
       2,
       "humidity",
       123,
       "Annual",
+      "max",
     );
   });
 
@@ -269,12 +275,14 @@ describe("useTrendGraphData", () => {
       "temperature",
       123,
       "Annual",
+      "max",
     );
     expect(mockFetchTrendGraphData).toHaveBeenNthCalledWith(
       2,
       "temperature",
       123,
       "Winter",
+      "max",
     );
   });
 
@@ -320,6 +328,7 @@ describe("useTrendGraphData", () => {
       "temperature",
       123,
       "Annual",
+      "max",
     );
     expect(result.current.data).toStrictEqual(mockData);
   });
@@ -343,6 +352,7 @@ describe("useTrendGraphData", () => {
       "temperature",
       0,
       "Annual",
+      "max",
     );
     expect(result.current.data).toStrictEqual(mockData);
   });

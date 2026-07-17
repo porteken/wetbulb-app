@@ -92,6 +92,7 @@ describe("pageMain", () => {
     initialGraphMeasure: "avg",
     initialGraphSeason: "Annual",
     initialReferenceYear: "2000",
+    initialWetbulbBasis: "max",
     location: {
       city: "Test City",
       lat: 40.7128,

@@ -30,6 +30,7 @@ const Main: FC<PageProperties> = ({
   initialGraphMeasure,
   initialGraphSeason,
   initialReferenceYear,
+  initialWetbulbBasis,
   location,
   LocationOptions,
   ReferenceWetbulbs,
@@ -94,6 +95,7 @@ const Main: FC<PageProperties> = ({
             initialGraphSeason={initialGraphSeason}
             initialIncreasePerYear={IncreasePerYear}
             initialTrendlineWetbulbs={TrendlineWetbulbs}
+            initialWetbulbBasis={initialWetbulbBasis}
             initialYearWetbulbs={YearWetbulbs}
             initialYears={Years}
             onMeasureChange={handleMeasureChange}

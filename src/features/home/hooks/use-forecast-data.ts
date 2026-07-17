@@ -1,5 +1,10 @@
 import { queryKeys } from "@/lib/api/query-client";
-import { DEFAULT_GRAPH_SEASON, type GraphSeason } from "@/lib/constants";
+import {
+  DEFAULT_GRAPH_SEASON,
+  DEFAULT_WETBULB_BASIS,
+  type GraphSeason,
+  type WetbulbBasis,
+} from "@/lib/constants";
 import { useQuery } from "@tanstack/react-query";
 
 import type { ForecastGraphData } from "@/lib/utils/trend-analysis";
@@ -7,6 +12,7 @@ import type { ForecastGraphData } from "@/lib/utils/trend-analysis";
 const STALE_TIME_MS = 1000 * 60 * 5;
 
 interface UseForecastDataOptions {
+  basis?: WetbulbBasis;
   enabled?: boolean;
   initialData?: ForecastGraphData;
   locationId: number | undefined;
@@ -16,6 +22,7 @@ interface UseForecastDataOptions {
 }
 
 export const useForecastData = ({
+  basis = DEFAULT_WETBULB_BASIS,
   enabled = true,
   initialData,
   locationId,
@@ -30,23 +37,21 @@ export const useForecastData = ({
     initialData,
     queryFn: async () => {
       const { FetchForecastData } = await import("@/lib/api/fetch-client");
-      const data = await FetchForecastData(
-        resolvedLocationId,
-        yearsAhead,
-        season,
+      const data = await FetchForecastData(resolvedLocationId, yearsAhead, {
+        basis,
         option,
-      );
+        season,
+      });
 
       // React Query forbids resolving undefined; null marks "no forecast
       // available" (e.g. locations without enough complete years of data).
       return data ?? null;
     },
-    queryKey: queryKeys.forecast(
-      resolvedLocationId,
-      yearsAhead,
-      season,
+    queryKey: queryKeys.forecast(resolvedLocationId, yearsAhead, {
+      basis,
       option,
-    ),
+      season,
+    }),
     staleTime: STALE_TIME_MS,
   });
 };

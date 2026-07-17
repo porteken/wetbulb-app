@@ -38,4 +38,38 @@ describe("db queries extra coverage", () => {
 
     vi.restoreAllMocks();
   });
+
+  it("returns distinct values for the avg vs max wetbulb basis", async () => {
+    vi.spyOn(environment, "shouldUseRuntimeDbMocks").mockReturnValue(true);
+
+    const maxBasisRankings = await fetchCityRankingsRows(2024, "Annual", "max");
+    const avgBasisRankings = await fetchCityRankingsRows(2024, "Annual", "avg");
+    expect(avgBasisRankings[0]?.avg_wetbulb).not.toStrictEqual(
+      maxBasisRankings[0]?.avg_wetbulb,
+    );
+    expect(avgBasisRankings[0]?.max_wetbulb).not.toStrictEqual(
+      maxBasisRankings[0]?.max_wetbulb,
+    );
+
+    const maxBasisTrend = await fetchTrendGraphRows(1, "avg", undefined, "max");
+    const avgBasisTrend = await fetchTrendGraphRows(1, "avg", undefined, "avg");
+    expect(avgBasisTrend[0]?.wetbulb).not.toStrictEqual(
+      maxBasisTrend[0]?.wetbulb,
+    );
+
+    const queryWindow = { lastHistoricalYear: 2020, targetYear: 2030 };
+    const maxBasisForecast = await fetchForecastRows(1, queryWindow, {
+      basis: "max",
+      option: "avg",
+    });
+    const avgBasisForecast = await fetchForecastRows(1, queryWindow, {
+      basis: "avg",
+      option: "avg",
+    });
+    expect(avgBasisForecast[0]?.wetbulb).not.toStrictEqual(
+      maxBasisForecast[0]?.wetbulb,
+    );
+
+    vi.restoreAllMocks();
+  });
 });

@@ -10,6 +10,7 @@ import {
   DEFAULT_FORECAST_ENABLED,
   DEFAULT_FORECAST_YEARS_AHEAD,
   DEFAULT_GRAPH_MEASURE,
+  DEFAULT_WETBULB_BASIS,
   FORECAST_ENABLED_COOKIE_NAME,
   FORECAST_YEARS_AHEAD_COOKIE_NAME,
   GRAPH_CONFIG,
@@ -19,7 +20,10 @@ import {
   MAX_FORECAST_YEARS_AHEAD,
   MIN_FORECAST_YEARS_AHEAD,
   normalizeGraphSeason,
+  normalizeWetbulbBasis,
   type GraphSeason,
+  type WetbulbBasis,
+  WETBULB_BASIS_COOKIE_NAME,
 } from "@/lib/constants";
 import { isSelectableReferenceYear } from "@/lib/utils/select-options";
 import { getLatestCookieValue } from "@/lib/utils/server-cookies";
@@ -71,6 +75,7 @@ interface LocationPagePreferences {
   initialGraphMeasure: string;
   initialGraphSeason: GraphSeason;
   initialReferenceYear: string;
+  initialWetbulbBasis: WetbulbBasis;
 }
 
 const createEmptyGraphData = (): GraphData => ({
@@ -162,16 +167,23 @@ const getPreferencesFromCookies =
         ? rawForecastYearsAhead
         : DEFAULT_FORECAST_YEARS_AHEAD;
 
+    const initialWetbulbBasis = normalizeWetbulbBasis(
+      getLatestCookieValue(cookieStore, WETBULB_BASIS_COOKIE_NAME) ??
+        DEFAULT_WETBULB_BASIS,
+    );
+
     return {
       initialForecastEnabled,
       initialForecastYearsAhead,
       initialGraphMeasure,
       initialGraphSeason,
       initialReferenceYear,
+      initialWetbulbBasis,
     };
   };
 
 interface FetchGraphDataOptions {
+  basis: WetbulbBasis;
   forecastEnabled: boolean;
   forecastYearsAhead: number;
   locationId: number;
@@ -181,6 +193,7 @@ interface FetchGraphDataOptions {
 }
 
 const fetchGraphData = async ({
+  basis,
   forecastEnabled,
   forecastYearsAhead,
   locationId,
@@ -189,12 +202,16 @@ const fetchGraphData = async ({
   season,
 }: FetchGraphDataOptions): Promise<GraphData> => {
   const forecastPromise = forecastEnabled
-    ? FetchForecastData(locationId, forecastYearsAhead, season, measure)
+    ? FetchForecastData(locationId, forecastYearsAhead, {
+        basis,
+        option: measure,
+        season,
+      })
     : undefined;
 
   const [trendResult, currentResult, referenceResult] =
     await Promise.allSettled([
-      FetchTrendGraphData(measure, locationId, season),
+      FetchTrendGraphData(measure, locationId, season, basis),
       FetchReferenceGraphData(
         String(GRAPH_CONFIG.YEAR_RANGE.END),
         locationId,
@@ -285,6 +302,7 @@ export const loadLocationPageData = async (
   const [locationData, graphData] = await Promise.all([
     fetchLocationData(),
     fetchGraphData({
+      basis: preferences.initialWetbulbBasis,
       forecastEnabled: preferences.initialForecastEnabled,
       forecastYearsAhead: preferences.initialForecastYearsAhead,
       locationId,
@@ -338,6 +356,7 @@ export const loadLocationPageData = async (
       initialGraphMeasure: preferences.initialGraphMeasure,
       initialGraphSeason: preferences.initialGraphSeason,
       initialReferenceYear: preferences.initialReferenceYear,
+      initialWetbulbBasis: preferences.initialWetbulbBasis,
       location: selectedLocation,
       LocationOptions,
       ReferenceWetbulbs: graphData.reference_wetbulbs,

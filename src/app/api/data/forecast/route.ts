@@ -1,5 +1,9 @@
 import { FetchForecastData } from "@/lib/api/fetch-server";
-import { DEFAULT_GRAPH_SEASON, normalizeGraphSeason } from "@/lib/constants";
+import {
+  DEFAULT_GRAPH_SEASON,
+  normalizeGraphSeason,
+  normalizeWetbulbBasis,
+} from "@/lib/constants";
 import { validateLocationId } from "@/lib/utils/validation";
 import { NextResponse } from "next/server";
 
@@ -17,6 +21,9 @@ export async function GET(request: Request) {
     url.searchParams.get("season") ?? DEFAULT_GRAPH_SEASON,
   );
   const option = url.searchParams.get("option") ?? "avg";
+  const basis = normalizeWetbulbBasis(
+    url.searchParams.get("basis") ?? undefined,
+  );
   const yearsAhead = Number(url.searchParams.get("yearsAhead"));
 
   if (!validateLocationId(locationId)) {
@@ -31,12 +38,11 @@ export async function GET(request: Request) {
   }
 
   try {
-    const data = await FetchForecastData(
-      locationId,
-      yearsAhead,
-      season,
+    const data = await FetchForecastData(locationId, yearsAhead, {
+      basis,
       option,
-    );
+      season,
+    });
     return createCachedDataRouteResponse(data ?? null);
   } catch (error) {
     return createDataRouteErrorResponse(error, "Failed to fetch forecast data");

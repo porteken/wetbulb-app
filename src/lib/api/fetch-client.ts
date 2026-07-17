@@ -4,8 +4,11 @@ import {
 } from "@/lib/api/schemas";
 import {
   DEFAULT_GRAPH_SEASON,
+  DEFAULT_WETBULB_BASIS,
   type GraphSeason,
   normalizeGraphSeason,
+  normalizeWetbulbBasis,
+  type WetbulbBasis,
 } from "@/lib/constants";
 import { FetchError } from "@/lib/utils/errors";
 import {
@@ -23,11 +26,16 @@ import {
 
 import type { TrendGraphDataProperties } from "@/types/types";
 
+interface ForecastDataFilters {
+  basis?: WetbulbBasis;
+  option?: string;
+  season?: GraphSeason;
+}
+
 export async function FetchForecastData(
   locationId: number,
   yearsAhead: number,
-  season: GraphSeason = DEFAULT_GRAPH_SEASON,
-  option: string = "avg",
+  filters: ForecastDataFilters = {},
 ): Promise<
   | undefined
   | {
@@ -37,6 +45,12 @@ export async function FetchForecastData(
       upperBound90: number[];
     }
 > {
+  const {
+    basis = DEFAULT_WETBULB_BASIS,
+    option = "avg",
+    season = DEFAULT_GRAPH_SEASON,
+  } = filters;
+
   if (!validateLocationId(locationId)) {
     throw new FetchError(`Invalid location ID: ${locationId}`);
   }
@@ -52,10 +66,12 @@ export async function FetchForecastData(
   }
 
   const resolvedSeason = normalizeGraphSeason(season);
+  const resolvedBasis = normalizeWetbulbBasis(basis);
 
   const response = await apiRequest(async () => {
     const payload = await fetchApiJson(
       `/api/data/forecast?${buildQueryString({
+        basis: resolvedBasis,
         locationId,
         option,
         season: resolvedSeason,
@@ -83,8 +99,10 @@ export async function FetchTrendGraphData(
   option: string,
   locationId: number,
   season: GraphSeason = DEFAULT_GRAPH_SEASON,
+  basis: WetbulbBasis = DEFAULT_WETBULB_BASIS,
 ): Promise<TrendGraphDataProperties> {
   const resolvedSeason = normalizeGraphSeason(season);
+  const resolvedBasis = normalizeWetbulbBasis(basis);
 
   if (!validateTrendOption(option)) {
     throw new FetchError("Invalid trend option. Must be 'avg' or 'max'");
@@ -97,6 +115,7 @@ export async function FetchTrendGraphData(
   const response = await apiRequest(async () => {
     const payload = await fetchApiJson(
       `/api/data/trend?${buildQueryString({
+        basis: resolvedBasis,
         locationId,
         option,
         season: resolvedSeason,

@@ -33,35 +33,35 @@ describe("queryKeys", () => {
       123,
       "avg",
       "Annual",
+      "max",
     ]);
     expect(queryKeys.trendGraph(123, "avg")).toStrictEqual([
       "trend-graph",
       123,
       "avg",
       "Annual",
+      "max",
     ]);
     expect(queryKeys.trendGraph(999, "max")).toStrictEqual([
       "trend-graph",
       999,
       "max",
       "Annual",
+      "max",
     ]);
   });
 
   it("builds stable forecast query keys", () => {
-    expect(queryKeys.forecast(123, 10, "Winter", "max")).toStrictEqual([
-      "forecast",
-      123,
-      10,
-      "Winter",
-      "max",
-    ]);
+    expect(
+      queryKeys.forecast(123, 10, { option: "max", season: "Winter" }),
+    ).toStrictEqual(["forecast", 123, 10, "Winter", "max", "max"]);
     expect(queryKeys.forecast(123, 10)).toStrictEqual([
       "forecast",
       123,
       10,
       "Annual",
       "avg",
+      "max",
     ]);
   });
 });
@@ -79,6 +79,7 @@ describe("getTrendGraphQueryOptions", () => {
       44,
       "avg",
       "Annual",
+      "max",
     ]);
     expect(options.queryFn).toBeTypeOf("function");
   });
@@ -96,7 +97,12 @@ describe("getTrendGraphQueryOptions", () => {
     const options = getTrendGraphQueryOptions(55, "max");
     const result = await options.queryFn();
 
-    expect(mockFetchTrendGraphData).toHaveBeenCalledWith("max", 55, "Annual");
+    expect(mockFetchTrendGraphData).toHaveBeenCalledWith(
+      "max",
+      55,
+      "Annual",
+      "max",
+    );
     expect(result).toStrictEqual(mockData);
   });
 });
@@ -116,7 +122,7 @@ describe("prefetch/invalidate helpers", () => {
 
     expect(prefetchSpy).toHaveBeenCalledWith({
       queryFn: expect.any(Function),
-      queryKey: ["trend-graph", 77, "avg", "Annual"],
+      queryKey: ["trend-graph", 77, "avg", "Annual", "max"],
     });
   });
 

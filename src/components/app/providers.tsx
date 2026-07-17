@@ -1,5 +1,6 @@
 "use client";
 
+import { BasisProvider } from "@/components/app/basis-provider";
 import { ThemeProvider } from "@/components/app/theme-provider";
 import { UnitProvider } from "@/components/app/unit-provider";
 import { ToastProvider } from "@/components/ui/toast";
@@ -10,7 +11,9 @@ export const AppProviders = ({
 }: Readonly<{ children: React.ReactNode }>) => (
   <ThemeProvider>
     <UnitProvider>
-      <ToastProvider>{children}</ToastProvider>
+      <BasisProvider>
+        <ToastProvider>{children}</ToastProvider>
+      </BasisProvider>
     </UnitProvider>
   </ThemeProvider>
 );

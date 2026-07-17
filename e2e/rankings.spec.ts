@@ -193,4 +193,40 @@ test.describe("Rankings Page", () => {
       timeout: 15_000,
     });
   });
+
+  test("should default to daily max and switch basis via the header toggle", async ({
+    page,
+  }) => {
+    await page.goto("/rankings");
+
+    await expect(
+      page.getByRole("heading", { name: "Cities ranked by Average Wetbulb" }),
+    ).toBeVisible({ timeout: 10_000 });
+
+    const firstRow = page.locator("table tbody tr").first();
+    await expect(firstRow).toBeVisible({ timeout: 10_000 });
+
+    const basisToggle = page.getByRole("button", {
+      name: /switch to daily (?<basis>average|maximum) wetbulb/iu,
+    });
+    await expect(basisToggle).toHaveText("Daily Max");
+
+    const initialRowText = await firstRow.textContent();
+
+    await basisToggle.click();
+    await expect(basisToggle).toHaveText("Daily Avg");
+
+    await expect(async () => {
+      expect(await firstRow.textContent()).not.toStrictEqual(initialRowText);
+    }).toPass({ timeout: 10_000 });
+
+    const cookies = await page.context().cookies();
+    const basisCookie = cookies.find(
+      (cookie) => cookie.name === "wetbulb-basis",
+    );
+    expect(basisCookie?.value).toBe("avg");
+
+    await page.reload();
+    await expect(basisToggle).toHaveText("Daily Avg");
+  });
 });

@@ -31,6 +31,7 @@ import {
   DEFAULT_FORECAST_YEARS_AHEAD,
   DEFAULT_GRAPH_MEASURE,
   DEFAULT_GRAPH_SEASON,
+  DEFAULT_WETBULB_BASIS,
   FORECAST_ENABLED_COOKIE_NAME,
   FORECAST_YEARS_AHEAD_COOKIE_NAME,
   GRAPH_MEASURE_COOKIE_NAME,
@@ -180,6 +181,7 @@ describe("loadLocationPageData", () => {
         initialGraphMeasure: DEFAULT_GRAPH_MEASURE,
         initialGraphSeason: DEFAULT_GRAPH_SEASON,
         initialReferenceYear: DEFAULT_REFERENCE_YEAR,
+        initialWetbulbBasis: DEFAULT_WETBULB_BASIS,
         location: {
           city: "Boston",
           lat: 42.3601,
@@ -233,6 +235,7 @@ describe("loadLocationPageData", () => {
         initialGraphMeasure: DEFAULT_GRAPH_MEASURE,
         initialGraphSeason: DEFAULT_GRAPH_SEASON,
         initialReferenceYear: DEFAULT_REFERENCE_YEAR,
+        initialWetbulbBasis: DEFAULT_WETBULB_BASIS,
         location: {
           city: "Boston",
           lat: 42.3601,
@@ -311,6 +314,7 @@ describe("loadLocationPageData", () => {
         initialGraphMeasure: "max",
         initialGraphSeason: "Winter",
         initialReferenceYear: "2010",
+        initialWetbulbBasis: DEFAULT_WETBULB_BASIS,
         location,
         LocationOptions: locationOptions,
         ReferenceWetbulbs: [25, 26],
@@ -321,7 +325,12 @@ describe("loadLocationPageData", () => {
       status: "success",
     });
 
-    expect(mockFetchTrendGraphData).toHaveBeenCalledWith("max", 7, "Winter");
+    expect(mockFetchTrendGraphData).toHaveBeenCalledWith(
+      "max",
+      7,
+      "Winter",
+      "max",
+    );
     expect(mockFetchReferenceGraphData).toHaveBeenNthCalledWith(
       1,
       "2025",
@@ -334,7 +343,11 @@ describe("loadLocationPageData", () => {
       7,
       "Annual",
     );
-    expect(mockFetchForecastData).toHaveBeenCalledWith(7, 25, "Winter", "max");
+    expect(mockFetchForecastData).toHaveBeenCalledWith(7, 25, {
+      basis: "max",
+      option: "max",
+      season: "Winter",
+    });
   });
 
   it("skips fetching forecast data when forecasting is disabled", async () => {
@@ -421,7 +434,12 @@ describe("loadLocationPageData", () => {
       status: "success",
     });
 
-    expect(mockFetchTrendGraphData).toHaveBeenCalledWith("avg", 0, "Annual");
+    expect(mockFetchTrendGraphData).toHaveBeenCalledWith(
+      "avg",
+      0,
+      "Annual",
+      "max",
+    );
     expect(mockFetchReferenceGraphData).toHaveBeenNthCalledWith(
       1,
       "2025",

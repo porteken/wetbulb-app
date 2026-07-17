@@ -72,6 +72,9 @@ BEGIN
     ALTER COLUMN location_id TYPE smallint USING location_id::smallint,
     ALTER COLUMN wetbulb TYPE real USING wetbulb::real ;
 
+    ALTER TABLE IF EXISTS public.wetbulb
+    ADD COLUMN IF NOT EXISTS wetbulb_avg real ;
+
     IF EXISTS (
         SELECT
             1

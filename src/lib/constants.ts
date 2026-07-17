@@ -27,6 +27,24 @@ export const normalizeTemperatureUnit = (
   return DEFAULT_TEMPERATURE_UNIT;
 };
 
+export const WETBULB_BASIS_COOKIE_NAME = "wetbulb-basis" as const;
+const WETBULB_BASES = ["max", "avg"] as const;
+export type WetbulbBasis = (typeof WETBULB_BASES)[number];
+export const DEFAULT_WETBULB_BASIS: WetbulbBasis = "max";
+
+const isWetbulbBasis = (value: string): value is WetbulbBasis =>
+  (WETBULB_BASES as readonly string[]).includes(value);
+
+export const normalizeWetbulbBasis = (
+  value: string | undefined,
+): WetbulbBasis => {
+  if (value && isWetbulbBasis(value)) {
+    return value;
+  }
+
+  return DEFAULT_WETBULB_BASIS;
+};
+
 export const GRAPH_MEASURE_COOKIE_NAME = "graph-measure" as const;
 export const GRAPH_SEASON_COOKIE_NAME = "graph-season" as const;
 export const REFERENCE_YEAR_COOKIE_NAME = "reference-year" as const;

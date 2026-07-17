@@ -1,5 +1,6 @@
 "use client";
 
+import { useWetbulbBasis } from "@/components/app/basis-provider";
 import { PageLoader } from "@/components/app/page-loader";
 import { PageShell } from "@/components/app/page-shell";
 import { useTemperatureUnit } from "@/components/app/unit-provider";
@@ -71,12 +72,15 @@ const Home: FC<MapProperties> = ({
   const isMobileViewport = useIsMobileViewport();
   const [isMobileGraphLegendOpen, setIsMobileGraphLegendOpen] = useState(false);
   const { unit } = useTemperatureUnit();
+  const { basis } = useWetbulbBasis();
   const markerPrefetchOptionsRef = useRef({
+    basis,
     graphMeasure: selectedGraphMeasure,
     graphSeason: selectedGraphSeason,
   });
 
   markerPrefetchOptionsRef.current = {
+    basis,
     graphMeasure: selectedGraphMeasure,
     graphSeason: selectedGraphSeason,
   };
@@ -104,11 +108,13 @@ const Home: FC<MapProperties> = ({
   );
 
   const trendQuery = useTrendGraphData({
+    basis,
     locationId: selectedLocationId,
     option: selectedGraphMeasure,
     season: selectedGraphSeason,
   });
   const forecastQuery = useForecastData({
+    basis,
     enabled: forecastEnabled && selectedLocationId !== undefined,
     locationId: selectedLocationId,
     option: selectedGraphMeasure,
@@ -182,11 +188,16 @@ const Home: FC<MapProperties> = ({
 
   const handleMarkerPrefetch = useCallback(
     async (locationId: number) => {
-      const { graphMeasure, graphSeason } = markerPrefetchOptionsRef.current;
+      const {
+        basis: prefetchBasis,
+        graphMeasure,
+        graphSeason,
+      } = markerPrefetchOptionsRef.current;
       const queryKey = queryKeys.trendGraph(
         locationId,
         graphMeasure,
         graphSeason,
+        prefetchBasis,
       );
       const queryState = queryClient.getQueryState(queryKey);
       const isFresh =
@@ -198,12 +209,10 @@ const Home: FC<MapProperties> = ({
       }
 
       try {
-        await prefetchTrendGraphData(
-          queryClient,
-          locationId,
-          graphMeasure,
-          graphSeason,
-        );
+        await prefetchTrendGraphData(queryClient, locationId, graphMeasure, {
+          basis: prefetchBasis,
+          season: graphSeason,
+        });
       } catch {
         // Ignore speculative prefetch failures.
       }

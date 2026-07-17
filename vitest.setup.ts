@@ -4,7 +4,7 @@ import { mockFn } from "@/testing/mock-fn";
 import { server } from "@/testing/server";
 import { afterAll, afterEach, beforeAll, vi } from "vitest";
 
-import type { TemperatureUnit } from "@/lib/constants";
+import type { TemperatureUnit, WetbulbBasis } from "@/lib/constants";
 import type { ReactNode } from "react";
 
 vi.mock("@/components/app/unit-provider", () => ({
@@ -12,6 +12,14 @@ vi.mock("@/components/app/unit-provider", () => ({
   useTemperatureUnit: () => ({
     setUnit: vi.fn<(unit: TemperatureUnit) => void>(),
     unit: "F" as const,
+  }),
+}));
+
+vi.mock("@/components/app/basis-provider", () => ({
+  BasisProvider: ({ children }: { children: ReactNode }) => children,
+  useWetbulbBasis: () => ({
+    basis: "max" as const,
+    setBasis: vi.fn<(basis: WetbulbBasis) => void>(),
   }),
 }));
 

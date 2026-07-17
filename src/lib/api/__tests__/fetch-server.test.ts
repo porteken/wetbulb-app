@@ -78,6 +78,7 @@ describe("fetch-server", () => {
       expect(mockDbQueries.fetchCityRankingsRows).toHaveBeenCalledWith(
         2024,
         "Annual",
+        "max",
       );
       expect(result[0]).toStrictEqual({
         avg_wetbulb: 35.5,
@@ -330,6 +331,7 @@ describe("fetch-server", () => {
         1,
         "avg",
         "Annual",
+        "max",
       );
       expect(result.years).toStrictEqual([2020, 2021]);
       expect(result.year_wetbulbs).toStrictEqual([25.5, 26.2]);
@@ -397,8 +399,7 @@ describe("fetch-server", () => {
       expect(mockDbQueries.fetchForecastRows).toHaveBeenCalledWith(
         1,
         { lastHistoricalYear: 2025, targetYear: 2035 },
-        "Annual",
-        "avg",
+        { basis: "max", option: "avg", season: "Annual" },
       );
       expect(result).toStrictEqual({
         forecastValues: [30.5, 31],
@@ -414,7 +415,7 @@ describe("fetch-server", () => {
         { lower: 10.5, wetbulb: 12.5, upper: 14.5, year: 2026 },
       ]);
 
-      await fetchServer.FetchForecastData(1, 10, "Winter");
+      await fetchServer.FetchForecastData(1, 10, { season: "Winter" });
 
       expect(mockDbQueries.fetchHistoricalYearRow).toHaveBeenCalledWith(
         1,
@@ -423,8 +424,7 @@ describe("fetch-server", () => {
       expect(mockDbQueries.fetchForecastRows).toHaveBeenCalledWith(
         1,
         { lastHistoricalYear: 2025, targetYear: 2035 },
-        "Winter",
-        "avg",
+        { basis: "max", option: "avg", season: "Winter" },
       );
     });
 

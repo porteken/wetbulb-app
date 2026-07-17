@@ -94,7 +94,12 @@ describe("get /api/data/trend", () => {
     expect(response.headers.get("Cache-Control")).toBe(
       "public, s-maxage=3600, stale-while-revalidate=86400",
     );
-    expect(mockFetchTrendGraphData).toHaveBeenCalledWith("max", 4, "Summer");
+    expect(mockFetchTrendGraphData).toHaveBeenCalledWith(
+      "max",
+      4,
+      "Summer",
+      "max",
+    );
   });
 
   it("normalizes invalid seasons to the default season", async () => {
@@ -118,7 +123,12 @@ describe("get /api/data/trend", () => {
       years: [],
     });
     expect(response.status).toBe(200);
-    expect(mockFetchTrendGraphData).toHaveBeenCalledWith("avg", 4, "Annual");
+    expect(mockFetchTrendGraphData).toHaveBeenCalledWith(
+      "avg",
+      4,
+      "Annual",
+      "max",
+    );
   });
 
   it("converts thrown errors into data route responses", async () => {

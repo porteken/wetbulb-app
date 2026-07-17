@@ -333,7 +333,12 @@ describe("home", () => {
       await selectFirstMapMarker();
 
       await waitFor(() => {
-        expect(FetchTrendGraphData).toHaveBeenCalledWith("avg", 1, "Annual");
+        expect(FetchTrendGraphData).toHaveBeenCalledWith(
+          "avg",
+          1,
+          "Annual",
+          "max",
+        );
         expect(GenerateTrendGraph).toHaveBeenCalled();
       });
     });
@@ -367,7 +372,12 @@ describe("home", () => {
 
       await waitFor(() => {
         expect(setGraphMeasure).toHaveBeenCalledWith("max");
-        expect(FetchTrendGraphData).toHaveBeenCalledWith("max", 1, "Annual");
+        expect(FetchTrendGraphData).toHaveBeenCalledWith(
+          "max",
+          1,
+          "Annual",
+          "max",
+        );
       });
     });
 
@@ -436,7 +446,11 @@ describe("home", () => {
       await selectFirstMapMarker();
 
       await waitFor(() => {
-        expect(FetchForecastData).toHaveBeenCalledWith(1, 10, "Annual", "avg");
+        expect(FetchForecastData).toHaveBeenCalledWith(1, 10, {
+          basis: "max",
+          option: "avg",
+          season: "Annual",
+        });
       });
     });
 
@@ -452,7 +466,11 @@ describe("home", () => {
       await selectFirstMapMarker();
 
       await waitFor(() => {
-        expect(FetchForecastData).toHaveBeenCalledWith(1, 10, "Winter", "avg");
+        expect(FetchForecastData).toHaveBeenCalledWith(1, 10, {
+          basis: "max",
+          option: "avg",
+          season: "Winter",
+        });
       });
     });
 
@@ -533,7 +551,11 @@ describe("home", () => {
       await selectFirstMapMarker();
 
       await waitFor(() => {
-        expect(FetchForecastData).toHaveBeenCalledWith(1, 10, "Annual", "avg");
+        expect(FetchForecastData).toHaveBeenCalledWith(1, 10, {
+          basis: "max",
+          option: "avg",
+          season: "Annual",
+        });
       });
     });
 
@@ -543,7 +565,12 @@ describe("home", () => {
       await selectFirstMapMarker();
 
       await waitFor(() => {
-        expect(FetchTrendGraphData).toHaveBeenCalledWith("max", 1, "Annual");
+        expect(FetchTrendGraphData).toHaveBeenCalledWith(
+          "max",
+          1,
+          "Annual",
+          "max",
+        );
       });
     });
 
@@ -559,7 +586,11 @@ describe("home", () => {
       await selectFirstMapMarker();
 
       await waitFor(() => {
-        expect(FetchForecastData).toHaveBeenCalledWith(1, 20, "Annual", "avg");
+        expect(FetchForecastData).toHaveBeenCalledWith(1, 20, {
+          basis: "max",
+          option: "avg",
+          season: "Annual",
+        });
       });
     });
   });

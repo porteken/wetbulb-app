@@ -1,5 +1,9 @@
 import { FetchTrendGraphData } from "@/lib/api/fetch-server";
-import { DEFAULT_GRAPH_SEASON, normalizeGraphSeason } from "@/lib/constants";
+import {
+  DEFAULT_GRAPH_SEASON,
+  normalizeGraphSeason,
+  normalizeWetbulbBasis,
+} from "@/lib/constants";
 import {
   validateLocationId,
   validateTrendOption,
@@ -20,6 +24,9 @@ export async function GET(request: Request) {
   const season = normalizeGraphSeason(
     url.searchParams.get("season") ?? DEFAULT_GRAPH_SEASON,
   );
+  const basis = normalizeWetbulbBasis(
+    url.searchParams.get("basis") ?? undefined,
+  );
 
   if (!validateLocationId(locationId)) {
     return NextResponse.json({ error: "Invalid location ID" }, { status: 400 });
@@ -33,7 +40,7 @@ export async function GET(request: Request) {
   }
 
   try {
-    const data = await FetchTrendGraphData(option, locationId, season);
+    const data = await FetchTrendGraphData(option, locationId, season, basis);
     return createCachedDataRouteResponse(data);
   } catch (error) {
     return createDataRouteErrorResponse(
