@@ -26,10 +26,10 @@ minimumReleaseAgeExclude:
   - "@tanstack/react-query@5.101.2"
   - knip@6.23.0
   - postcss@8.5.16
-  - '@oxlint-tsgolint/darwin-arm64@0.25.0'
-  - '@oxlint-tsgolint/darwin-x64@0.25.0'
-  - '@oxlint-tsgolint/linux-arm64@0.25.0'
-  - '@oxlint-tsgolint/linux-x64@0.25.0'
-  - '@oxlint-tsgolint/win32-arm64@0.25.0'
-  - '@oxlint-tsgolint/win32-x64@0.25.0'
+  - "@oxlint-tsgolint/darwin-arm64@0.25.0"
+  - "@oxlint-tsgolint/darwin-x64@0.25.0"
+  - "@oxlint-tsgolint/linux-arm64@0.25.0"
+  - "@oxlint-tsgolint/linux-x64@0.25.0"
+  - "@oxlint-tsgolint/win32-arm64@0.25.0"
+  - "@oxlint-tsgolint/win32-x64@0.25.0"
   - oxlint-tsgolint@0.25.0
