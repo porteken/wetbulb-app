@@ -27,8 +27,6 @@ describe("db queries", () => {
     expect(rows[0]).not.toHaveProperty("location_id");
   });
 
-  // The schema uses "id", so fetching with "location_id" should either throw or we can just omit testing it since it's an internal fallback that might fail on real PG depending on how Kysely handles missing columns.
-
   it("fetches trend graph rows correctly", async () => {
     const rows = await fetchTrendGraphRows(1, "avg");
     expect(rows.length).toBeGreaterThan(0);

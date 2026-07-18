@@ -462,10 +462,8 @@ describe("trendAnalysis", () => {
 
       const select = screen.getByLabelText("Graph Measure");
       fireEvent.change(select, { target: { value: "max" } });
-      // Switch back to avg — React Query returns cached avg data immediately
       fireEvent.change(select, { target: { value: "avg" } });
 
-      // Switching back to avg hits the query cache; graph shows original avg data
       await waitFor(() => {
         const calls = vi.mocked(GenerateTrendGraph).mock.calls;
         expect(calls.at(-1)?.[0]).toStrictEqual(
@@ -485,7 +483,6 @@ describe("trendAnalysis", () => {
         years: [2020, 2021, 2022, 2023],
       });
 
-      // Stale max response resolves but the requestId guard discards it
       await waitFor(() => {
         const calls = vi.mocked(GenerateTrendGraph).mock.calls;
         expect(calls.at(-1)?.[0]).toStrictEqual(

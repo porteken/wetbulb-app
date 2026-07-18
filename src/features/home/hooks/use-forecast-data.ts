@@ -43,8 +43,6 @@ export const useForecastData = ({
         season,
       });
 
-      // React Query forbids resolving undefined; null marks "no forecast
-      // available" (e.g. locations without enough complete years of data).
       return data ?? null;
     },
     queryKey: queryKeys.forecast(resolvedLocationId, yearsAhead, {

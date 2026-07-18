@@ -41,8 +41,6 @@ const setCookie = (value: string) => {
   cookieValue = `wetbulb-basis=${value}`;
 };
 
-// Override document.cookie with a controllable getter so tests can seed a
-// value without assigning to document.cookie directly.
 const resetCookie = () => {
   cookieValue = "";
   setWetbulbBasisMock.mockClear();

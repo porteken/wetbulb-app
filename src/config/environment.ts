@@ -102,9 +102,6 @@ export const getServerTestingEnvironment = (): ServerTestingEnvironment => {
 export const shouldUseRuntimeDbMocks = () =>
   getServerTestingEnvironment().E2E_USE_RUNTIME_MOCKS === "true";
 
-// True for a real production deployment; false for local/dev and for prod
-// e2e test runs, which build with NODE_ENV=production but serve over
-// http://localhost and set NEXT_PUBLIC_E2E_TEST=true before the build.
 export const isProductionRuntime = (): boolean =>
   process.env.NODE_ENV === "production" &&
   process.env.NEXT_PUBLIC_E2E_TEST !== "true";

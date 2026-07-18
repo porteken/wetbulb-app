@@ -88,9 +88,6 @@ vi.mock("next/navigation", () => ({
   useSearchParams: () => mockUseSearchParameters(),
 }));
 
-// UnitToggle and BasisToggle have their own tests and pull in ToastProvider
-// via useIgnorePersistenceError; stub them out so these HeaderBar tests stay
-// focused.
 vi.mock("@/components/app/unit-toggle", () => ({
   UnitToggle: () => null,
 }));

@@ -59,7 +59,6 @@ async function main() {
     container = undefined;
   };
 
-  // process.argv[2...] will contain the command to run, e.g. "playwright test" or "pnpm build && playwright test"
   const command = getWrappedCommand(process.argv.slice(2));
   if (!command) {
     console.error("No command provided to run-e2e.ts");

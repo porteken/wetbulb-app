@@ -158,12 +158,12 @@ const hasPgCode = (error: unknown): error is { code: string } =>
 const PG_DB_ERROR_CODES = new Set([
   "08000",
   "08003",
-  "08006", // connection errors
-  "40P01", // deadlock
-  "55P03", // lock not available
-  "57014", // statement canceled
-  "42501", // insufficient privilege
-  "42601", // syntax error
+  "08006",
+  "40P01",
+  "55P03",
+  "57014",
+  "42501",
+  "42601",
 ]);
 
 export const handleAsyncError = (

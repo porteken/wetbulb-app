@@ -127,8 +127,6 @@ function compareRankingItems(
       return (a.max_wetbulb ?? 0) - (b.max_wetbulb ?? 0);
     }
     case "rank": {
-      // Rank is derived from Avg Wetbulb (desc) over the shown data, so ranking
-      // ascending is equivalent to ordering by Avg Wetbulb descending.
       return b.avg_wetbulb - a.avg_wetbulb;
     }
     case "state": {
@@ -231,8 +229,6 @@ function rankingsReducer(
 ): RankingsState {
   switch (action.type) {
     case "SET_YEAR": {
-      // Matches prior behavior: changing the year resets an out-of-range
-      // wetbulb-level filter but does not reset pagination.
       return { ...state, wetbulbLevelFilter: "", selectedYear: action.year };
     }
     case "SET_SEASON": {
@@ -687,8 +683,6 @@ export function RankingsMain({
     });
   }, [rankings, stateFilter, wetbulbLevelFilter, sortColumn, sortDirection]);
 
-  // Derive ranks from the filtered data so the numbers reflect what is shown:
-  // rank 1 is the highest Avg Wetbulb within the current filters.
   const rankByLocation = useMemo(() => {
     const map = new Map<number, number>();
     const sortedByWetbulb = filteredAndSortedRankings.toSorted(

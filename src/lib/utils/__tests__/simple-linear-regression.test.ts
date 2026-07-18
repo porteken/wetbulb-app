@@ -132,47 +132,20 @@ describe("simpleLinearRegression", () => {
       expect(result.prediction).toBeCloseTo(12, 0);
     });
 
-    it("should support 0.5 confidence level", () => {
-      const x = [1, 2, 3, 4, 5];
-      const y = [2.1, 3.9, 6.2, 7.8, 10.1];
-      const regression = new SimpleLinearRegression(x, y);
+    it.each([0.5, 0.95, 0.99, 0.75])(
+      "should support %s confidence level",
+      (confidenceLevel) => {
+        const x = [1, 2, 3, 4, 5];
+        const y = [2.1, 3.9, 6.2, 7.8, 10.1];
+        const regression = new SimpleLinearRegression(x, y);
 
-      const result = regression.predictWithConfidence(6, 0.5);
+        const result = regression.predictWithConfidence(6, confidenceLevel);
 
-      expect(result.prediction).toBeCloseTo(12, 0);
-      expect(result.lowerBound).toBeLessThan(result.prediction);
-      expect(result.upperBound).toBeGreaterThan(result.prediction);
-    });
-
-    it("should support 0.95 confidence level", () => {
-      const x = [1, 2, 3, 4, 5];
-      const y = [2.1, 3.9, 6.2, 7.8, 10.1];
-      const regression = new SimpleLinearRegression(x, y);
-
-      const result = regression.predictWithConfidence(6, 0.95);
-
-      expect(result.prediction).toBeCloseTo(12, 0);
-    });
-
-    it("should support 0.99 confidence level", () => {
-      const x = [1, 2, 3, 4, 5];
-      const y = [2.1, 3.9, 6.2, 7.8, 10.1];
-      const regression = new SimpleLinearRegression(x, y);
-
-      const result = regression.predictWithConfidence(6, 0.99);
-
-      expect(result.prediction).toBeCloseTo(12, 0);
-    });
-
-    it("should fall back to 0.8 t-value for unknown confidence levels", () => {
-      const x = [1, 2, 3, 4, 5];
-      const y = [2.1, 3.9, 6.2, 7.8, 10.1];
-      const regression = new SimpleLinearRegression(x, y);
-
-      const result = regression.predictWithConfidence(6, 0.75);
-
-      expect(result.prediction).toBeCloseTo(12, 0);
-    });
+        expect(result.prediction).toBeCloseTo(12, 0);
+        expect(result.lowerBound).toBeLessThan(result.prediction);
+        expect(result.upperBound).toBeGreaterThan(result.prediction);
+      },
+    );
 
     it("should have wider interval for higher confidence level", () => {
       const x = [1, 2, 3, 4, 5];

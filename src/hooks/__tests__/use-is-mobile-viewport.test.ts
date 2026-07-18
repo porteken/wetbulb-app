@@ -21,8 +21,8 @@ describe("useIsMobileViewport", () => {
             matches: false,
             media: query,
             onchange: null,
-            addListener: vi.fn<() => void>(), // Deprecated
-            removeListener: vi.fn<() => void>(), // Deprecated
+            addListener: vi.fn<() => void>(),
+            removeListener: vi.fn<() => void>(),
             addEventListener: vi
               .fn<
                 (
@@ -105,7 +105,6 @@ describe("useIsMobileViewport", () => {
     const { result } = renderHook(() => useIsMobileViewport());
     expect(result.current).toBe(false);
 
-    // Simulate change
     act(() => {
       currentMatches = true;
       for (const listener of listeners) {

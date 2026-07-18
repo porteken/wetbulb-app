@@ -9,17 +9,14 @@ import type { ServerDatabaseEnvironment } from "@/config/environment";
 const DB_RETRY_ATTEMPTS = 3;
 const DB_RETRY_BASE_DELAY_MS = 200;
 
-// Codes for connection-level failures (restarts, network blips, exhausted
-// pools) that are worth retrying. Query errors (bad SQL, missing columns,
-// constraint violations) are not transient and should fail immediately.
 const TRANSIENT_DB_ERROR_CODES = new Set([
   "ECONNREFUSED",
   "ECONNRESET",
   "ETIMEDOUT",
-  "57P01", // admin_shutdown
-  "53300", // too_many_connections
-  "08001", // sqlclient_unable_to_establish_sqlconnection
-  "08006", // connection_failure
+  "57P01",
+  "53300",
+  "08001",
+  "08006",
 ]);
 
 export const isTransientDbError = (error: unknown): boolean => {
@@ -85,8 +82,6 @@ const createPool = () => {
     user: environment.PGUSER,
   });
 
-  // pg emits 'error' when an idle client dies (DB restart, network blip); an
-  // unhandled emitter error would otherwise crash the standalone Node server.
   pool.on("error", (error: unknown) => {
     console.error("Postgres pool idle client error", error);
     Sentry.captureException(error);

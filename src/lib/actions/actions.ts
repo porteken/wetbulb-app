@@ -107,7 +107,6 @@ export async function setTemperatureUnit(unit: string) {
   }
 
   const cookieStore = await cookies();
-  // Not httpOnly: UnitProvider reads this cookie client-side (see readCookieUnit).
   cookieStore.set(TEMPERATURE_UNIT_COOKIE_NAME, unit, {
     ...PREFERENCE_COOKIE_OPTIONS,
     httpOnly: false,
@@ -120,7 +119,6 @@ export async function setWetbulbBasis(basis: string) {
   }
 
   const cookieStore = await cookies();
-  // Not httpOnly: BasisProvider reads this cookie client-side (see readCookieBasis).
   cookieStore.set(WETBULB_BASIS_COOKIE_NAME, basis, {
     ...PREFERENCE_COOKIE_OPTIONS,
     httpOnly: false,

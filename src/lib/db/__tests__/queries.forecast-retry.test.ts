@@ -19,8 +19,6 @@ const mockedGetDb = vi.mocked(getDb);
 
 const queryWindow = { lastHistoricalYear: 2020, targetYear: 2030 };
 
-// withDbRetry rethrows non-Error rejections wrapped in a generic Error,
-// which would strip the `code` field that isMissingColumnError relies on.
 const createDbError = (code: string, message: string) =>
   Object.assign(new Error(message), { code });
 

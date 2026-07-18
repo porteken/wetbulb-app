@@ -87,7 +87,6 @@ export class SimpleLinearRegression {
     const denominator = n * xSquared - xSum * xSum;
 
     if (denominator === 0) {
-      // All x values are identical — return a flat line at the mean of y.
       return { intercept: ySum / n, slope: 0 };
     }
 

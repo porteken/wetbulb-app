@@ -75,9 +75,6 @@ export interface DeriveTrendAnalysisOptions {
   unit?: TemperatureUnit;
 }
 
-// Pure derivation over already-fetched trend/forecast data — pairs with
-// useTrendGraphData/useForecastData so the fetching itself is left to
-// React Query instead of being re-implemented here.
 export const deriveTrendAnalysis = (
   trendData: TrendGraphDataProperties,
   forecastData: ForecastGraphData | undefined,
