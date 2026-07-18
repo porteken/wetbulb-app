@@ -7,6 +7,8 @@ import userEvent from "@testing-library/user-event";
 import React from "react";
 import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 
+import type { LocationOptionSection } from "@/types/types";
+
 const {
   mockGet,
   mockPathname,
@@ -72,7 +74,9 @@ const mixedLocationOptions = [
   },
 ];
 
-const titleOnlyLocationOptions = [{ title: "Test Section" }];
+const titleOnlyLocationOptions = [
+  { title: "Test Section" },
+] as unknown as LocationOptionSection[];
 
 const undefinedLocationOptions = undefined as unknown as never;
 
@@ -210,10 +214,7 @@ describe("headerBar", () => {
 
   describe("edge Cases", () => {
     it("should handle section with items set to undefined", () => {
-      render(
-        // @ts-expect-error - Testing invalid props
-        <HeaderBar LocationOptions={titleOnlyLocationOptions} />,
-      );
+      render(<HeaderBar LocationOptions={titleOnlyLocationOptions} />);
 
       expect(document.body).toBeInTheDocument();
     });

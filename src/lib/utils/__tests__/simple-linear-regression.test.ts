@@ -107,12 +107,19 @@ describe("simpleLinearRegression", () => {
   });
 
   describe("predictWithConfidence", () => {
-    it("should return prediction with confidence bounds", () => {
+    it.each([
+      { level: 0.5, label: "0.5" },
+      { level: 0.75, label: "0.75" },
+      { level: 0.8, label: "0.8" },
+      { level: 0.95, label: "0.95" },
+      { level: 0.99, label: "0.99" },
+      { level: undefined, label: "default (0.8)" },
+    ])("should support $label confidence level", ({ level }) => {
       const x = [1, 2, 3, 4, 5];
       const y = [2.1, 3.9, 6.2, 7.8, 10.1];
       const regression = new SimpleLinearRegression(x, y);
 
-      const result = regression.predictWithConfidence(6, 0.8);
+      const result = regression.predictWithConfidence(6, level);
 
       expect(result).toHaveProperty("prediction");
       expect(result).toHaveProperty("lowerBound");
@@ -121,31 +128,6 @@ describe("simpleLinearRegression", () => {
       expect(result.lowerBound).toBeLessThan(result.prediction);
       expect(result.upperBound).toBeGreaterThan(result.prediction);
     });
-
-    it("should use default confidence level of 0.8", () => {
-      const x = [1, 2, 3, 4, 5];
-      const y = [2.1, 3.9, 6.2, 7.8, 10.1];
-      const regression = new SimpleLinearRegression(x, y);
-
-      const result = regression.predictWithConfidence(6);
-
-      expect(result.prediction).toBeCloseTo(12, 0);
-    });
-
-    it.each([0.5, 0.95, 0.99, 0.75])(
-      "should support %s confidence level",
-      (confidenceLevel) => {
-        const x = [1, 2, 3, 4, 5];
-        const y = [2.1, 3.9, 6.2, 7.8, 10.1];
-        const regression = new SimpleLinearRegression(x, y);
-
-        const result = regression.predictWithConfidence(6, confidenceLevel);
-
-        expect(result.prediction).toBeCloseTo(12, 0);
-        expect(result.lowerBound).toBeLessThan(result.prediction);
-        expect(result.upperBound).toBeGreaterThan(result.prediction);
-      },
-    );
 
     it("should have wider interval for higher confidence level", () => {
       const x = [1, 2, 3, 4, 5];
