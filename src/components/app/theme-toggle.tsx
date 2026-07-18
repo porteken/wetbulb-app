@@ -25,7 +25,7 @@ export const ThemeToggle = () => {
   return (
     <Button
       aria-label={label}
-      className="min-w-30 justify-center sm:min-w-35"
+      className="justify-center sm:min-w-35"
       onClick={handleToggle}
       size="sm"
       type="button"
@@ -37,7 +37,6 @@ export const ThemeToggle = () => {
         <MoonStar className="size-4" />
       )}
       <span className="hidden sm:inline">{mounted ? themeLabel : "Theme"}</span>
-      <span className="sm:hidden">Theme</span>
     </Button>
   );
 };

@@ -25,7 +25,7 @@ export const BasisToggle = () => {
   return (
     <Button
       aria-label={label}
-      className="min-w-24 justify-center"
+      className="justify-center sm:min-w-24"
       onClick={handleToggle}
       size="sm"
       type="button"

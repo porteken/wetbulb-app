@@ -22,7 +22,7 @@ export const UnitToggle = () => {
   return (
     <Button
       aria-label={label}
-      className="min-w-16 justify-center"
+      className="justify-center sm:min-w-16"
       onClick={handleToggle}
       size="sm"
       type="button"
