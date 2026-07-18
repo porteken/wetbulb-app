@@ -1,7 +1,12 @@
 import { FetchError } from "@/lib/utils/errors";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { apiRequest, type ApiResponse, hasError } from "../api-client";
+import {
+  apiRequest,
+  type ApiResponse,
+  hasError,
+  parseWithFetchError,
+} from "../api-client";
 
 vi.mock("@sentry/nextjs", () => ({
   captureException: mockFn(),
@@ -188,6 +193,19 @@ describe("api-client", () => {
 
       expect(result.data).toStrictEqual(mockData);
       expect(result.error).toBeUndefined();
+    });
+  });
+
+  describe("parseWithFetchError", () => {
+    it("rethrows non-schema-validation errors unchanged", () => {
+      const originalError = new Error("Boom");
+      const parser = () => {
+        throw originalError;
+      };
+
+      expect(() => parseWithFetchError("Forecast", parser, {})).toThrow(
+        originalError,
+      );
     });
   });
 

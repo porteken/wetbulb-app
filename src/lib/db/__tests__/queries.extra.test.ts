@@ -7,6 +7,7 @@ import {
   fetchTrendGraphRows,
   fetchHistoricalYearRow,
   fetchForecastRows,
+  fetchReferenceGraphRows,
 } from "../queries";
 
 describe("db queries extra coverage", () => {
@@ -28,6 +29,10 @@ describe("db queries extra coverage", () => {
     // Test fetchHistoricalYearRow runtime branch
     const historicalYear = await fetchHistoricalYearRow(1);
     expect(historicalYear).toBeDefined();
+
+    // Test fetchReferenceGraphRows runtime branch
+    const reference = await fetchReferenceGraphRows(1, "2020");
+    expect(reference).toBeInstanceOf(Array);
 
     // Test fetchForecastRows runtime branch
     const forecast = await fetchForecastRows(1, {

@@ -9,6 +9,7 @@ import {
   setRankingsState,
   setRankingsYear,
   setTemperatureUnit,
+  setWetbulbBasis,
 } from "../actions";
 
 import type { GraphSeason } from "@/lib/constants";
@@ -149,6 +150,45 @@ describe("setTemperatureUnit", () => {
     await setTemperatureUnit("kelvin");
 
     expect(mockSet).not.toHaveBeenCalled();
+  });
+});
+
+describe("setWetbulbBasis", () => {
+  let mockSet: ReturnType<typeof vi.fn>;
+
+  beforeEach(async () => {
+    vi.clearAllMocks();
+
+    const { cookies } = await import("next/headers");
+    const cookiesResult = await cookies();
+    mockSet = vi.mocked(cookiesResult.set);
+  });
+
+  it("sets a client-readable wetbulb-basis cookie and revalidates rankings", async () => {
+    const { revalidatePath } = await import("next/cache");
+
+    await setWetbulbBasis("avg");
+
+    expect(mockSet).toHaveBeenCalledWith(
+      "wetbulb-basis",
+      "avg",
+      expect.objectContaining({
+        expires: expect.any(Date),
+        httpOnly: false,
+        path: "/",
+        secure: false,
+      }),
+    );
+    expect(revalidatePath).toHaveBeenCalledWith("/rankings");
+  });
+
+  it("ignores an invalid basis without setting a cookie", async () => {
+    const { revalidatePath } = await import("next/cache");
+
+    await setWetbulbBasis("median");
+
+    expect(mockSet).not.toHaveBeenCalled();
+    expect(revalidatePath).not.toHaveBeenCalled();
   });
 });
 

@@ -9,6 +9,7 @@ import type {
   FetchReferenceGraphData as FetchReferenceGraphDataFunction,
   FetchTrendGraphData as FetchTrendGraphDataFunction,
 } from "../fetch-server";
+import type * as SchemasModule from "@/lib/api/schemas";
 import type {
   createMockLinearRegression,
   createMockValidation,
@@ -261,6 +262,56 @@ describe("fetch-server", () => {
           mockError,
         ),
       );
+    });
+
+    it("wraps schema validation failures as a DatabaseError", async () => {
+      mockDbQueries.fetchLocationRows.mockResolvedValue([
+        {
+          city: "",
+          id: 1,
+          lat: 42.3601,
+          lng: -71.0589,
+          state: "Massachusetts",
+        },
+      ]);
+
+      await expect(fetchServer.FetchLocations()).rejects.toThrow(
+        "Locations response validation failed",
+      );
+    });
+
+    it("rethrows non-schema-validation errors from parsing unchanged", async () => {
+      vi.resetModules();
+      clearAllMocks();
+
+      vi.doMock("@/lib/api/schemas", async () => {
+        const actual =
+          await vi.importActual<typeof SchemasModule>("@/lib/api/schemas");
+
+        return {
+          ...actual,
+          parseLocationRows: () => {
+            throw new Error("Boom");
+          },
+        };
+      });
+
+      const setup = await setupApiServerTest();
+      setup.mockDbQueries.fetchLocationRows.mockResolvedValue([
+        {
+          city: "Boston",
+          id: 1,
+          lat: 42.3601,
+          lng: -71.0589,
+          state: "Massachusetts",
+        },
+      ]);
+
+      const freshFetchServer = await import("../fetch-server");
+
+      await expect(freshFetchServer.FetchLocations()).rejects.toThrow("Boom");
+
+      vi.doUnmock("@/lib/api/schemas");
     });
   });
 

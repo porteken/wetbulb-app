@@ -35,9 +35,14 @@ const getHomeSelectTestId = (label?: string) =>
 class MockMapComponent extends React.PureComponent<{
   locations: unknown[];
   onMarkerClick: (locationId: number) => void;
+  onMarkerPrefetch?: (locationId: number) => void;
 }> {
   private readonly handleMarkerClick = () => {
     this.props.onMarkerClick(1);
+  };
+
+  private readonly handleMarkerPrefetch = () => {
+    this.props.onMarkerPrefetch?.(1);
   };
 
   public render(): React.ReactNode {
@@ -52,6 +57,13 @@ class MockMapComponent extends React.PureComponent<{
           type="button"
         >
           Click Marker 1
+        </button>
+        <button
+          data-testid="marker-prefetch"
+          onClick={this.handleMarkerPrefetch}
+          type="button"
+        >
+          Prefetch Marker 1
         </button>
       </div>
     );
@@ -389,6 +401,43 @@ describe("home", () => {
       fireEvent.click(screen.getByTestId("modal-close"));
 
       expect(screen.queryByTestId("modal")).not.toBeInTheDocument();
+    });
+
+    it("should handle season change when a location is selected", async () => {
+      const { setGraphSeason } = await import("@/lib/actions/actions");
+
+      renderHome(<Home {...defaultProps} />);
+
+      await selectFirstMapMarker();
+
+      const seasonSelect = screen.getByTestId("graph-season-select");
+      fireEvent.change(seasonSelect, { target: { value: "Winter" } });
+
+      await waitFor(() => {
+        expect(setGraphSeason).toHaveBeenCalledWith("Winter");
+        expect(FetchTrendGraphData).toHaveBeenCalledWith(
+          "avg",
+          1,
+          "Winter",
+          "max",
+        );
+      });
+    });
+
+    it("should prefetch trend graph data when a marker is prefetched", async () => {
+      renderHome(<Home {...defaultProps} />);
+
+      await screen.findByTestId("map-component");
+      fireEvent.click(screen.getByTestId("marker-prefetch"));
+
+      await waitFor(() => {
+        expect(FetchTrendGraphData).toHaveBeenCalledWith(
+          "avg",
+          1,
+          "Annual",
+          "max",
+        );
+      });
     });
   });
 
