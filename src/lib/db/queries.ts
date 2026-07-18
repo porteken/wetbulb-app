@@ -1,5 +1,8 @@
 import { shouldUseRuntimeDbMocks } from "@/config/environment";
-import { DEFAULT_WETBULB_BASIS } from "@/lib/constants";
+import {
+  DEFAULT_FORECAST_SCENARIO,
+  DEFAULT_WETBULB_BASIS,
+} from "@/lib/constants";
 import { sortBy } from "@/lib/sort-by";
 import { classifyDbError } from "@/lib/utils/errors";
 import { getRuntimeMockTableRows } from "@/testing/runtime-mocks";
@@ -534,12 +537,14 @@ export function fetchForecastRows(
   }
 
   const isMax = option === "max";
+  const usesScenarioView =
+    scenario !== undefined && scenario !== DEFAULT_FORECAST_SCENARIO;
   let table:
     | "wetbulb_forecast"
     | "wetbulb_forecast_max"
     | "wetbulb_forecast_max_scenarios"
     | "wetbulb_forecast_scenarios";
-  if (scenario) {
+  if (usesScenarioView) {
     table = isMax
       ? "wetbulb_forecast_max_scenarios"
       : "wetbulb_forecast_scenarios";
@@ -575,7 +580,7 @@ export function fetchForecastRows(
       query = query.where("season", "=", selectedSeason);
     }
 
-    if (scenario !== undefined) {
+    if (usesScenarioView) {
       query = query.where("scenario", "=", scenario);
     }
 

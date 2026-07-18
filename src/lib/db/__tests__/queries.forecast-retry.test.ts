@@ -71,6 +71,25 @@ describe("fetchForecastRows retry and fallback behavior", () => {
     expect(fakeQuery.where).toHaveBeenCalledWith("scenario", "=", "ssp126");
   });
 
+  it("uses the backward-compatible default view for SSP2-4.5", async () => {
+    const execute = vi.fn<() => Promise<ForecastRow[]>>().mockResolvedValue([]);
+    const fakeQuery = createFakeQuery(execute);
+    const selectFrom = vi
+      .fn<(table: string) => FakeQuery>()
+      .mockReturnValue(fakeQuery);
+    mockedGetDb.mockReturnValue({ selectFrom } as unknown as ReturnType<
+      typeof getDb
+    >);
+
+    await fetchForecastRows(1, queryWindow, {
+      basis: "max",
+      scenario: "ssp245",
+    });
+
+    expect(selectFrom).toHaveBeenCalledWith("wetbulb_forecast");
+    expect(fakeQuery.where).not.toHaveBeenCalledWith("scenario", "=", "ssp245");
+  });
+
   it("retries without a season filter when the season column is missing", async () => {
     const rows: ForecastRow[] = [
       { lower: 1, upper: 3, wetbulb: 2, year: 2021 },
