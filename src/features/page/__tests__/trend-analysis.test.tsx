@@ -722,6 +722,7 @@ describe("trendAnalysis", () => {
         forecastYears: [],
         lowerBound10: [],
         upperBound90: [],
+        scenario: "ssp245",
       });
 
       renderWithQueryClient(<TrendAnalysis {...defaultProps} />);

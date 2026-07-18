@@ -2,8 +2,10 @@
 
 import {
   DEFAULT_GRAPH_SEASON,
+  DEFAULT_FORECAST_SCENARIO,
   DEFAULT_WETBULB_BASIS,
   type GraphSeason,
+  type ForecastScenario,
   type WetbulbBasis,
 } from "@/lib/constants";
 import { QueryClient } from "@tanstack/react-query";
@@ -24,6 +26,7 @@ interface ForecastQueryKeyFilters {
   basis?: WetbulbBasis;
   option?: string;
   season?: GraphSeason;
+  scenario?: ForecastScenario;
 }
 
 export const queryKeys = {
@@ -35,10 +38,19 @@ export const queryKeys = {
     const {
       basis = DEFAULT_WETBULB_BASIS,
       option = "avg",
+      scenario = DEFAULT_FORECAST_SCENARIO,
       season = DEFAULT_GRAPH_SEASON,
     } = filters;
 
-    return ["forecast", locationId, yearsAhead, season, option, basis] as const;
+    return [
+      "forecast",
+      locationId,
+      yearsAhead,
+      season,
+      option,
+      basis,
+      scenario,
+    ] as const;
   },
   referenceGraph: (
     locationId: number,

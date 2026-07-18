@@ -52,6 +52,25 @@ describe("fetchForecastRows retry and fallback behavior", () => {
     vi.spyOn(environment, "shouldUseRuntimeDbMocks").mockReturnValue(false);
   });
 
+  it("queries the scenario materialized view when a scenario is selected", async () => {
+    const execute = vi.fn<() => Promise<ForecastRow[]>>().mockResolvedValue([]);
+    const fakeQuery = createFakeQuery(execute);
+    const selectFrom = vi
+      .fn<(table: string) => FakeQuery>()
+      .mockReturnValue(fakeQuery);
+    mockedGetDb.mockReturnValue({ selectFrom } as unknown as ReturnType<
+      typeof getDb
+    >);
+
+    await fetchForecastRows(1, queryWindow, {
+      basis: "max",
+      scenario: "ssp126",
+    });
+
+    expect(selectFrom).toHaveBeenCalledWith("wetbulb_forecast_scenarios");
+    expect(fakeQuery.where).toHaveBeenCalledWith("scenario", "=", "ssp126");
+  });
+
   it("retries without a season filter when the season column is missing", async () => {
     const rows: ForecastRow[] = [
       { lower: 1, upper: 3, wetbulb: 2, year: 2021 },

@@ -43,6 +43,10 @@ export interface WetbulbForecastTable {
   year: number;
 }
 
+interface WetbulbForecastScenarioTable extends WetbulbForecastTable {
+  scenario: "ssp126" | "ssp245" | "ssp370";
+}
+
 interface WetbulbTable {
   date: Date | string;
   location_id: number;
@@ -69,5 +73,7 @@ export interface Database {
   wetbulb: WetbulbTable;
   wetbulb_forecast: WetbulbForecastTable;
   wetbulb_forecast_max: WetbulbForecastTable;
+  wetbulb_forecast_scenarios: WetbulbForecastScenarioTable;
+  wetbulb_forecast_max_scenarios: WetbulbForecastScenarioTable;
   wetbulb_year_stats: WetbulbYearStatsTable;
 }

@@ -2,10 +2,12 @@
 
 import { PageLoader } from "@/components/app/page-loader";
 import { WetbulbIndexLegend } from "@/components/app/wetbulb-index-legend";
+import * as Sentry from "@sentry/nextjs";
 import { useTheme } from "next-themes";
 import React, { memo, useEffect, useMemo, useState } from "react";
 import Map from "react-map-gl/maplibre";
 
+import { isWebglSupported } from "../lib/webgl-support";
 import { OptimizedMarker } from "./optimized-marker";
 
 import type * as MapLibreGL from "maplibre-gl";
@@ -321,16 +323,129 @@ const E2EMarkerSurface = ({
   );
 };
 
+interface FallbackCityButtonProperties {
+  location: Location;
+  onMarkerClick: (_locationId: number) => void;
+}
+
+const FallbackCityButton = memo<FallbackCityButtonProperties>(
+  ({ location, onMarkerClick }): React.ReactElement => {
+    const handleClick = React.useCallback(() => {
+      onMarkerClick(location.location_id);
+    }, [location.location_id, onMarkerClick]);
+
+    return (
+      <button
+        className="w-full rounded-2xl px-4 py-3 text-left text-sm font-medium text-foreground glass-panel-muted transition hover:bg-accent"
+        onClick={handleClick}
+        type="button"
+      >
+        {location.city}, {location.state}
+      </button>
+    );
+  },
+);
+
+FallbackCityButton.displayName = "FallbackCityButton";
+
+interface MapUnavailableFallbackProperties {
+  locations: Location[];
+  onMarkerClick: (_locationId: number) => void;
+}
+
+const MapUnavailableFallback = ({
+  locations,
+  onMarkerClick,
+}: MapUnavailableFallbackProperties): React.ReactElement => {
+  const sortedLocations = React.useMemo(
+    () =>
+      locations.toSorted((a, b) =>
+        `${a.state} ${a.city}`.localeCompare(`${b.state} ${b.city}`),
+      ),
+    [locations],
+  );
+
+  return (
+    <div className="h-full overflow-y-auto bg-background/30 px-4 py-8">
+      <div className="mx-auto max-w-md p-6">
+        <h1 className="mb-4 text-center text-2xl font-bold text-foreground">
+          Interactive Map Unavailable
+        </h1>
+        <p className="mb-6 text-center text-muted-foreground">
+          This device or browser can&apos;t display the map because WebGL is
+          unavailable. You can still pick a city below to view its wetbulb
+          details.
+        </p>
+        <ul className="space-y-2">
+          {sortedLocations.map((location) => (
+            <li key={location.location_id}>
+              <FallbackCityButton
+                location={location}
+                onMarkerClick={onMarkerClick}
+              />
+            </li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  );
+};
+
+interface MapErrorBoundaryProperties {
+  children: React.ReactNode;
+  fallback: React.ReactNode;
+}
+
+interface MapErrorBoundaryState {
+  hasError: boolean;
+}
+
+class MapErrorBoundary extends React.Component<
+  MapErrorBoundaryProperties,
+  MapErrorBoundaryState
+> {
+  constructor(properties: MapErrorBoundaryProperties) {
+    super(properties);
+    this.state = { hasError: false };
+  }
+
+  static getDerivedStateFromError(): MapErrorBoundaryState {
+    return { hasError: true };
+  }
+
+  componentDidCatch(error: Error): void {
+    Sentry.captureException(error, {
+      tags: { component: "map-component" },
+    });
+  }
+
+  render(): React.ReactNode {
+    return this.state.hasError ? this.props.fallback : this.props.children;
+  }
+}
+
 export const MapComponent = memo<MapComponentProperties>(
   ({ locations, onMarkerClick, onMarkerPrefetch }) => {
     const { resolvedTheme } = useTheme();
     const [mapLib, setMapLib] = useState<MapLibreModule | null>(null);
+    const [webglSupported, setWebglSupported] = useState<boolean | null>(null);
     const [isLegendOpen, setIsLegendOpen] = useState(false);
 
     useEffect(() => {
       let isCancelled = false;
 
       const loadMapLibrary = async () => {
+        if (!isWebglSupported()) {
+          if (!isCancelled) {
+            setWebglSupported(false);
+          }
+          return;
+        }
+
+        if (!isCancelled) {
+          setWebglSupported(true);
+        }
+
         try {
           const loadedMapLib = await import("maplibre-gl");
           if (!isCancelled) {
@@ -367,7 +482,17 @@ export const MapComponent = memo<MapComponentProperties>(
       ));
     }, [locations, onMarkerClick, onMarkerPrefetch]);
 
-    if (!mapLib) {
+    const mapUnavailableFallback = useMemo(
+      () => (
+        <MapUnavailableFallback
+          locations={locations}
+          onMarkerClick={onMarkerClick}
+        />
+      ),
+      [locations, onMarkerClick],
+    );
+
+    if (webglSupported === null || (webglSupported && !mapLib)) {
       return <PageLoader />;
     }
 
@@ -431,32 +556,38 @@ export const MapComponent = memo<MapComponentProperties>(
       );
     }
 
+    if (!webglSupported || !mapLib) {
+      return mapUnavailableFallback;
+    }
+
     const mapStyleDefinition = isDarkTheme ? DARK_MAP_STYLE : LIGHT_MAP_STYLE;
 
     return (
-      <div className="relative size-full">
-        <div
-          className="size-full"
-          data-map-provider="maplibre"
-          data-map-theme={isDarkTheme ? "dark" : "light"}
-          data-testid={MAP_CONTAINER_TEST_ID}
-        >
-          <Map
-            dragRotate={false}
-            initialViewState={INITIAL_VIEW_STATE}
-            mapLib={mapLib}
-            mapStyle={mapStyleDefinition}
-            scrollZoom
-            style={MAP_STYLE}
+      <MapErrorBoundary fallback={mapUnavailableFallback}>
+        <div className="relative size-full">
+          <div
+            className="size-full"
+            data-map-provider="maplibre"
+            data-map-theme={isDarkTheme ? "dark" : "light"}
+            data-testid={MAP_CONTAINER_TEST_ID}
           >
-            {markers}
-          </Map>
+            <Map
+              dragRotate={false}
+              initialViewState={INITIAL_VIEW_STATE}
+              mapLib={mapLib}
+              mapStyle={mapStyleDefinition}
+              scrollZoom
+              style={MAP_STYLE}
+            >
+              {markers}
+            </Map>
+          </div>
+          <WetbulbIndexLegendOverlay
+            isLegendOpen={isLegendOpen}
+            setIsLegendOpen={setIsLegendOpen}
+          />
         </div>
-        <WetbulbIndexLegendOverlay
-          isLegendOpen={isLegendOpen}
-          setIsLegendOpen={setIsLegendOpen}
-        />
-      </div>
+      </MapErrorBoundary>
     );
   },
 );

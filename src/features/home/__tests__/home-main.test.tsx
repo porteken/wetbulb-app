@@ -214,6 +214,8 @@ import { FetchForecastData, FetchTrendGraphData } from "@/lib/api/fetch-client";
 
 import Home from "../components/home-main";
 
+import type { ForecastScenario } from "@/lib/constants";
+
 const mockLocationOptions = [
   {
     items: [
@@ -257,16 +259,19 @@ const buildForecastData = ({
   forecastYears = [2025, 2026, 2027],
   lowerBound10 = [26, 28, 30],
   upperBound90 = [30, 32, 34],
+  scenario = "ssp245",
 }: {
   forecastValues?: number[];
   forecastYears?: number[];
   lowerBound10?: number[];
   upperBound90?: number[];
+  scenario?: ForecastScenario;
 } = {}) => ({
   forecastValues,
   forecastYears,
   lowerBound10,
   upperBound90,
+  scenario,
 });
 
 const selectFirstMapMarker = async () => {

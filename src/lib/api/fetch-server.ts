@@ -17,8 +17,10 @@ import {
 } from "@/lib/api/schemas";
 import {
   DEFAULT_GRAPH_SEASON,
+  DEFAULT_FORECAST_SCENARIO,
   DEFAULT_WETBULB_BASIS,
   type GraphSeason,
+  type ForecastScenario,
   normalizeGraphSeason,
   normalizeWetbulbBasis,
   type WetbulbBasis,
@@ -194,6 +196,7 @@ interface ForecastDataFilters {
   basis?: WetbulbBasis;
   option?: string;
   season?: GraphSeason;
+  scenario?: ForecastScenario;
 }
 
 async function fetchForecastDataUncached(
@@ -207,11 +210,13 @@ async function fetchForecastDataUncached(
       forecastYears: number[];
       lowerBound10: number[];
       upperBound90: number[];
+      scenario: ForecastScenario;
     }
 > {
   const {
     basis = DEFAULT_WETBULB_BASIS,
     option = "avg",
+    scenario = DEFAULT_FORECAST_SCENARIO,
     season = DEFAULT_GRAPH_SEASON,
   } = filters;
 
@@ -260,6 +265,7 @@ async function fetchForecastDataUncached(
     forecastRows = await fetchForecastRows(locationId, queryWindow, {
       basis: resolvedBasis,
       option,
+      scenario,
       season: resolvedSeason,
     });
   } catch (error) {
@@ -283,6 +289,7 @@ async function fetchForecastDataUncached(
     forecastValues: validatedForecastRows.map(({ wetbulb }) => wetbulb),
     forecastYears: validatedForecastRows.map(({ year }) => year),
     lowerBound10: validatedForecastRows.map(({ lower }) => lower),
+    scenario,
     upperBound90: validatedForecastRows.map(({ upper }) => upper),
   };
 }

@@ -1,6 +1,8 @@
 import { FetchForecastData } from "@/lib/api/fetch-server";
 import {
   DEFAULT_GRAPH_SEASON,
+  DEFAULT_FORECAST_SCENARIO,
+  isForecastScenario,
   normalizeGraphSeason,
   normalizeWetbulbBasis,
 } from "@/lib/constants";
@@ -25,6 +27,8 @@ export async function GET(request: Request) {
     url.searchParams.get("basis") ?? undefined,
   );
   const yearsAhead = Number(url.searchParams.get("yearsAhead"));
+  const scenarioValue =
+    url.searchParams.get("scenario") ?? DEFAULT_FORECAST_SCENARIO;
 
   if (!validateLocationId(locationId)) {
     return NextResponse.json({ error: "Invalid location ID" }, { status: 400 });
@@ -37,10 +41,18 @@ export async function GET(request: Request) {
     );
   }
 
+  if (!isForecastScenario(scenarioValue)) {
+    return NextResponse.json(
+      { error: "Invalid forecast scenario" },
+      { status: 400 },
+    );
+  }
+
   try {
     const data = await FetchForecastData(locationId, yearsAhead, {
       basis,
       option,
+      scenario: scenarioValue,
       season,
     });
     return createCachedDataRouteResponse(data ?? null);

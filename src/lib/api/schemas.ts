@@ -84,6 +84,7 @@ const forecastGraphDataResponseSchema = z.object({
   forecastYears: z.array(yearSchema),
   lowerBound10: z.array(finiteNumberSchema),
   upperBound90: z.array(finiteNumberSchema),
+  scenario: z.enum(["ssp126", "ssp245", "ssp370"]).default("ssp245"),
 });
 
 const formatIssuePath = (issuePath: PropertyKey[]) =>

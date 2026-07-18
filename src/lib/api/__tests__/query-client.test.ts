@@ -54,7 +54,7 @@ describe("queryKeys", () => {
   it("builds stable forecast query keys", () => {
     expect(
       queryKeys.forecast(123, 10, { option: "max", season: "Winter" }),
-    ).toStrictEqual(["forecast", 123, 10, "Winter", "max", "max"]);
+    ).toStrictEqual(["forecast", 123, 10, "Winter", "max", "max", "ssp245"]);
     expect(queryKeys.forecast(123, 10)).toStrictEqual([
       "forecast",
       123,
@@ -62,6 +62,7 @@ describe("queryKeys", () => {
       "Annual",
       "avg",
       "max",
+      "ssp245",
     ]);
   });
 });

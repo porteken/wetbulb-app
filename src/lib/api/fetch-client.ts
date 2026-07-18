@@ -4,8 +4,10 @@ import {
 } from "@/lib/api/schemas";
 import {
   DEFAULT_GRAPH_SEASON,
+  DEFAULT_FORECAST_SCENARIO,
   DEFAULT_WETBULB_BASIS,
   type GraphSeason,
+  type ForecastScenario,
   normalizeGraphSeason,
   normalizeWetbulbBasis,
   type WetbulbBasis,
@@ -30,6 +32,7 @@ interface ForecastDataFilters {
   basis?: WetbulbBasis;
   option?: string;
   season?: GraphSeason;
+  scenario?: ForecastScenario;
 }
 
 export async function FetchForecastData(
@@ -43,11 +46,13 @@ export async function FetchForecastData(
       forecastYears: number[];
       lowerBound10: number[];
       upperBound90: number[];
+      scenario: ForecastScenario;
     }
 > {
   const {
     basis = DEFAULT_WETBULB_BASIS,
     option = "avg",
+    scenario = DEFAULT_FORECAST_SCENARIO,
     season = DEFAULT_GRAPH_SEASON,
   } = filters;
 
@@ -74,6 +79,7 @@ export async function FetchForecastData(
         basis: resolvedBasis,
         locationId,
         option,
+        scenario,
         season: resolvedSeason,
         yearsAhead,
       })}`,

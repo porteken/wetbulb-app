@@ -450,13 +450,19 @@ describe("fetch-server", () => {
       expect(mockDbQueries.fetchForecastRows).toHaveBeenCalledWith(
         1,
         { lastHistoricalYear: 2025, targetYear: 2035 },
-        { basis: "max", option: "avg", season: "Annual" },
+        {
+          basis: "max",
+          option: "avg",
+          scenario: "ssp245",
+          season: "Annual",
+        },
       );
       expect(result).toStrictEqual({
         forecastValues: [30.5, 31],
         forecastYears: [2026, 2027],
         lowerBound10: [28.5, 29],
         upperBound90: [32.5, 33],
+        scenario: "ssp245",
       });
     });
 
@@ -475,7 +481,12 @@ describe("fetch-server", () => {
       expect(mockDbQueries.fetchForecastRows).toHaveBeenCalledWith(
         1,
         { lastHistoricalYear: 2025, targetYear: 2035 },
-        { basis: "max", option: "avg", season: "Winter" },
+        {
+          basis: "max",
+          option: "avg",
+          scenario: "ssp245",
+          season: "Winter",
+        },
       );
     });
 

@@ -1,0 +1,40 @@
+- generic [active] [ref=e1]:
+    - generic [ref=e2]:
+        - link "Skip to main content" [ref=e3] [cursor=pointer]:
+            - /url: "#main-content"
+        - banner [ref=e5]:
+            - generic [ref=e8]:
+                - generic [ref=e9]:
+                    - heading [level=1] [ref=e11]:
+                        - link "Historical Wetbulb App" [ref=e12] [cursor=pointer]:
+                            - /url: /
+                    - generic [ref=e14]:
+                        - link "View source code on GitHub" [ref=e15] [cursor=pointer]:
+                            - /url: https://github.com/porteken/wetbulb-app
+                            - generic [ref=e16]: GitHub
+                        - button "Switch to daily average wetbulb" [ref=e17]:
+                            - generic [ref=e18]: Daily Max
+                        - button "Switch to °C" [ref=e19]:
+                            - generic [ref=e20]: °F
+                        - button "Toggle color theme" [ref=e21]:
+                            - generic [ref=e22]: Theme
+                - generic [ref=e24]:
+                    - generic [ref=e26]:
+                        - combobox [ref=e27]:
+                            - generic: Select City
+                        - combobox [ref=e28]
+                    - generic [ref=e29]:
+                        - link "Navigate to map view" [ref=e30] [cursor=pointer]:
+                            - /url: /
+                            - text: Map
+                        - link "Navigate to rankings page" [ref=e31] [cursor=pointer]:
+                            - /url: /rankings
+                            - text: Rankings
+                        - link "Navigate to about page" [ref=e32] [cursor=pointer]:
+                            - /url: /about
+                            - text: About
+        - main [ref=e33]:
+            - paragraph [ref=e37]: Loading map...
+    - region "Notifications (F8)":
+        - list
+    - button "Open Next.js Dev Tools" [ref=e43] [cursor=pointer]

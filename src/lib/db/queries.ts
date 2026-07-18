@@ -8,7 +8,11 @@ import { sql } from "kysely";
 import { getDb, withDbRetry } from "./kysely";
 
 import type { NumericLike } from "./types";
-import type { GraphSeason, WetbulbBasis } from "@/lib/constants";
+import type {
+  ForecastScenario,
+  GraphSeason,
+  WetbulbBasis,
+} from "@/lib/constants";
 
 export type TrendMetricOption = "avg" | "max";
 type LocationIdentifierColumn = "id" | "location_id";
@@ -22,6 +26,7 @@ export interface ForecastRowsFilters {
   basis?: WetbulbBasis;
   option?: TrendMetricOption;
   season?: GraphSeason;
+  scenario?: ForecastScenario;
 }
 
 interface TrendGraphRow {
@@ -512,17 +517,35 @@ export function fetchForecastRows(
   queryWindow: ForecastQueryWindow,
   filters: ForecastRowsFilters = {},
 ) {
-  const { basis = DEFAULT_WETBULB_BASIS, option = "avg", season } = filters;
+  const {
+    basis = DEFAULT_WETBULB_BASIS,
+    option = "avg",
+    scenario,
+    season,
+  } = filters;
 
   if (shouldUseRuntimeDbMocks()) {
     return getRuntimeForecastRows(locationId, queryWindow, {
       basis,
       option,
+      scenario,
       season,
     });
   }
 
-  const table = option === "max" ? "wetbulb_forecast_max" : "wetbulb_forecast";
+  const isMax = option === "max";
+  let table:
+    | "wetbulb_forecast"
+    | "wetbulb_forecast_max"
+    | "wetbulb_forecast_max_scenarios"
+    | "wetbulb_forecast_scenarios";
+  if (scenario) {
+    table = isMax
+      ? "wetbulb_forecast_max_scenarios"
+      : "wetbulb_forecast_scenarios";
+  } else {
+    table = isMax ? "wetbulb_forecast_max" : "wetbulb_forecast";
+  }
 
   const buildQuery = (
     selectedSeason?: GraphSeason,
@@ -550,6 +573,10 @@ export function fetchForecastRows(
 
     if (selectedSeason !== undefined) {
       query = query.where("season", "=", selectedSeason);
+    }
+
+    if (scenario !== undefined) {
+      query = query.where("scenario", "=", scenario);
     }
 
     return query.orderBy("year", "asc");

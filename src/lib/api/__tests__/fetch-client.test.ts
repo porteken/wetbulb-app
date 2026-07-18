@@ -184,7 +184,7 @@ describe("fetchForecastData", () => {
     const result = await FetchForecastData(1, 10);
 
     expect(fetchMock).toHaveBeenCalledWith(
-      "/api/data/forecast?basis=max&locationId=1&option=avg&season=Annual&yearsAhead=10",
+      "/api/data/forecast?basis=max&locationId=1&option=avg&scenario=ssp245&season=Annual&yearsAhead=10",
       expect.any(Object),
     );
     expect(result).toStrictEqual({
@@ -192,6 +192,7 @@ describe("fetchForecastData", () => {
       forecastYears: [2026, 2027],
       lowerBound10: [28.5, 29],
       upperBound90: [32.5, 33],
+      scenario: "ssp245",
     });
   });
 
@@ -208,7 +209,7 @@ describe("fetchForecastData", () => {
     await FetchForecastData(1, 10, { season: "Winter" });
 
     expect(fetchMock).toHaveBeenCalledWith(
-      "/api/data/forecast?basis=max&locationId=1&option=avg&season=Winter&yearsAhead=10",
+      "/api/data/forecast?basis=max&locationId=1&option=avg&scenario=ssp245&season=Winter&yearsAhead=10",
       expect.any(Object),
     );
   });

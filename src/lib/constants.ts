@@ -32,6 +32,12 @@ const WETBULB_BASES = ["max", "avg"] as const;
 export type WetbulbBasis = (typeof WETBULB_BASES)[number];
 export const DEFAULT_WETBULB_BASIS: WetbulbBasis = "max";
 
+const FORECAST_SCENARIOS = ["ssp126", "ssp245", "ssp370"] as const;
+export type ForecastScenario = (typeof FORECAST_SCENARIOS)[number];
+export const DEFAULT_FORECAST_SCENARIO: ForecastScenario = "ssp245";
+export const isForecastScenario = (value: string): value is ForecastScenario =>
+  (FORECAST_SCENARIOS as readonly string[]).includes(value);
+
 const isWetbulbBasis = (value: string): value is WetbulbBasis =>
   (WETBULB_BASES as readonly string[]).includes(value);
 

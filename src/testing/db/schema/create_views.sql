@@ -924,6 +924,20 @@ ON public.wetbulb_forecast_max (season) ;
 CREATE INDEX if not exists wetbulb_forecast_max_location_season_year_idx
 ON public.wetbulb_forecast_max (location_id, season, year) ;
 
+CREATE MATERIALIZED VIEW public.wetbulb_forecast_scenarios AS
+SELECT f.*, 'ssp245'::text AS scenario
+FROM public.wetbulb_forecast AS f ;
+
+CREATE UNIQUE INDEX wetbulb_forecast_scenarios_uidx
+ON public.wetbulb_forecast_scenarios (location_id, year, season, scenario) ;
+
+CREATE MATERIALIZED VIEW public.wetbulb_forecast_max_scenarios AS
+SELECT f.*, 'ssp245'::text AS scenario
+FROM public.wetbulb_forecast_max AS f ;
+
+CREATE UNIQUE INDEX wetbulb_forecast_max_scenarios_uidx
+ON public.wetbulb_forecast_max_scenarios (location_id, year, season, scenario) ;
+
 CREATE VIEW public.wetbulb_city_rankings_view AS
 WITH combined_yearly_avg AS (
 SELECT

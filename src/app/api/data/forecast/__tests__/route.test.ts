@@ -5,6 +5,7 @@ interface ForecastData {
   forecastYears: number[];
   lowerBound10: number[];
   upperBound90: number[];
+  scenario: "ssp126" | "ssp245" | "ssp370";
 }
 
 const { mockFetchForecastData, mockValidateLocationId } = vi.hoisted(() => ({
@@ -72,11 +73,12 @@ describe("get /api/data/forecast", () => {
       forecastYears: [2026],
       lowerBound10: [28.5],
       upperBound90: [31.9],
+      scenario: "ssp126",
     });
 
     const response = await GET(
       new Request(
-        "http://localhost/api/data/forecast?locationId=7&season=Summer&yearsAhead=12",
+        "http://localhost/api/data/forecast?locationId=7&season=Summer&yearsAhead=12&scenario=ssp126",
       ),
     );
 
@@ -85,6 +87,7 @@ describe("get /api/data/forecast", () => {
       forecastYears: [2026],
       lowerBound10: [28.5],
       upperBound90: [31.9],
+      scenario: "ssp126",
     });
     expect(response.status).toBe(200);
     expect(response.headers.get("Cache-Control")).toBe(
@@ -93,6 +96,7 @@ describe("get /api/data/forecast", () => {
     expect(mockFetchForecastData).toHaveBeenCalledWith(7, 12, {
       basis: "max",
       option: "avg",
+      scenario: "ssp126",
       season: "Summer",
     });
   });
@@ -111,8 +115,23 @@ describe("get /api/data/forecast", () => {
     expect(mockFetchForecastData).toHaveBeenCalledWith(7, 5, {
       basis: "max",
       option: "avg",
+      scenario: "ssp245",
       season: "Annual",
     });
+  });
+
+  it("returns 400 for an invalid forecast scenario", async () => {
+    const response = await GET(
+      new Request(
+        "http://localhost/api/data/forecast?locationId=7&yearsAhead=5&scenario=rcp85",
+      ),
+    );
+
+    await expect(response.json()).resolves.toStrictEqual({
+      error: "Invalid forecast scenario",
+    });
+    expect(response.status).toBe(400);
+    expect(mockFetchForecastData).not.toHaveBeenCalled();
   });
 
   it("converts thrown errors into data route responses", async () => {

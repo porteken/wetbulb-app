@@ -5,13 +5,18 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { MapComponent } from "../components/map-component";
 
-const { mockUseTheme } = vi.hoisted(() => ({
+const { mockIsWebglSupported, mockUseTheme } = vi.hoisted(() => ({
+  mockIsWebglSupported: mockFn(() => true),
   mockUseTheme: mockFn(() => ({ resolvedTheme: "light" })),
 }));
 
 vi.mock("next-themes", () =>
   Object.fromEntries([["useTheme", () => mockUseTheme()]]),
 );
+
+vi.mock("../lib/webgl-support", () => ({
+  isWebglSupported: () => mockIsWebglSupported(),
+}));
 
 vi.mock("react-map-gl/maplibre", () => {
   interface MockComponentProperties {
@@ -92,6 +97,7 @@ const renderWithQueryClient = (ui: React.ReactElement) => {
 describe("mapComponent", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockIsWebglSupported.mockReturnValue(true);
     mockUseTheme.mockReturnValue({ resolvedTheme: "light" });
   });
 
@@ -172,6 +178,61 @@ describe("mapComponent", () => {
       throw new Error("No location found");
     }
     expect(onMarkerClick).toHaveBeenCalledWith(firstLocation.location_id);
+  });
+
+  it("should show the WebGL fallback with a city list when WebGL is unsupported", async () => {
+    mockIsWebglSupported.mockReturnValue(false);
+
+    renderWithQueryClient(
+      <MapComponent
+        locations={mockLocations}
+        onMarkerClick={noopMarkerClick}
+      />,
+    );
+
+    const fallbackHeading = await screen.findByText(
+      /interactive map unavailable/iu,
+    );
+    expect(fallbackHeading).toBeInTheDocument();
+
+    expect(screen.queryByTestId("maplibre-map")).not.toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "New York, NY" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Los Angeles, CA" }),
+    ).toBeInTheDocument();
+  });
+
+  it("should call onMarkerClick from the WebGL fallback city list", async () => {
+    mockIsWebglSupported.mockReturnValue(false);
+    const onMarkerClick = mockFn();
+
+    renderWithQueryClient(
+      <MapComponent locations={mockLocations} onMarkerClick={onMarkerClick} />,
+    );
+
+    const cityButton = await screen.findByRole("button", {
+      name: "New York, NY",
+    });
+    fireEvent.click(cityButton);
+
+    expect(onMarkerClick).toHaveBeenCalledTimes(1);
+    expect(onMarkerClick).toHaveBeenCalledWith(1);
+  });
+
+  it('should still show "No Map Data Available" when WebGL is unsupported and no locations exist', async () => {
+    mockIsWebglSupported.mockReturnValue(false);
+
+    renderWithQueryClient(
+      <MapComponent
+        locations={emptyLocations}
+        onMarkerClick={noopMarkerClick}
+      />,
+    );
+
+    const noDataMessage = await screen.findByText(/no map data available/iu);
+    expect(noDataMessage).toBeInTheDocument();
   });
 
   it("should keep the thermal stress legend collapsed by default and toggle open", async () => {
