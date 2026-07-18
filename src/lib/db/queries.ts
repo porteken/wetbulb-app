@@ -511,7 +511,7 @@ export async function fetchHistoricalYearRow(
   }
 }
 
-export async function fetchForecastRows(
+export function fetchForecastRows(
   locationId: number,
   queryWindow: ForecastQueryWindow,
   filters: ForecastRowsFilters = {},
@@ -564,30 +564,35 @@ export async function fetchForecastRows(
     isMissingColumnError(error, table, "lower_avg") ||
     isMissingColumnError(error, table, "upper_avg");
 
-  try {
-    return await withDbRetry(() => buildQuery(season).execute());
-  } catch (error) {
-    if (season !== undefined && isMissingColumnError(error, table, "season")) {
-      return buildQuery().execute();
-    }
+  type ForecastRow = Awaited<
+    ReturnType<ReturnType<typeof buildQuery>["execute"]>
+  >;
 
-    if (basis === "avg" && isMissingAvgColumnError(error)) {
-      // The deployed table predates the wetbulb_avg/lower_avg/upper_avg
-      // columns; its plain columns already hold this basis's data.
-      try {
-        return await withDbRetry(() => buildQuery(season, false).execute());
-      } catch (fallbackError) {
-        if (
-          season !== undefined &&
-          isMissingColumnError(fallbackError, table, "season")
-        ) {
-          return buildQuery(undefined, false).execute();
-        }
-
-        throw classifyDbError(fallbackError);
+  const runQuery = async (
+    selectedSeason: GraphSeason | undefined,
+    useAvgColumns: boolean,
+  ): Promise<ForecastRow> => {
+    try {
+      return await withDbRetry(() =>
+        buildQuery(selectedSeason, useAvgColumns).execute(),
+      );
+    } catch (error) {
+      if (
+        selectedSeason !== undefined &&
+        isMissingColumnError(error, table, "season")
+      ) {
+        return runQuery(undefined, useAvgColumns);
       }
-    }
 
-    throw classifyDbError(error);
-  }
+      if (useAvgColumns && isMissingAvgColumnError(error)) {
+        // The deployed table predates the wetbulb_avg/lower_avg/upper_avg
+        // columns; its plain columns already hold this basis's data.
+        return runQuery(selectedSeason, false);
+      }
+
+      throw classifyDbError(error);
+    }
+  };
+
+  return runQuery(season, basis === "avg");
 }

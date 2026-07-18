@@ -17,7 +17,7 @@ const BasisContext = React.createContext<BasisContextValue | undefined>(
   undefined,
 );
 
-const readCookieBasis = (): WetbulbBasis => {
+export const readCookieBasis = (): WetbulbBasis => {
   if (typeof document === "undefined") {
     return DEFAULT_WETBULB_BASIS;
   }
