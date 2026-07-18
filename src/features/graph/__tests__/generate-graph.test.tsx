@@ -96,7 +96,7 @@ describe("graph Components", () => {
     expect(yAxisMock).toHaveBeenCalledWith(
       expect.objectContaining({
         allowDataOverflow: true,
-        domain: [16, 32],
+        domain: [16, 30],
       }),
       undefined,
     );
@@ -211,11 +211,7 @@ describe("graph Components", () => {
         />,
       );
 
-      expect(
-        lineMock.mock.calls
-          .slice(-2)
-          .every(([props]) => props.isAnimationActive),
-      ).toBe(true);
+      expect(lineMock.mock.calls.at(-1)?.[0].isAnimationActive).toBe(true);
 
       rerender(
         <GenerateTrendGraph
@@ -228,11 +224,7 @@ describe("graph Components", () => {
         />,
       );
 
-      expect(
-        lineMock.mock.calls
-          .slice(-2)
-          .every(([props]) => !props.isAnimationActive),
-      ).toBe(true);
+      expect(lineMock.mock.calls.at(-1)?.[0].isAnimationActive).toBe(false);
     });
   });
 

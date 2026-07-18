@@ -96,7 +96,6 @@ interface TrendChartPoint {
   forecast?: number;
   wetbulb?: number;
   tooltipLabel: string;
-  trendline?: number;
   year: number;
 }
 
@@ -240,7 +239,6 @@ const buildReferenceChartData = (
 const buildTrendChartData = (
   years: number[],
   yearWetbulbs: number[],
-  trendlineWetbulbs: number[],
   forecastData?: TrendForecastData,
 ): TrendChartPoint[] => {
   const pointMap = new Map<number, TrendChartPoint>(
@@ -249,7 +247,6 @@ const buildTrendChartData = (
       {
         wetbulb: yearWetbulbs[index],
         tooltipLabel: String(year),
-        trendline: trendlineWetbulbs[index],
         year,
       },
     ]),
@@ -315,12 +312,8 @@ const getChartMargin = ({
   top: MARGIN_TOP,
 });
 
-const hasTrendGraphData = (
-  years: number[],
-  yearWetbulbs: number[],
-  trendlineWetbulbs: number[],
-): boolean =>
-  years.length > 0 && yearWetbulbs.length > 0 && trendlineWetbulbs.length > 0;
+const hasTrendGraphData = (years: number[], yearWetbulbs: number[]): boolean =>
+  years.length > 0 && yearWetbulbs.length > 0;
 
 const hasReferenceGraphData = (
   dates: Date[],
@@ -536,11 +529,7 @@ const TrendChartBody = ({
   const yAxisDomain = React.useMemo(
     () =>
       getYAxisDomain(
-        chartData.flatMap((point) => [
-          point.wetbulb,
-          point.trendline,
-          point.forecast,
-        ]),
+        chartData.flatMap((point) => [point.wetbulb, point.forecast]),
       ),
     [chartData],
   );
@@ -623,17 +612,6 @@ const TrendChartBody = ({
             name="Wetbulb"
             stroke={GRAPH_COLORS.primary}
             strokeWidth={2.5}
-            type="monotone"
-          />
-          <Line
-            connectNulls
-            dataKey="trendline"
-            dot={false}
-            isAnimationActive={shouldAnimate}
-            name="Trendline of Wetbulb"
-            stroke={GRAPH_COLORS.reference}
-            strokeDasharray="8 5"
-            strokeWidth={2}
             type="monotone"
           />
         </ComposedChart>
@@ -771,7 +749,7 @@ export const GenerateTrendGraph = ({
   option,
   season = DEFAULT_GRAPH_SEASON,
   showLegend = true,
-  trendlineWetbulbs,
+  trendlineWetbulbs: _trendlineWetbulbs,
   unit = DEFAULT_TEMPERATURE_UNIT,
   useCompactDesktopHeight = false,
   yearWetbulbs,
@@ -779,7 +757,7 @@ export const GenerateTrendGraph = ({
 }: GenerateTrendGraphOptions): React.ReactElement => {
   const shouldAnimate = useInitialChartAnimation();
 
-  if (!hasTrendGraphData(years, yearWetbulbs, trendlineWetbulbs)) {
+  if (!hasTrendGraphData(years, yearWetbulbs)) {
     return (
       <ChartShell
         emptyState="No data available for the selected parameters."
@@ -794,7 +772,6 @@ export const GenerateTrendGraph = ({
   const chartData = buildTrendChartData(
     years,
     yearWetbulbs.map((value) => convertFromCelsius(value, unit)),
-    trendlineWetbulbs.map((value) => convertFromCelsius(value, unit)),
     convertedForecastData,
   );
 
