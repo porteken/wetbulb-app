@@ -1,6 +1,7 @@
 import { expect, test } from "./fixtures";
 import { MARKER_SELECTOR } from "./utils/map-marker";
 import {
+  getSettledGraphMeasureSelect,
   MAP_CONTAINER_SELECTOR,
   waitForLocationDetailsPage,
 } from "./utils/map-page";
@@ -24,7 +25,7 @@ test.describe("Accessibility", () => {
     await page.keyboard.press("Tab");
     await page.keyboard.press("Tab");
 
-    const graphMeasure = page.locator("select#graph-measure");
+    const graphMeasure = await getSettledGraphMeasureSelect(page);
     await graphMeasure.focus();
 
     await page.keyboard.press("ArrowDown");
@@ -51,7 +52,7 @@ test.describe("Accessibility", () => {
     await expect(referenceYearLabel).toBeVisible();
     await expect(referenceYearLabel).toHaveText("Reference Year");
 
-    await expect(page.locator("select#graph-measure")).toBeVisible();
+    await expect(await getSettledGraphMeasureSelect(page)).toBeVisible();
     await expect(page.locator("select#reference-year")).toBeVisible();
     await expect(page.getByTestId("city-selector")).toBeVisible({
       timeout: 10_000,
@@ -78,7 +79,7 @@ test.describe("Accessibility", () => {
       page.getByRole("heading", REFERENCE_DATA_HEADING),
     ).toBeVisible();
 
-    const graphMeasure = page.locator("select#graph-measure");
+    const graphMeasure = await getSettledGraphMeasureSelect(page);
     await expect(graphMeasure).toBeVisible();
 
     await graphMeasure.focus();
@@ -107,7 +108,7 @@ test.describe("Accessibility", () => {
       timeout: 15_000,
     });
 
-    const graphMeasure = page.locator("select#graph-measure");
+    const graphMeasure = await getSettledGraphMeasureSelect(page);
     await graphMeasure.selectOption("max");
 
     await expect(page.locator(LOCATION_CHARTS)).toHaveCount(2, {
@@ -122,7 +123,7 @@ test.describe("Accessibility", () => {
 
     await page.setViewportSize({ height: 600, width: 800 });
 
-    await expect(page.locator("select#graph-measure")).toBeVisible();
+    await expect(await getSettledGraphMeasureSelect(page)).toBeVisible();
 
     await expect(
       page.getByRole("heading", TREND_ANALYSIS_HEADING),
@@ -131,7 +132,7 @@ test.describe("Accessibility", () => {
       page.getByRole("heading", REFERENCE_DATA_HEADING),
     ).toBeVisible();
 
-    const graphMeasure = page.locator("select#graph-measure");
+    const graphMeasure = await getSettledGraphMeasureSelect(page);
     await expect(graphMeasure).toBeVisible();
     await graphMeasure.selectOption("max");
 
@@ -161,7 +162,7 @@ test.describe("Accessibility", () => {
     const visibleNavElements = await navElements.all();
     expect(visibleNavElements.length).toBeGreaterThan(0);
 
-    const selectElement = page.locator("select#graph-measure");
+    const selectElement = await getSettledGraphMeasureSelect(page);
     await selectElement.focus();
     await expect(selectElement).toBeVisible();
   });
@@ -173,9 +174,10 @@ test.describe("Accessibility", () => {
 
     await page.goto("/1");
 
+    const graphMeasureSelect = await getSettledGraphMeasureSelect(page);
     const touchTargets = [
       page.locator("select#graph-season"),
-      page.locator("select#graph-measure"),
+      graphMeasureSelect,
       page.locator("select#reference-year"),
     ];
 
@@ -194,9 +196,8 @@ test.describe("Accessibility", () => {
       page.getByRole("heading", TREND_ANALYSIS_HEADING),
     ).toBeVisible();
 
-    const graphMeasure = page.locator("select#graph-measure");
-    await graphMeasure.click();
-    await graphMeasure.selectOption("max");
+    await graphMeasureSelect.click();
+    await graphMeasureSelect.selectOption("max");
 
     await expect(page.locator(LOCATION_CHARTS)).toHaveCount(2, {
       timeout: 15_000,

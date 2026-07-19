@@ -1,4 +1,5 @@
 import { expect, test } from "./fixtures";
+import { getSettledGraphMeasureSelect } from "./utils/map-page";
 
 test.describe("Location Page", () => {
   const locationCharts =
@@ -7,7 +8,7 @@ test.describe("Location Page", () => {
   test("should display location content and graphs", async ({ page }) => {
     await page.goto("/1");
     await expect(page.getByRole("heading", { name: /, /u })).toBeVisible();
-    await expect(page.locator("select#graph-measure")).toBeVisible();
+    await expect(await getSettledGraphMeasureSelect(page)).toBeVisible();
     await expect(page.locator("select#reference-year")).toBeVisible();
     await expect(page.locator(locationCharts)).toHaveCount(2, {
       timeout: 15_000,
@@ -27,7 +28,7 @@ test.describe("Location Page", () => {
 
   test("should change graph measure and reference year", async ({ page }) => {
     await page.goto("/1");
-    const graphMeasure = page.locator("select#graph-measure");
+    const graphMeasure = await getSettledGraphMeasureSelect(page);
     await graphMeasure.selectOption("max");
     await expect(page.locator(locationCharts)).toHaveCount(2, {
       timeout: 10_000,
