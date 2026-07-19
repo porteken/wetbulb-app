@@ -18,19 +18,6 @@ export async function gotoAndWaitForMapPage(
   await waitForMapPage(page);
 }
 
-export async function navigateToLocationDetailsFromMap(
-  page: Page,
-  route: string,
-): Promise<void> {
-  await gotoAndWaitForMapPage(page, route);
-
-  const { viewDetailsButton } = await openLocationDetailsModal(page);
-
-  await expect(viewDetailsButton).toBeEnabled({ timeout: MODAL_TIMEOUT });
-  await viewDetailsButton.click();
-  await waitForLocationDetailsPage(page);
-}
-
 export async function openLocationDetailsModal(
   page: Page,
 ): Promise<{ modal: Locator; viewDetailsButton: Locator }> {
