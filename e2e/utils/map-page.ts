@@ -1,4 +1,4 @@
-import { expect, type Locator, type Page } from "@playwright/test";
+import { expect, test, type Locator, type Page } from "@playwright/test";
 
 import { clickClickableMarker } from "./map-marker";
 
@@ -66,6 +66,79 @@ export async function waitForMapPage(page: Page): Promise<void> {
   });
 }
 
+declare global {
+  interface Window {
+    graphMeasureDuplicateCallback?: (html: string) => void;
+  }
+}
+
+const graphMeasureDuplicateHtml = new WeakMap<Page, string>();
+const exposedGraphMeasureWatcher = new WeakSet<Page>();
+
+// Runs inside the page via page.evaluate() below, not in this Node process —
+// document/MutationObserver/window only exist in that browser context, and
+// `window` (rather than globalThis) is required for the Window augmentation
+// above to type-check.
+/* oxlint-disable unicorn/consistent-function-scoping, unicorn/prefer-global-this -- serialized and sent to the browser, not shared with outer Node scope */
+function installGraphMeasureDuplicateWatcher(): void {
+  const check = (): void => {
+    if (document.querySelectorAll("#graph-measure").length > 1) {
+      window.graphMeasureDuplicateCallback?.(
+        document.documentElement.outerHTML,
+      );
+    }
+  };
+
+  check();
+  new MutationObserver(check).observe(document.body, {
+    childList: true,
+    subtree: true,
+  });
+}
+/* oxlint-enable unicorn/consistent-function-scoping, unicorn/prefer-global-this */
+
+/**
+ * `select#graph-measure` intermittently resolves to 2 elements in CI (see
+ * flaky-test investigation), but the duplicate self-heals within
+ * milliseconds — by the time the surrounding assertion's timeout elapses
+ * (whether it passes on a later poll or ultimately fails), the DOM has
+ * already returned to normal, so a catch-block snapshot never captures the
+ * actual duplicated state. A MutationObserver installed in the page
+ * captures `document.documentElement.outerHTML` synchronously, in-browser,
+ * the instant a duplicate is observed, so there's no race with the
+ * duplicate healing before we can inspect it.
+ */
+async function watchForDuplicateGraphMeasureSelect(
+  page: Page,
+): Promise<() => Promise<void>> {
+  graphMeasureDuplicateHtml.delete(page);
+
+  if (!exposedGraphMeasureWatcher.has(page)) {
+    exposedGraphMeasureWatcher.add(page);
+    await page.exposeFunction(
+      "graphMeasureDuplicateCallback",
+      (html: string) => {
+        graphMeasureDuplicateHtml.set(page, html);
+      },
+    );
+  }
+
+  await page.evaluate(installGraphMeasureDuplicateWatcher);
+
+  return async () => {
+    const capturedHtml = graphMeasureDuplicateHtml.get(page);
+    if (capturedHtml !== undefined) {
+      await test
+        .info()
+        .attach("graph-measure-duplicate-dom", {
+          body: capturedHtml,
+          contentType: "text/html",
+        })
+        .catch(() => {});
+    }
+  };
+}
+
 export async function waitForLocationDetailsPage(
   page: Page,
   urlPattern = /\/\d+(?:\?.*)?$/u,
@@ -96,9 +169,15 @@ export async function waitForLocationDetailsPage(
   ).toBeVisible({
     timeout: LOCATION_DETAILS_TIMEOUT,
   });
-  await expect(page.locator("select#graph-measure")).toBeVisible({
-    timeout: LOCATION_DETAILS_TIMEOUT,
-  });
+  const stopWatchingGraphMeasure =
+    await watchForDuplicateGraphMeasureSelect(page);
+  try {
+    await expect(page.locator("select#graph-measure")).toBeVisible({
+      timeout: LOCATION_DETAILS_TIMEOUT,
+    });
+  } finally {
+    await stopWatchingGraphMeasure();
+  }
   await expect(page.locator("select#reference-year")).toBeVisible({
     timeout: LOCATION_DETAILS_TIMEOUT,
   });
