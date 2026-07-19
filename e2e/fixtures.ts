@@ -42,6 +42,17 @@ const isSameOrigin = (url: string, baseURL: string | undefined): boolean => {
   }
 };
 
+/**
+ * WebKit sometimes reports a Next.js RSC prefetch fetch that was aborted by
+ * client-side navigation as an access-control failure instead of an
+ * AbortError. This is a WebKit/Next.js prefetch-cancellation quirk, not an
+ * application error — real access-control failures don't carry an `_rsc`
+ * query param.
+ */
+const isWebKitRscPrefetchAbort = (message: string): boolean =>
+  message.endsWith("due to access control checks.") &&
+  /[?&]_rsc=/u.test(message);
+
 const formatErrors = (errors: BrowserError[]): string =>
   errors
     .map((error) => {
@@ -69,6 +80,10 @@ export const test = base.extend<BrowserErrorFixtures>({
       );
 
     page.on("pageerror", (error: Error) => {
+      if (isWebKitRscPrefetchAbort(error.message)) {
+        return;
+      }
+
       if (seenExceptionMessages.has(error.message)) {
         return;
       }
@@ -97,6 +112,10 @@ export const test = base.extend<BrowserErrorFixtures>({
 
     page.context().on("weberror", (webError: WebError) => {
       const error = webError.error();
+      if (isWebKitRscPrefetchAbort(error.message)) {
+        return;
+      }
+
       if (seenExceptionMessages.has(error.message)) {
         return;
       }
