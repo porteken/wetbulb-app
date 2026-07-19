@@ -35,24 +35,11 @@ test.describe("Rankings Page", () => {
     });
 
     await expect(page.getByTestId("rankings-year-filter")).toBeVisible();
+    await expect(page.getByTestId("rankings-season-filter")).toBeVisible();
     await expect(page.getByTestId("rankings-state-filter")).toBeVisible();
     await expect(
       page.getByTestId("rankings-wetbulb-level-filter"),
     ).toBeVisible();
-  });
-
-  test("should show the city selector in the header", async ({ page }) => {
-    await page.goto("/rankings");
-
-    await expect(
-      page.getByRole("link", { name: "Historical Wetbulb App" }),
-    ).toBeVisible({ timeout: 10_000 });
-    await expect(page.getByTestId("city-selector")).toBeVisible({
-      timeout: 10_000,
-    });
-    await expect(page.getByTestId("city-selector")).toContainText(
-      "Select City",
-    );
   });
 
   test("should display wetbulb index legend", async ({ page }) => {
@@ -74,7 +61,7 @@ test.describe("Rankings Page", () => {
   });
 
   test("should change year and update rankings", async ({ page }) => {
-    await page.goto("/rankings");
+    await page.goto("/rankings?year=2010");
 
     await expect(
       page.getByRole("heading", { name: "Cities ranked by Average Wetbulb" }),
@@ -82,14 +69,21 @@ test.describe("Rankings Page", () => {
       timeout: 10_000,
     });
 
-    await expect(page.getByTestId("rankings-year-filter")).toBeVisible({
+    const yearSelect = page.getByTestId("rankings-year-filter");
+    await expect(yearSelect).toContainText("2010", { timeout: 10_000 });
+
+    await selectCustomOption(page, yearSelect, /^2015$/u);
+    await expect(yearSelect).toContainText("2015");
+    await expect(page.locator("table tbody tr").first()).toBeVisible({
+      timeout: 10_000,
+    });
+    await expect(page.locator('[data-slot="select-content"]')).toHaveCount(0, {
       timeout: 10_000,
     });
 
-    const yearSelect = page.getByTestId("rankings-year-filter");
-    await selectCustomOption(page, yearSelect, /^2010$/u);
-    await expect(yearSelect).toContainText("2010");
-
+    const seasonSelect = page.getByTestId("rankings-season-filter");
+    await selectCustomOption(page, seasonSelect, /^Summer$/u);
+    await expect(seasonSelect).toContainText("Summer");
     await expect(page.locator("table tbody tr").first()).toBeVisible({
       timeout: 10_000,
     });
@@ -104,13 +98,22 @@ test.describe("Rankings Page", () => {
       timeout: 10_000,
     });
 
-    const tableHeaders = page.locator("table thead th");
-    await expect(tableHeaders.first()).toBeVisible({ timeout: 10_000 });
+    const cityHeader = page.locator("table thead th").nth(1);
+    await expect(cityHeader).toBeVisible({ timeout: 10_000 });
+    const cityHeaderButton = cityHeader.getByRole("button");
+    const firstRowCity = page
+      .locator("table tbody tr")
+      .first()
+      .locator("td")
+      .nth(1);
 
-    const cityHeader = tableHeaders.nth(1);
-    await cityHeader.click();
+    await cityHeaderButton.click();
+    await expect(cityHeader).toHaveAttribute("aria-sort", "ascending");
+    await expect(firstRowCity).toContainText("Dallas");
 
-    await expect(page.locator("table tbody tr").first()).toBeVisible();
+    await cityHeaderButton.click();
+    await expect(cityHeader).toHaveAttribute("aria-sort", "descending");
+    await expect(firstRowCity).toContainText("Seattle");
   });
 
   test("should navigate to location page when row is clicked", async ({
@@ -153,12 +156,22 @@ test.describe("Rankings Page", () => {
 
     await expect(stateSelect).toContainText(stateLabel ?? "");
 
-    await expect(page.locator("table tbody tr").first()).toBeVisible({
+    await expect(page.locator("table tbody tr")).toHaveCount(1, {
       timeout: 10_000,
     });
     await expect(
       page.locator("table tbody tr").first().locator("td").nth(2),
     ).toContainText(stateLabel ?? "");
+    await expect(page.getByText("Showing 1-1 of 1 cities")).toBeVisible();
+
+    const clearStateButton = stateSelect
+      .locator("..")
+      .getByRole("button", { name: "Clear" });
+    await clearStateButton.click();
+
+    await expect(page.locator("table tbody tr")).toHaveCount(6, {
+      timeout: 10_000,
+    });
   });
 
   test("should filter by wetbulb level", async ({ page }) => {

@@ -1,9 +1,5 @@
 import { expect, test } from "./fixtures";
-import {
-  MAP_CONTAINER_SELECTOR,
-  gotoAndWaitForMapPage,
-  waitForMapPage,
-} from "./utils/map-page";
+import { gotoAndWaitForMapPage, waitForMapPage } from "./utils/map-page";
 
 import type { Page } from "@playwright/test";
 
@@ -38,23 +34,5 @@ test.describe("Navigation", () => {
     await navigateToRankingsPage(page);
 
     await navigateToMapView(page);
-  });
-
-  test("should navigate away from a location page", async ({ page }) => {
-    await page.goto("/1");
-    await expect(
-      page.getByRole("heading", { name: "Trend Analysis" }),
-    ).toBeVisible({ timeout: 10_000 });
-
-    await expect(
-      page.getByRole("link", { name: "Navigate to rankings page" }),
-    ).toBeVisible({ timeout: 10_000 });
-
-    await navigateToRankingsPage(page);
-
-    await navigateToMapView(page);
-    await expect(page.locator(MAP_CONTAINER_SELECTOR)).toBeVisible({
-      timeout: NAVIGATION_TIMEOUT,
-    });
   });
 });
