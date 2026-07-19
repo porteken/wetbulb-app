@@ -1,11 +1,12 @@
-import { expect, type Locator, type Page, test } from "@playwright/test";
-
+import { expect, test } from "./fixtures";
 import {
   fillOpenCustomSelectSearch,
   getOpenCustomSelectContent,
   getOpenCustomSelectOptions,
   openCustomSelect,
 } from "./utils/custom-select";
+
+import type { Locator, Page } from "@playwright/test";
 
 const getRequiredTextContent = async (locator: Locator): Promise<string> => {
   const text = await locator.textContent();

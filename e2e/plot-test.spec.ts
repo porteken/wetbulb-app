@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./fixtures";
 
 const shouldIgnoreConsoleMessage = (message: string): boolean =>
   message.includes("403 (Forbidden)");

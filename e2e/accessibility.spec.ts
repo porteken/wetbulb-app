@@ -1,5 +1,4 @@
-import { expect, test } from "@playwright/test";
-
+import { expect, test } from "./fixtures";
 import { MARKER_SELECTOR } from "./utils/map-marker";
 import {
   MAP_CONTAINER_SELECTOR,

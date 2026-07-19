@@ -1,10 +1,11 @@
-import { expect, type Page, test } from "@playwright/test";
-
+import { expect, test } from "./fixtures";
 import {
   MAP_CONTAINER_SELECTOR,
   gotoAndWaitForMapPage,
   waitForMapPage,
 } from "./utils/map-page";
+
+import type { Page } from "@playwright/test";
 
 const NAVIGATION_TIMEOUT = 30_000;
 
