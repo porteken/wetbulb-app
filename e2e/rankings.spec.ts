@@ -45,15 +45,19 @@ test.describe("Rankings Page", () => {
   test("should display wetbulb index legend", async ({ page }) => {
     await page.goto("/rankings");
 
-    await expect(page.getByText("Wetbulb Index")).toBeVisible({
-      timeout: 10_000,
-    });
-
+    // Scope to the legend region by id. A bare getByText("Wetbulb Index") is
+    // ambiguous: it also substring-matches the "Show/Hide Wetbulb Index"
+    // collapse toggle, tripping a strict-mode violation at the `xl` breakpoint.
+    // `.first()` additionally tolerates the App Router's transient double-render
+    // during hydration, which briefly duplicates the region before it
+    // self-heals (see getSettledGraphMeasureSelect for the same quirk).
     const legendSection = page
-      .locator("div")
-      .filter({ has: page.getByText("Wetbulb Index") })
+      .locator("#rankings-wetbulb-index-legend")
       .first();
 
+    await expect(legendSection).toContainText("Wetbulb Index", {
+      timeout: 10_000,
+    });
     await expect(legendSection).toContainText("None");
     await expect(legendSection).toContainText("Low Risk");
     await expect(legendSection).toContainText("Extreme Risk");

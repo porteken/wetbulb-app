@@ -42,16 +42,40 @@ const isSameOrigin = (url: string, baseURL: string | undefined): boolean => {
   }
 };
 
+const WEBKIT_ACCESS_CONTROL_SUFFIX = "due to access control checks.";
+
 /**
- * WebKit sometimes reports a Next.js RSC prefetch fetch that was aborted by
- * client-side navigation as an access-control failure instead of an
- * AbortError. This is a WebKit/Next.js prefetch-cancellation quirk, not an
- * application error — real access-control failures don't carry an `_rsc`
- * query param.
+ * WebKit surfaces fetches that were aborted by client-side navigation (a
+ * Next.js RSC prefetch, or the in-flight document request cancelled by a
+ * reload) as an access-control failure instead of an AbortError. This is a
+ * WebKit/Next.js cancellation quirk, not an application error. A same-origin
+ * request cannot genuinely fail a CORS/access-control check, so any
+ * access-control message that points at the app's own origin is this false
+ * positive. RSC prefetch messages additionally carry an `_rsc` query param,
+ * but the cancelled-document variant reports only the bare route.
  */
-const isWebKitRscPrefetchAbort = (message: string): boolean =>
-  message.endsWith("due to access control checks.") &&
-  /[?&]_rsc=/u.test(message);
+const isWebKitAccessControlAbort = (
+  message: string,
+  baseURL: string | undefined,
+): boolean => {
+  if (!message.endsWith(WEBKIT_ACCESS_CONTROL_SUFFIX)) {
+    return false;
+  }
+
+  if (/[?&]_rsc=/u.test(message)) {
+    return true;
+  }
+
+  if (!baseURL) {
+    return false;
+  }
+
+  try {
+    return message.includes(new URL(baseURL).host);
+  } catch {
+    return false;
+  }
+};
 
 const formatErrors = (errors: BrowserError[]): string =>
   errors
@@ -80,7 +104,7 @@ export const test = base.extend<BrowserErrorFixtures>({
       );
 
     page.on("pageerror", (error: Error) => {
-      if (isWebKitRscPrefetchAbort(error.message)) {
+      if (isWebKitAccessControlAbort(error.message, baseURL)) {
         return;
       }
 
@@ -112,7 +136,7 @@ export const test = base.extend<BrowserErrorFixtures>({
 
     page.context().on("weberror", (webError: WebError) => {
       const error = webError.error();
-      if (isWebKitRscPrefetchAbort(error.message)) {
+      if (isWebKitAccessControlAbort(error.message, baseURL)) {
         return;
       }
 
