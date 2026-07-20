@@ -16,9 +16,12 @@ test.describe("Rankings Page", () => {
       timeout: 10_000,
     });
 
-    await expect(page.locator("table")).toBeVisible();
+    // `.first()` tolerates the App Router's transient double-render during
+    // hydration, which briefly duplicates the table before it self-heals
+    // (see the "wetbulb index legend" test for the same quirk).
+    await expect(page.locator("table").first()).toBeVisible();
 
-    const rows = page.locator("table tbody tr");
+    const rows = page.locator("table").first().locator("tbody tr");
     await expect(rows.first()).toBeVisible({ timeout: 10_000 });
 
     const rowCount = await rows.count();
