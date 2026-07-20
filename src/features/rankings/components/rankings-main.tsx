@@ -442,7 +442,7 @@ const SortHeader = memo(
     return (
       <th
         aria-sort={ariaSort}
-        className="px-6 py-4 text-left text-xs font-medium tracking-[0.2em] text-muted-foreground uppercase"
+        className="px-3 py-4 text-left text-xs font-medium tracking-[0.15em] text-muted-foreground uppercase"
       >
         <button
           className="flex cursor-pointer items-center gap-1 transition hover:text-foreground"
@@ -508,27 +508,27 @@ const RankingRow = memo(({ item, push, rank, unit }: RankingRowProperties) => {
       onKeyDown={handleKeyDown}
       tabIndex={0}
     >
-      <td className="px-6 py-4 text-sm font-medium whitespace-nowrap text-foreground">
+      <td className="px-3 py-4 text-sm font-medium whitespace-nowrap text-foreground">
         <span
           className={`inline-flex min-w-10 items-center justify-center rounded-full px-3 py-1 text-xs font-bold ${getRankBadgeClasses(rank)}`}
         >
           {rank}
         </span>
       </td>
-      <td className="px-6 py-4 text-sm whitespace-nowrap text-foreground">
+      <td className="px-3 py-4 text-sm whitespace-nowrap text-foreground">
         {city}
       </td>
-      <td className="px-6 py-4 text-sm whitespace-nowrap text-muted-foreground">
+      <td className="px-3 py-4 text-sm whitespace-nowrap text-muted-foreground">
         <span className="rounded-full bg-background/80 px-2.5 py-1 font-medium text-foreground">
           {state}
         </span>
       </td>
-      <td className="px-6 py-4 text-sm whitespace-nowrap">
+      <td className="px-3 py-4 text-sm whitespace-nowrap">
         <span className={`font-semibold ${avgWetbulbInfo.color}`}>
           {formatWetbulbValue(avg_wetbulb, unit)}
         </span>
       </td>
-      <td className="px-6 py-4 text-sm whitespace-nowrap">
+      <td className="px-3 py-4 text-sm whitespace-nowrap">
         {max_wetbulb === undefined ? (
           <span className="text-muted-foreground">N/A</span>
         ) : (
@@ -539,14 +539,14 @@ const RankingRow = memo(({ item, push, rank, unit }: RankingRowProperties) => {
           </span>
         )}
       </td>
-      <td className="px-6 py-4 text-sm whitespace-nowrap text-muted-foreground">
+      <td className="px-3 py-4 text-sm whitespace-nowrap text-muted-foreground">
         {p10 !== undefined && p90 !== undefined ? (
           `${getWetbulbRange(p10, p90, unit)}°${unit}`
         ) : (
           <span className="text-muted-foreground">N/A</span>
         )}
       </td>
-      <td className="px-6 py-4 text-sm whitespace-nowrap">
+      <td className="px-3 py-4 text-sm whitespace-nowrap">
         {changeFrom2000InUnit === undefined ? (
           <span className="text-muted-foreground">N/A</span>
         ) : (
@@ -558,7 +558,7 @@ const RankingRow = memo(({ item, push, rank, unit }: RankingRowProperties) => {
           </span>
         )}
       </td>
-      <td className="px-6 py-4 text-sm whitespace-nowrap">
+      <td className="px-3 py-4 text-sm whitespace-nowrap">
         {FutureValueLower !== undefined && FutureValueUpper !== undefined ? (
           <div>
             <span
@@ -617,6 +617,10 @@ export function RankingsMain({
   } = state;
 
   const [isPending, startTransition] = useTransition();
+  const [isLegendOpen, setIsLegendOpen] = React.useState(false);
+  const handleToggleLegend = useCallback(() => {
+    setIsLegendOpen((previous) => !previous);
+  }, []);
   const { toast } = useToast();
   const persist = useCallback<PersistAction>(
     (...actions) => {
@@ -763,8 +767,23 @@ export function RankingsMain({
 
         <div className="flex flex-col gap-6 xl:flex-row">
           <div className="w-full xl:w-64 xl:shrink-0">
-            <div className="rounded-3xl p-6 glass-panel xl:sticky xl:top-28">
-              <WetbulbIndexLegend />
+            <div className="rounded-3xl glass-panel xl:sticky xl:top-28 xl:p-6">
+              <button
+                aria-controls="rankings-wetbulb-index-legend"
+                aria-expanded={isLegendOpen}
+                className="flex w-full items-center justify-between gap-2 p-4 text-sm font-semibold text-foreground xl:hidden"
+                onClick={handleToggleLegend}
+                type="button"
+              >
+                {isLegendOpen ? "Hide Wetbulb Index" : "Show Wetbulb Index"}
+                <span aria-hidden="true">{isLegendOpen ? "▲" : "▼"}</span>
+              </button>
+              <div
+                className={`${isLegendOpen ? "block" : "hidden"} p-4 pt-0 xl:block xl:p-0`}
+                id="rankings-wetbulb-index-legend"
+              >
+                <WetbulbIndexLegend />
+              </div>
             </div>
           </div>
 
@@ -808,7 +827,7 @@ export function RankingsMain({
                       dispatch={dispatch}
                       label="Max Wetbulb"
                     />
-                    <th className="px-6 py-4 text-left text-xs font-medium tracking-[0.2em] text-muted-foreground uppercase">
+                    <th className="px-3 py-4 text-left text-xs font-medium tracking-[0.15em] text-muted-foreground uppercase">
                       Wetbulb Range (10th-90th percentile)
                     </th>
                     <SortHeader
@@ -818,7 +837,7 @@ export function RankingsMain({
                       dispatch={dispatch}
                       label="Change from 2000"
                     />
-                    <th className="px-6 py-4 text-left text-xs font-medium tracking-[0.2em] text-muted-foreground uppercase">
+                    <th className="px-3 py-4 text-left text-xs font-medium tracking-[0.15em] text-muted-foreground uppercase">
                       2100 Forecast Range
                     </th>
                   </tr>
@@ -827,7 +846,7 @@ export function RankingsMain({
                   {paginatedRankings.length === 0 ? (
                     <tr>
                       <td
-                        className="px-6 py-12 text-center text-sm text-muted-foreground"
+                        className="px-3 py-12 text-center text-sm text-muted-foreground"
                         colSpan={8}
                       >
                         No cities match the current filters.
