@@ -1,5 +1,3 @@
-import "@testing-library/jest-dom";
-
 import { HeaderBar } from "@/features/header-bar";
 import { mockFn } from "@/testing/mock-fn";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";

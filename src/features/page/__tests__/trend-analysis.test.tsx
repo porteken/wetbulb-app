@@ -1,10 +1,17 @@
-import "@testing-library/jest-dom";
-
+import { GenerateTrendGraph } from "@/features/graph";
+import { setForecastPreferences } from "@/lib/actions/actions";
+import { FetchForecastData, FetchTrendGraphData } from "@/lib/api/fetch-client";
+import {
+  getForecastWetbulbDescription,
+  getWetbulbDescription,
+} from "@/lib/utils/wetbulb-index";
 import { MockForecastControls } from "@/testing/react-component-mocks";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import React from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+
+import { TrendAnalysis } from "../components/trend-analysis";
 
 const renderWithQueryClient = (ui: React.ReactElement) => {
   const queryClient = new QueryClient({
@@ -17,9 +24,9 @@ const renderWithQueryClient = (ui: React.ReactElement) => {
 };
 
 vi.mock("@/features/graph", () => ({
-  GenerateTrendGraph: mockFn().mockReturnValue(
-    <div data-testid="mock-trend-graph">Trend Graph</div>,
-  ),
+  GenerateTrendGraph: mockFn().mockImplementation(() => (
+    <div data-testid="mock-trend-graph">Trend Graph</div>
+  )),
 }));
 
 vi.mock("@/lib/api/fetch-client", () => ({
@@ -76,16 +83,6 @@ const { mockToast } = vi.hoisted(() => ({ mockToast: mockFn() }));
 vi.mock("@/components/ui/toast", () => ({
   useToast: () => ({ toast: mockToast }),
 }));
-
-import { GenerateTrendGraph } from "@/features/graph";
-import { setForecastPreferences } from "@/lib/actions/actions";
-import { FetchForecastData, FetchTrendGraphData } from "@/lib/api/fetch-client";
-import {
-  getForecastWetbulbDescription,
-  getWetbulbDescription,
-} from "@/lib/utils/wetbulb-index";
-
-import { TrendAnalysis } from "../components/trend-analysis";
 
 const defaultProps: React.ComponentProps<typeof TrendAnalysis> = {
   graphSeason: "Annual",

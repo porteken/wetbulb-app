@@ -8,21 +8,23 @@ export const useIsMobileViewport = (query = MOBILE_VIEWPORT_QUERY): boolean => {
   const [isMobileViewport, setIsMobileViewport] = React.useState(false);
 
   React.useEffect(() => {
-    if (typeof globalThis.matchMedia !== "function") {
-      return () => {};
+    let cleanup: (() => void) | undefined;
+
+    if (typeof globalThis.matchMedia === "function") {
+      const mediaQuery = globalThis.matchMedia(query);
+      const updateViewportState = () => {
+        setIsMobileViewport(mediaQuery.matches);
+      };
+
+      updateViewportState();
+      mediaQuery.addEventListener("change", updateViewportState);
+
+      cleanup = () => {
+        mediaQuery.removeEventListener("change", updateViewportState);
+      };
     }
 
-    const mediaQuery = globalThis.matchMedia(query);
-    const updateViewportState = () => {
-      setIsMobileViewport(mediaQuery.matches);
-    };
-
-    updateViewportState();
-    mediaQuery.addEventListener("change", updateViewportState);
-
-    return () => {
-      mediaQuery.removeEventListener("change", updateViewportState);
-    };
+    return cleanup;
   }, [query]);
 
   return isMobileViewport;

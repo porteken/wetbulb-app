@@ -1,6 +1,8 @@
 import { render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import Page from "../page";
+
 const { mockAbout, mockDatabaseError, mockFetchLocations } = vi.hoisted(() => ({
   mockAbout: mockFn(({ LocationOptions }: { LocationOptions: unknown[] }) => (
     <div data-count={LocationOptions.length} data-testid="about-page" />
@@ -30,8 +32,6 @@ vi.mock("@/lib/api/fetch-server", () => ({
 vi.mock("next/dynamic", () => ({
   default: mockFn(() => mockAbout),
 }));
-
-import Page from "../page";
 
 describe("about page", () => {
   beforeEach(() => {

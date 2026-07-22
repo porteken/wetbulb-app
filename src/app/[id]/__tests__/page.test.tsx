@@ -3,6 +3,8 @@ import { render, screen } from "@testing-library/react";
 import React, { Suspense } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import LocationPage, { LocationPageContent } from "../page";
+
 const { mockDatabaseError, mockLoadLocationPageData, mockNotFound, mockPage } =
   vi.hoisted(() => ({
     mockDatabaseError: mockFn(
@@ -43,8 +45,6 @@ vi.mock("@/features/page", () => ({
 vi.mock("next/dynamic", () => ({
   default: mockFn(() => mockPage),
 }));
-
-import LocationPage, { LocationPageContent } from "../page";
 
 describe("location route page", () => {
   beforeEach(() => {

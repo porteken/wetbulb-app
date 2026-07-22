@@ -44,7 +44,7 @@ export async function POST(request: Request) {
   let payload: GraphPreferencesPayload;
 
   try {
-    const json = await request.json();
+    const json: unknown = await request.json();
 
     if (!isRecord(json)) {
       return NextResponse.json(

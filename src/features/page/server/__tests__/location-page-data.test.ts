@@ -1,4 +1,19 @@
+import {
+  DEFAULT_REFERENCE_YEAR,
+  DEFAULT_FORECAST_ENABLED,
+  DEFAULT_FORECAST_YEARS_AHEAD,
+  DEFAULT_GRAPH_MEASURE,
+  DEFAULT_GRAPH_SEASON,
+  DEFAULT_WETBULB_BASIS,
+  FORECAST_ENABLED_COOKIE_NAME,
+  FORECAST_YEARS_AHEAD_COOKIE_NAME,
+  GRAPH_MEASURE_COOKIE_NAME,
+  GRAPH_SEASON_COOKIE_NAME,
+  REFERENCE_YEAR_COOKIE_NAME,
+} from "@/lib/constants";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+
+import { loadLocationPageData } from "../location-page-data";
 
 const {
   mockCookies,
@@ -24,22 +39,6 @@ vi.mock("@/lib/api/fetch-server", () => ({
   FetchReferenceGraphData: mockFetchReferenceGraphData,
   FetchTrendGraphData: mockFetchTrendGraphData,
 }));
-
-import {
-  DEFAULT_REFERENCE_YEAR,
-  DEFAULT_FORECAST_ENABLED,
-  DEFAULT_FORECAST_YEARS_AHEAD,
-  DEFAULT_GRAPH_MEASURE,
-  DEFAULT_GRAPH_SEASON,
-  DEFAULT_WETBULB_BASIS,
-  FORECAST_ENABLED_COOKIE_NAME,
-  FORECAST_YEARS_AHEAD_COOKIE_NAME,
-  GRAPH_MEASURE_COOKIE_NAME,
-  GRAPH_SEASON_COOKIE_NAME,
-  REFERENCE_YEAR_COOKIE_NAME,
-} from "@/lib/constants";
-
-import { loadLocationPageData } from "../location-page-data";
 
 const createCookieStore = (
   values: Partial<Record<string, string>>,

@@ -1,5 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import { GET } from "../route";
+
 interface ReferenceGraphData {
   dates: Date[];
   wetbulbs: number[];
@@ -30,8 +32,6 @@ vi.mock("@/lib/utils/validation", () => ({
   validateLocationId: mockValidateLocationId,
   validateYear: mockValidateYear,
 }));
-
-import { GET } from "../route";
 
 describe("get /api/data/reference", () => {
   beforeEach(() => {

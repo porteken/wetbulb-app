@@ -1,6 +1,8 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import PlotTestClient from "../plot-test-client";
+
 import type { ReactNode } from "react";
 
 interface LineStubProperties extends Record<string, unknown> {
@@ -37,8 +39,6 @@ vi.mock("recharts", () => ({
   XAxis: createRechartsStub("recharts-x-axis"),
   YAxis: createRechartsStub("recharts-y-axis"),
 }));
-
-import PlotTestClient from "../plot-test-client";
 
 describe("plot test client", () => {
   beforeEach(() => {

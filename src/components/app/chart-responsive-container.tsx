@@ -35,14 +35,13 @@ export const ChartResponsiveContainer = ({
     .join(" ");
 
   React.useEffect(() => {
+    let cleanup: (() => void) | undefined;
     const container = containerReference.current;
-    if (!container) {
-      return () => {};
-    }
 
     if (
-      process.env.NODE_ENV === "test" ||
-      typeof globalThis.ResizeObserver !== "function"
+      container &&
+      (process.env.NODE_ENV === "test" ||
+        typeof globalThis.ResizeObserver !== "function")
     ) {
       const { height, width } = container.getBoundingClientRect();
       if (hasPositiveSize(width, height)) {
@@ -59,50 +58,51 @@ export const ChartResponsiveContainer = ({
       }
 
       setIsReady(true);
-      return () => {};
-    }
-
-    const updateReadiness = (width: number, height: number) => {
-      if (!hasPositiveSize(width, height)) {
-        setIsReady(false);
-        return;
-      }
-
-      setInitialDimension((previous) => {
-        const nextWidth = toInitialChartDimension(width);
-        const nextHeight = toInitialChartDimension(height);
-
-        if (previous.width === nextWidth && previous.height === nextHeight) {
-          return previous;
+    } else if (container) {
+      const updateReadiness = (width: number, height: number) => {
+        if (!hasPositiveSize(width, height)) {
+          setIsReady(false);
+          return;
         }
 
-        return { height: nextHeight, width: nextWidth };
+        setInitialDimension((previous) => {
+          const nextWidth = toInitialChartDimension(width);
+          const nextHeight = toInitialChartDimension(height);
+
+          if (previous.width === nextWidth && previous.height === nextHeight) {
+            return previous;
+          }
+
+          return { height: nextHeight, width: nextWidth };
+        });
+        setIsReady(true);
+      };
+
+      const measureContainer = () => {
+        const { height, width } = container.getBoundingClientRect();
+        updateReadiness(width, height);
+      };
+
+      measureContainer();
+
+      const resizeObserver = new ResizeObserver((entries) => {
+        const entry = entries[0];
+        if (!entry) {
+          measureContainer();
+          return;
+        }
+
+        updateReadiness(entry.contentRect.width, entry.contentRect.height);
       });
-      setIsReady(true);
-    };
 
-    const measureContainer = () => {
-      const { height, width } = container.getBoundingClientRect();
-      updateReadiness(width, height);
-    };
+      resizeObserver.observe(container);
 
-    measureContainer();
+      cleanup = () => {
+        resizeObserver.disconnect();
+      };
+    }
 
-    const resizeObserver = new ResizeObserver((entries) => {
-      const entry = entries[0];
-      if (!entry) {
-        measureContainer();
-        return;
-      }
-
-      updateReadiness(entry.contentRect.width, entry.contentRect.height);
-    });
-
-    resizeObserver.observe(container);
-
-    return () => {
-      resizeObserver.disconnect();
-    };
+    return cleanup;
   }, []);
 
   return (

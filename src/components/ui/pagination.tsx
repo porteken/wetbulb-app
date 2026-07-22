@@ -45,6 +45,7 @@ function PaginationLink({
   className,
   isActive,
   size = "icon",
+  children,
   ...props
 }: PaginationLinkProps) {
   return (
@@ -59,7 +60,9 @@ function PaginationLink({
         data-slot="pagination-link"
         data-active={isActive}
         {...props}
-      />
+      >
+        {children}
+      </a>
     </Button>
   );
 }
@@ -159,7 +162,9 @@ const Pagination = ({ className, onChange, total, value }: PaginationProps) => {
             aria-label="Go to previous page"
             className="pl-1.5!"
             disabled={value <= 1}
-            onClick={() => onChange(value - 1)}
+            onClick={() => {
+              onChange(value - 1);
+            }}
             size="default"
             type="button"
             variant="ghost"
@@ -177,7 +182,9 @@ const Pagination = ({ className, onChange, total, value }: PaginationProps) => {
               <Button
                 aria-current={page === value ? "page" : undefined}
                 data-active={page === value}
-                onClick={() => onChange(page)}
+                onClick={() => {
+                  onChange(page);
+                }}
                 size="icon"
                 type="button"
                 variant={page === value ? "outline" : "ghost"}
@@ -195,7 +202,9 @@ const Pagination = ({ className, onChange, total, value }: PaginationProps) => {
             aria-label="Go to next page"
             className="pr-1.5!"
             disabled={value >= total}
-            onClick={() => onChange(value + 1)}
+            onClick={() => {
+              onChange(value + 1);
+            }}
             size="default"
             type="button"
             variant="ghost"

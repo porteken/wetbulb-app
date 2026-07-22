@@ -1,5 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import { GET } from "../route";
+
 interface TrendGraphData {
   increase_per_year: number;
   trendline_wetbulbs: number[];
@@ -32,8 +34,6 @@ vi.mock("@/lib/utils/validation", () => ({
   validateLocationId: mockValidateLocationId,
   validateTrendOption: mockValidateTrendOption,
 }));
-
-import { GET } from "../route";
 
 describe("get /api/data/trend", () => {
   beforeEach(() => {

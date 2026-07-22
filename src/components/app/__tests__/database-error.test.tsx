@@ -1,16 +1,13 @@
-import "@testing-library/jest-dom";
-
+import { reloadPage } from "@/utils/reload";
 import { fireEvent, render, screen } from "@testing-library/react";
 import React from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import { DatabaseError } from "../database-error";
+
 vi.mock("@/utils/reload", () => ({
   reloadPage: mockFn(),
 }));
-
-import { reloadPage } from "@/utils/reload";
-
-import { DatabaseError } from "../database-error";
 
 describe("databaseError", () => {
   beforeEach(() => {

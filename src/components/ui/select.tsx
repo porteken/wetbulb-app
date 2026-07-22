@@ -230,17 +230,19 @@ const Select = ({
   const searchInputRef = React.useRef<HTMLInputElement>(null);
 
   React.useEffect(() => {
-    if (!open || !searchable) {
-      return undefined;
+    let cleanup: (() => void) | undefined;
+
+    if (open && searchable) {
+      const frame = requestAnimationFrame(() => {
+        searchInputRef.current?.focus();
+      });
+
+      cleanup = () => {
+        cancelAnimationFrame(frame);
+      };
     }
 
-    const frame = requestAnimationFrame(() => {
-      searchInputRef.current?.focus();
-    });
-
-    return () => {
-      cancelAnimationFrame(frame);
-    };
+    return cleanup;
   }, [open, searchable]);
 
   const filteredData = React.useMemo(() => {
@@ -264,7 +266,7 @@ const Select = ({
         }
         return null;
       })
-      .filter(Boolean) as (SelectOption | SelectGroupOption)[];
+      .filter((item) => item !== null);
   }, [data, searchTerm]);
 
   const handleValueChange = (newValue: string) => {
@@ -280,7 +282,7 @@ const Select = ({
     }
   };
 
-  const hasValue = value !== undefined && value !== null && value !== "";
+  const hasValue = value !== undefined && value !== "";
 
   return (
     <div className={cn("flex flex-col gap-1.5", className)}>
@@ -306,9 +308,15 @@ const Select = ({
                 <SearchIcon className="mr-2 size-4 shrink-0 opacity-50" />
                 <input
                   className="placeholder:text-muted-foreground flex h-8 w-full rounded-md bg-transparent py-3 text-sm outline-none disabled:cursor-not-allowed disabled:opacity-50"
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  onClick={(e) => e.stopPropagation()}
-                  onKeyDown={(e) => e.stopPropagation()}
+                  onChange={(e) => {
+                    setSearchTerm(e.target.value);
+                  }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                  }}
+                  onKeyDown={(e) => {
+                    e.stopPropagation();
+                  }}
                   placeholder="Search..."
                   ref={searchInputRef}
                   value={searchTerm}

@@ -1,5 +1,9 @@
-import "@testing-library/jest-dom";
-
+import { RankingsMain } from "@/features/rankings";
+import {
+  setRankingsWetbulbLevel,
+  setRankingsSeason,
+  setRankingsYear,
+} from "@/lib/actions/actions";
 import {
   fireEvent,
   render,
@@ -157,13 +161,6 @@ vi.mock("@/components/ui/pagination", () => ({
     ),
   ),
 }));
-
-import { RankingsMain } from "@/features/rankings";
-import {
-  setRankingsWetbulbLevel,
-  setRankingsSeason,
-  setRankingsYear,
-} from "@/lib/actions/actions";
 
 const mockLocationOptions = [
   {

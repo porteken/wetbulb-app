@@ -1,5 +1,17 @@
 import { fireEvent, render, screen } from "@testing-library/react";
+import React from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+
+import LocationError from "../[id]/error";
+import AboutError from "../about/error";
+import Default from "../default";
+import ErrorPage from "../error";
+import GlobalErrorPage from "../global-error";
+import RootLayout, { metadata } from "../layout";
+import Loading from "../loading";
+import MapError from "../map/error";
+import NotFound from "../not-found";
+import RankingsError from "../rankings/error";
 
 const { captureExceptionMock, mockAppProviders } = vi.hoisted(() => ({
   captureExceptionMock: mockFn(),
@@ -30,19 +42,6 @@ vi.mock("next/link", () => ({
     </a>
   ),
 }));
-
-import React from "react";
-
-import LocationError from "../[id]/error";
-import AboutError from "../about/error";
-import Default from "../default";
-import ErrorPage from "../error";
-import GlobalErrorPage from "../global-error";
-import RootLayout, { metadata } from "../layout";
-import Loading from "../loading";
-import MapError from "../map/error";
-import NotFound from "../not-found";
-import RankingsError from "../rankings/error";
 
 describe("app shell and error pages", () => {
   beforeEach(() => {

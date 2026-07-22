@@ -1,6 +1,8 @@
 import { render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import Page from "../page";
+
 const {
   mockGetForecastPreferencesFromCookies,
   mockGetGraphMeasureFromCookies,
@@ -56,8 +58,6 @@ vi.mock("next/dynamic", () => ({
     },
   ),
 }));
-
-import Page from "../page";
 
 describe("page Component", () => {
   beforeEach(() => {

@@ -1,5 +1,4 @@
-import "@testing-library/jest-dom";
-
+import { ToastProvider } from "@/components/ui/toast";
 import {
   act,
   fireEvent,
@@ -8,6 +7,13 @@ import {
   screen,
 } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+
+import {
+  readCookieUnit,
+  UnitProvider,
+  useTemperatureUnit,
+} from "../unit-provider";
+import { UnitToggle } from "../unit-toggle";
 
 vi.unmock("@/components/app/unit-provider");
 
@@ -18,15 +24,6 @@ const { setTemperatureUnitMock } = vi.hoisted(() => ({
 vi.mock("@/lib/actions/actions", () => ({
   setTemperatureUnit: setTemperatureUnitMock,
 }));
-
-import { ToastProvider } from "@/components/ui/toast";
-
-import {
-  readCookieUnit,
-  UnitProvider,
-  useTemperatureUnit,
-} from "../unit-provider";
-import { UnitToggle } from "../unit-toggle";
 
 let cookieValue = "";
 

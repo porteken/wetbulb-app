@@ -1,5 +1,4 @@
-import "@testing-library/jest-dom";
-
+import { GenerateReferenceGraph, GenerateTrendGraph } from "@/features/graph";
 import { render, screen } from "@testing-library/react";
 import React from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
@@ -33,8 +32,6 @@ vi.mock("recharts", async () => ({
   XAxis: createRechartsStub("recharts-x-axis"),
   YAxis: yAxisMock,
 }));
-
-import { GenerateReferenceGraph, GenerateTrendGraph } from "@/features/graph";
 
 const mockTrendlineWetbulbs1 = [25, 26, 27];
 const mockYearWetbulbs1 = [25.2, 26.1, 27.4];

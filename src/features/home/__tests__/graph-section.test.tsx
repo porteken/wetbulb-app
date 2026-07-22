@@ -1,5 +1,3 @@
-import "@testing-library/jest-dom";
-
 import {
   MockForecastControls,
   MockSelectControl,
@@ -7,6 +5,8 @@ import {
 import { fireEvent, render, screen } from "@testing-library/react";
 import React from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+
+import { GraphSection } from "../components/graph-section";
 
 const mockPush = mockFn();
 
@@ -87,8 +87,6 @@ vi.mock("@/features/graph", () => ({
     <div data-testid="wetbulb-graph">Mock Graph</div>,
   ),
 }));
-
-import { GraphSection } from "../components/graph-section";
 
 const defaultProps: React.ComponentProps<typeof GraphSection> = {
   forecastEnabled: false,

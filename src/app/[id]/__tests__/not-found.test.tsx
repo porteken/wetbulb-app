@@ -1,6 +1,8 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
+import LocationNotFound from "../not-found";
+
 import type { ReactNode } from "react";
 
 vi.mock("next/link", () => ({
@@ -17,8 +19,6 @@ vi.mock("next/link", () => ({
     </a>
   ),
 }));
-
-import LocationNotFound from "../not-found";
 
 describe("location not-found page", () => {
   it("renders the missing location message and return link", () => {

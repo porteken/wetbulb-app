@@ -2,6 +2,8 @@ import { render, screen, within } from "@testing-library/react";
 import React from "react";
 import { describe, expect, it, vi } from "vitest";
 
+import AboutMain from "../components/about-main";
+
 vi.mock("next/link", () => ({
   default: ({ children, href, ...linkProperties }: any) => (
     <a href={href} {...linkProperties}>
@@ -19,8 +21,6 @@ vi.mock("@/features/header-bar", () => ({
     </div>
   )),
 }));
-
-import AboutMain from "../components/about-main";
 
 const mockLocationOptions = [
   {

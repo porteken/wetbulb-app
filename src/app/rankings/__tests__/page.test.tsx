@@ -1,5 +1,13 @@
+import {
+  RANKINGS_WETBULB_LEVEL_COOKIE_NAME,
+  RANKINGS_SEASON_COOKIE_NAME,
+  RANKINGS_STATE_COOKIE_NAME,
+  RANKINGS_YEAR_COOKIE_NAME,
+} from "@/lib/constants";
 import { render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+
+import RankingsPage, { metadata } from "../page";
 
 const {
   mockCookies,
@@ -27,15 +35,6 @@ vi.mock("@/lib/api/fetch-server", () => ({
   FetchCityRankings: mockFetchCityRankings,
   FetchLocations: mockFetchLocations,
 }));
-
-import {
-  RANKINGS_WETBULB_LEVEL_COOKIE_NAME,
-  RANKINGS_SEASON_COOKIE_NAME,
-  RANKINGS_STATE_COOKIE_NAME,
-  RANKINGS_YEAR_COOKIE_NAME,
-} from "@/lib/constants";
-
-import RankingsPage, { metadata } from "../page";
 
 const createCookieStore = (values: Partial<Record<string, string>>) => ({
   get: (name: string) => {

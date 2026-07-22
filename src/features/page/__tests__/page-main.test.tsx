@@ -1,8 +1,15 @@
+import { GenerateReferenceGraph, GenerateTrendGraph } from "@/features/graph";
+import {
+  FetchReferenceGraphData,
+  FetchTrendGraphData,
+} from "@/lib/api/fetch-client";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { act, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import React from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+
+import { PageMain } from "../components/page-main";
 
 const renderWithQueryClient = (ui: React.ReactElement) => {
   const queryClient = new QueryClient({
@@ -15,12 +22,12 @@ const renderWithQueryClient = (ui: React.ReactElement) => {
 };
 
 vi.mock("@/features/graph", () => ({
-  GenerateReferenceGraph: mockFn().mockReturnValue(
-    <div data-testid="reference-graph" />,
-  ),
-  GenerateTrendGraph: mockFn().mockReturnValue(
-    <div data-testid="trend-graph" />,
-  ),
+  GenerateReferenceGraph: mockFn().mockImplementation(() => (
+    <div data-testid="reference-graph" />
+  )),
+  GenerateTrendGraph: mockFn().mockImplementation(() => (
+    <div data-testid="trend-graph" />
+  )),
 }));
 
 vi.mock("@/features/header-bar", () => ({
@@ -70,14 +77,6 @@ vi.mock("@/lib/api/fetch-client", () => ({
     years: [2020, 2021, 2022],
   }),
 }));
-
-import { GenerateReferenceGraph, GenerateTrendGraph } from "@/features/graph";
-import {
-  FetchReferenceGraphData,
-  FetchTrendGraphData,
-} from "@/lib/api/fetch-client";
-
-import { PageMain } from "../components/page-main";
 
 let fetchMock: ReturnType<typeof vi.fn>;
 
