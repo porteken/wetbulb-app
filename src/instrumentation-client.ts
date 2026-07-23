@@ -1,8 +1,4 @@
-import {
-  captureRouterTransitionStart,
-  init,
-  replayIntegration,
-} from "@sentry/nextjs";
+import { init, replayIntegration } from "@sentry/nextjs";
 
 const DEFAULT_TRACES_SAMPLE_RATE = 0.1;
 const isE2ETestRun = process.env.NEXT_PUBLIC_E2E_TEST === "true";
@@ -14,7 +10,7 @@ const shouldEnableReplay =
 const tracesSampleRate = Number(
   process.env.NEXT_PUBLIC_SENTRY_TRACES_SAMPLE_RATE,
 );
-export const onRouterTransitionStart = captureRouterTransitionStart;
+export { captureRouterTransitionStart as onRouterTransitionStart } from "@sentry/nextjs";
 init({
   debug: false,
 
