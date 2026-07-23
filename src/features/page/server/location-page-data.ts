@@ -216,8 +216,14 @@ const fetchGraphData = async ({
         String(GRAPH_CONFIG.YEAR_RANGE.END),
         locationId,
         DEFAULT_GRAPH_SEASON,
+        basis,
       ),
-      FetchReferenceGraphData(referenceYear, locationId, DEFAULT_GRAPH_SEASON),
+      FetchReferenceGraphData(
+        referenceYear,
+        locationId,
+        DEFAULT_GRAPH_SEASON,
+        basis,
+      ),
     ]);
 
   let forecastData: ForecastGraphData | undefined;

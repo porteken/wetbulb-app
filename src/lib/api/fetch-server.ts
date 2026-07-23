@@ -298,8 +298,10 @@ async function fetchReferenceGraphDataUncached(
   year: string,
   locationId: number,
   season: GraphSeason = DEFAULT_GRAPH_SEASON,
+  basis: WetbulbBasis = DEFAULT_WETBULB_BASIS,
 ): Promise<ReferenceGraphDataProperties> {
   const resolvedSeason = normalizeGraphSeason(season);
+  const resolvedBasis = normalizeWetbulbBasis(basis);
 
   if (!validateLocationId(locationId)) {
     throw new DatabaseError(`Invalid locationId: ${locationId}`);
@@ -313,7 +315,7 @@ async function fetchReferenceGraphDataUncached(
 
   let rows;
   try {
-    rows = await fetchReferenceGraphRowsCached(locationId, year);
+    rows = await fetchReferenceGraphRowsCached(locationId, year, resolvedBasis);
   } catch (error) {
     throw new DatabaseError(
       "Failed to fetch reference graph data from database",

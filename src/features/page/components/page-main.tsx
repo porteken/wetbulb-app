@@ -108,6 +108,7 @@ const Main: FC<PageProperties> = ({
             id={id}
             initialHasError={graphDataError}
             initialReferenceYear={initialReferenceYear}
+            initialWetbulbBasis={initialWetbulbBasis}
             onReferenceYearChange={handleReferenceYearChange}
             referenceYear={selectedReferenceYear}
             ReferenceWetbulbs={ReferenceWetbulbs}

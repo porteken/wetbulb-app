@@ -51,6 +51,7 @@ interface WetbulbTable {
   date: Date | string;
   location_id: number;
   wetbulb: NumericLike;
+  wetbulb_avg: NumericLike | null;
 }
 
 export interface WetbulbYearStatsTable {

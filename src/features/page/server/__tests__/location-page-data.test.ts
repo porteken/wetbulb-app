@@ -335,12 +335,14 @@ describe("loadLocationPageData", () => {
       "2025",
       7,
       "Annual",
+      "max",
     );
     expect(mockFetchReferenceGraphData).toHaveBeenNthCalledWith(
       2,
       "2010",
       7,
       "Annual",
+      "max",
     );
     expect(mockFetchForecastData).toHaveBeenCalledWith(7, 25, {
       basis: "max",
@@ -444,6 +446,7 @@ describe("loadLocationPageData", () => {
       "2025",
       0,
       "Annual",
+      "max",
     );
   });
 
@@ -499,6 +502,7 @@ describe("loadLocationPageData", () => {
       "2025",
       7,
       "Annual",
+      "max",
     );
   });
 
@@ -548,6 +552,7 @@ describe("loadLocationPageData", () => {
       DEFAULT_REFERENCE_YEAR,
       7,
       "Annual",
+      "max",
     );
   });
 

@@ -1,5 +1,10 @@
 import { FetchReferenceGraphData } from "@/lib/api/fetch-server";
-import { DEFAULT_GRAPH_SEASON, normalizeGraphSeason } from "@/lib/constants";
+import {
+  DEFAULT_GRAPH_SEASON,
+  DEFAULT_WETBULB_BASIS,
+  normalizeGraphSeason,
+  normalizeWetbulbBasis,
+} from "@/lib/constants";
 import { validateLocationId, validateYear } from "@/lib/utils/validation";
 import { NextResponse } from "next/server";
 
@@ -17,6 +22,9 @@ export async function GET(request: Request) {
   const season = normalizeGraphSeason(
     url.searchParams.get("season") ?? DEFAULT_GRAPH_SEASON,
   );
+  const basis = normalizeWetbulbBasis(
+    url.searchParams.get("basis") ?? DEFAULT_WETBULB_BASIS,
+  );
 
   if (!validateLocationId(locationId)) {
     return NextResponse.json({ error: "Invalid location ID" }, { status: 400 });
@@ -30,7 +38,7 @@ export async function GET(request: Request) {
   }
 
   try {
-    const data = await FetchReferenceGraphData(year, locationId, season);
+    const data = await FetchReferenceGraphData(year, locationId, season, basis);
     return createCachedDataRouteResponse(data);
   } catch (error) {
     return createDataRouteErrorResponse(

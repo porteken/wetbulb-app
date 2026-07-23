@@ -147,18 +147,28 @@ const getRuntimeTrendRows = (
   );
 };
 
-const getRuntimeReferenceRows = (locationId: number, year: string) => {
+const getRuntimeReferenceRows = (
+  locationId: number,
+  year: string,
+  basis: WetbulbBasis = DEFAULT_WETBULB_BASIS,
+) => {
   const start = `${year}-01-01`;
   const end = `${Number(year) + 1}-01-01`;
   const rows = getRuntimeMockTableRows("wetbulb");
 
-  return sortBy(
-    rows.filter(
-      (row) =>
-        row.location_id === locationId && row.date >= start && row.date < end,
-    ),
-    "date",
+  const filtered = rows.filter(
+    (row) =>
+      row.location_id === locationId && row.date >= start && row.date < end,
   );
+
+  const mapped =
+    basis === "avg"
+      ? filtered
+          .filter((row) => row.wetbulb_avg !== null)
+          .map((row) => ({ ...row, wetbulb: row.wetbulb_avg }))
+      : filtered;
+
+  return sortBy(mapped, "date");
 };
 
 const getRuntimeHistoricalYearRow = (
@@ -459,25 +469,52 @@ export async function fetchTrendGraphRows(
   }
 }
 
-export function fetchReferenceGraphRows(locationId: number, year: string) {
+export function fetchReferenceGraphRows(
+  locationId: number,
+  year: string,
+  basis: WetbulbBasis = DEFAULT_WETBULB_BASIS,
+) {
   if (shouldUseRuntimeDbMocks()) {
-    return Promise.resolve(getRuntimeReferenceRows(locationId, year));
+    return Promise.resolve(getRuntimeReferenceRows(locationId, year, basis));
   }
 
-  return withDbRetry(() =>
-    getDb()
+  const buildQuery = (useAvgColumn: boolean) => {
+    let query = getDb()
       .selectFrom("wetbulb")
       .select((eb) => [
         sql<string>`cast(${eb.ref("date")} as text)`.as("date"),
         "location_id",
-        "wetbulb",
+        useAvgColumn
+          ? eb.ref("wetbulb_avg").as("wetbulb")
+          : eb.ref("wetbulb").as("wetbulb"),
       ])
       .where("location_id", "=", locationId)
       .where("date", ">=", `${year}-01-01`)
-      .where("date", "<", `${Number(year) + 1}-01-01`)
-      .orderBy("date", "asc")
-      .execute(),
-  );
+      .where("date", "<", `${Number(year) + 1}-01-01`);
+
+    if (useAvgColumn) {
+      query = query.where("wetbulb_avg", "is not", null);
+    }
+
+    return query.orderBy("date", "asc");
+  };
+
+  const runQuery = async (useAvgColumn: boolean) => {
+    try {
+      return await withDbRetry(() => buildQuery(useAvgColumn).execute());
+    } catch (error) {
+      if (
+        useAvgColumn &&
+        isMissingColumnError(error, "wetbulb", "wetbulb_avg")
+      ) {
+        return runQuery(false);
+      }
+
+      throw classifyDbError(error);
+    }
+  };
+
+  return runQuery(basis === "avg");
 }
 
 export async function fetchHistoricalYearRow(

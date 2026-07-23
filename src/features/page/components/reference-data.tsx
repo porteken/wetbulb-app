@@ -1,11 +1,16 @@
 "use client";
 
+import { useWetbulbBasis } from "@/components/app/basis-provider";
 import { ChartSkeleton } from "@/components/app/chart-skeleton";
 import { useTemperatureUnit } from "@/components/app/unit-provider";
 import { ErrorGraphDisplay } from "@/features/home/components/error-graph-display";
 import { useIsMobileViewport } from "@/hooks/use-is-mobile-viewport";
 import { getReferenceGraphQueryOptions } from "@/lib/api/query-client";
-import { DEFAULT_GRAPH_SEASON, GRAPH_CONFIG } from "@/lib/constants";
+import {
+  DEFAULT_GRAPH_SEASON,
+  GRAPH_CONFIG,
+  type WetbulbBasis,
+} from "@/lib/constants";
 import { YearOptions } from "@/lib/utils/select-options";
 import { useQuery } from "@tanstack/react-query";
 import dynamic from "next/dynamic";
@@ -17,6 +22,7 @@ interface ReferenceDataProperties {
   id: number;
   initialHasError?: boolean;
   initialReferenceYear: string;
+  initialWetbulbBasis: WetbulbBasis;
   onReferenceYearChange: (referenceYear: string) => void;
   referenceYear: string;
   ReferenceWetbulbs: number[];
@@ -45,6 +51,7 @@ const ReferenceDataComponent: React.FC<ReferenceDataProperties> = ({
   id,
   initialHasError = false,
   initialReferenceYear,
+  initialWetbulbBasis,
   onReferenceYearChange,
   referenceYear,
   ReferenceWetbulbs,
@@ -56,26 +63,58 @@ const ReferenceDataComponent: React.FC<ReferenceDataProperties> = ({
   const isMobileViewport = useIsMobileViewport();
   const [isMobileLegendOpen, setIsMobileLegendOpen] = React.useState(false);
   const { unit } = useTemperatureUnit();
+  const { basis } = useWetbulbBasis();
 
   const showReferenceLegend = !isMobileViewport || isMobileLegendOpen;
 
-  const initialReferenceData = React.useMemo(() => {
-    const hasValidInitialData =
-      CurrentDates.length > 0 &&
-      CurrentWetbulbs.length === CurrentDates.length &&
-      ReferenceWetbulbs.length === CurrentDates.length;
+  const currentYearKey = String(GRAPH_CONFIG.YEAR_RANGE.END);
 
-    return hasValidInitialData
-      ? { dates: CurrentDates, wetbulbs: ReferenceWetbulbs }
-      : undefined;
-  }, [CurrentDates, CurrentWetbulbs.length, ReferenceWetbulbs]);
+  const hasValidInitialData =
+    CurrentDates.length > 0 &&
+    CurrentWetbulbs.length === CurrentDates.length &&
+    ReferenceWetbulbs.length === CurrentDates.length;
+  const isInitialBasis = basis === initialWetbulbBasis;
+
+  const initialReferenceData = React.useMemo(
+    () =>
+      hasValidInitialData
+        ? { dates: CurrentDates, wetbulbs: ReferenceWetbulbs }
+        : undefined,
+    [hasValidInitialData, CurrentDates, ReferenceWetbulbs],
+  );
+
+  const initialCurrentData = React.useMemo(
+    () =>
+      hasValidInitialData
+        ? { dates: CurrentDates, wetbulbs: CurrentWetbulbs }
+        : undefined,
+    [hasValidInitialData, CurrentDates, CurrentWetbulbs],
+  );
 
   const referenceQuery = useQuery({
-    ...getReferenceGraphQueryOptions(id, referenceYear),
+    ...getReferenceGraphQueryOptions(
+      id,
+      referenceYear,
+      DEFAULT_GRAPH_SEASON,
+      basis,
+    ),
     initialData:
-      referenceYear === initialReferenceYear ? initialReferenceData : undefined,
+      referenceYear === initialReferenceYear && isInitialBasis
+        ? initialReferenceData
+        : undefined,
   });
 
+  const currentQuery = useQuery({
+    ...getReferenceGraphQueryOptions(
+      id,
+      currentYearKey,
+      DEFAULT_GRAPH_SEASON,
+      basis,
+    ),
+    initialData: isInitialBasis ? initialCurrentData : undefined,
+  });
+
+  const currentWetbulbs = currentQuery.data?.wetbulbs ?? CurrentWetbulbs;
   const referenceGraphSnapshot = referenceQuery.data;
   const hasReferenceError =
     referenceQuery.isError || (initialHasError && !referenceQuery.data);
@@ -165,7 +204,7 @@ const ReferenceDataComponent: React.FC<ReferenceDataProperties> = ({
                   >
                     <div className="h-full min-w-full" style={containerStyle}>
                       <GenerateReferenceGraph
-                        currentWetbulbs={CurrentWetbulbs}
+                        currentWetbulbs={currentWetbulbs}
                         currentYear={
                           CurrentDates.at(-1)?.getUTCFullYear() ??
                           GRAPH_CONFIG.YEAR_RANGE.END

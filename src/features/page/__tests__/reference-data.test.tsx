@@ -1,5 +1,7 @@
+import { BasisProvider } from "@/components/app/basis-provider";
 import { GenerateReferenceGraph } from "@/features/graph";
 import { FetchReferenceGraphData } from "@/lib/api/fetch-client";
+import { DEFAULT_WETBULB_BASIS } from "@/lib/constants";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import React from "react";
@@ -12,7 +14,9 @@ const renderWithQueryClient = (ui: React.ReactElement) => {
     defaultOptions: { queries: { retry: false } },
   });
   const Wrapper = ({ children }: { children: React.ReactNode }) => (
-    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+    <QueryClientProvider client={queryClient}>
+      <BasisProvider>{children}</BasisProvider>
+    </QueryClientProvider>
   );
   return render(ui, { wrapper: Wrapper });
 };
@@ -35,6 +39,7 @@ const defaultProps: React.ComponentProps<typeof ReferenceData> = {
   CurrentWetbulbs: [22, 24],
   id: 1,
   initialReferenceYear: "2000",
+  initialWetbulbBasis: DEFAULT_WETBULB_BASIS,
   onReferenceYearChange: mockFn(),
   referenceYear: "2000",
   ReferenceWetbulbs: [18, 20],
@@ -154,7 +159,12 @@ describe("referenceData", () => {
     );
 
     await waitFor(() => {
-      expect(FetchReferenceGraphData).toHaveBeenCalledWith("2001", 1, "Annual");
+      expect(FetchReferenceGraphData).toHaveBeenCalledWith(
+        "2001",
+        1,
+        "Annual",
+        "max",
+      );
     });
   });
 
@@ -189,7 +199,12 @@ describe("referenceData", () => {
     );
 
     await waitFor(() => {
-      expect(FetchReferenceGraphData).toHaveBeenCalledWith("2000", 1, "Annual");
+      expect(FetchReferenceGraphData).toHaveBeenCalledWith(
+        "2000",
+        1,
+        "Annual",
+        "max",
+      );
     });
   });
 });

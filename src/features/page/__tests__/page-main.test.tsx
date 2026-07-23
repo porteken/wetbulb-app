@@ -263,6 +263,7 @@ describe("pageMain", () => {
           "2001",
           1,
           "Annual",
+          "max",
         );
         expect(GenerateReferenceGraph).toHaveBeenCalled();
       });

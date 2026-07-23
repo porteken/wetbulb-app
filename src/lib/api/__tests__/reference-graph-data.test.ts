@@ -34,7 +34,7 @@ describe("reference-graph-data", () => {
     const result = await FetchReferenceGraphData("2023", 1);
 
     expect(fetchMock).toHaveBeenCalledWith(
-      "/api/data/reference?locationId=1&season=Annual&year=2023",
+      "/api/data/reference?basis=max&locationId=1&season=Annual&year=2023",
       expect.any(Object),
     );
     expect(result).toStrictEqual({

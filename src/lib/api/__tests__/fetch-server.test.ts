@@ -344,6 +344,7 @@ describe("fetch-server", () => {
       expect(mockDbQueries.fetchReferenceGraphRows).toHaveBeenCalledWith(
         5,
         "2023",
+        "max",
       );
       expect(result).toStrictEqual({
         dates: [new Date("2023-01-01"), new Date("2023-01-02")],

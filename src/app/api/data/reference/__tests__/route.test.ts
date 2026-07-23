@@ -94,6 +94,7 @@ describe("get /api/data/reference", () => {
       "2025",
       9,
       "Winter",
+      "max",
     );
   });
 
@@ -115,6 +116,7 @@ describe("get /api/data/reference", () => {
       "2025",
       9,
       "Annual",
+      "max",
     );
   });
 
