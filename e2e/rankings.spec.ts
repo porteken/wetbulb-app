@@ -16,9 +16,6 @@ test.describe("Rankings Page", () => {
       timeout: 10_000,
     });
 
-    // `.first()` tolerates the App Router's transient double-render during
-    // hydration, which briefly duplicates the table before it self-heals
-    // (see the "wetbulb index legend" test for the same quirk).
     await expect(page.locator("table").first()).toBeVisible();
 
     const rows = page.locator("table").first().locator("tbody tr");
@@ -48,12 +45,6 @@ test.describe("Rankings Page", () => {
   test("should display wetbulb index legend", async ({ page }) => {
     await page.goto("/rankings");
 
-    // Scope to the legend region by id. A bare getByText("Wetbulb Index") is
-    // ambiguous: it also substring-matches the "Show/Hide Wetbulb Index"
-    // collapse toggle, tripping a strict-mode violation at the `xl` breakpoint.
-    // `.first()` additionally tolerates the App Router's transient double-render
-    // during hydration, which briefly duplicates the region before it
-    // self-heals (see getSettledGraphMeasureSelect for the same quirk).
     const legendSection = page
       .locator("#rankings-wetbulb-index-legend")
       .first();

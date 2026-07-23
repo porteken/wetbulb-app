@@ -5,8 +5,6 @@ export const isWebglSupported = (): boolean => {
 
   try {
     const canvas = document.createElement("canvas");
-    // MapLibre GL v4+ requires WebGL2; probing it up front avoids the
-    // "Failed to initialize WebGL" throw from the Map constructor.
     const context = canvas.getContext("webgl2");
     if (!context) {
       return false;

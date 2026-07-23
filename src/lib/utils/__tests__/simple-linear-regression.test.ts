@@ -210,7 +210,7 @@ describe("simpleLinearRegression", () => {
       expect(regression.slope).toBe(0);
       expect(Number.isFinite(regression.predict(5))).toBe(true);
       expect(Number.isFinite(regression.predict(0))).toBe(true);
-      expect(regression.predict(5)).toBe(2); // mean of [1,2,3]
+      expect(regression.predict(5)).toBe(2);
     });
 
     it("should produce finite confidence bounds with constant x values", () => {

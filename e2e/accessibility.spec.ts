@@ -18,10 +18,6 @@ test.describe("Accessibility", () => {
     await page.goto("/");
 
     await page.keyboard.press("Tab");
-    // `.first()` tolerates the App Router's transient double-render during
-    // hydration, which briefly duplicates the skip link before it self-heals
-    // (see getSettledGraphMeasureSelect for the same quirk). Tab lands on the
-    // first skip link, so asserting focus on `.first()` is correct.
     await expect(page.locator(".skip-link").first()).toBeFocused();
     await page.keyboard.press("Enter");
     await expect(page).toHaveURL(/#main-content$/u);
