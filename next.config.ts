@@ -1,12 +1,14 @@
 import initializeBundleAnalyzer from "@next/bundle-analyzer";
 import { withSentryConfig } from "@sentry/nextjs";
 
+import type { NextConfig } from "next";
+
 const withBundleAnalyzer = initializeBundleAnalyzer({
   enabled: process.env.BUNDLE_ANALYZER_ENABLED === "true",
 });
 const projectRoot = import.meta.dirname;
 
-const nextConfig = {
+const nextConfig: NextConfig = {
   output: "standalone",
   outputFileTracingRoot: projectRoot,
   serverExternalPackages: ["pg"],
@@ -21,20 +23,14 @@ const nextConfig = {
 
 export default withSentryConfig(withBundleAnalyzer(nextConfig), {
   org: "personal-project-0l",
-
   project: "javascript-nextjs",
-
   silent: !process.env.CI,
-
-  widenClientFileUpload: true,
-
   tunnelRoute: "/monitoring",
-
   webpack: {
     automaticVercelMonitors: true,
-
     treeshake: {
       removeDebugLogging: true,
     },
   },
+  widenClientFileUpload: true,
 });
