@@ -230,9 +230,7 @@ const fetchGraphData = async ({
   if (forecastPromise) {
     try {
       forecastData = await forecastPromise;
-    } catch {
-      // Forecast data is optional; leave forecastData unset on failure.
-    }
+    } catch {}
   }
 
   const emptyGraphData = createEmptyGraphData();

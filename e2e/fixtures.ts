@@ -4,11 +4,6 @@ import type { ConsoleMessage, Response, WebError } from "@playwright/test";
 
 export { expect } from "@playwright/test";
 
-/**
- * Global allowlist for expected console errors (e.g. framework noise). Must
- * start empty — entries are added deliberately, one at a time, with a
- * comment justifying each as unambiguous non-application noise.
- */
 const GLOBAL_ALLOWED_CONSOLE_ERRORS: RegExp[] = [];
 
 type BrowserErrorSource = "console" | "pageerror" | "response" | "weberror";

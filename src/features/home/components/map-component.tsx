@@ -451,9 +451,7 @@ export const MapComponent = memo<MapComponentProperties>(
           if (!isCancelled) {
             setMapLib(loadedMapLib);
           }
-        } catch {
-          // Ignore map library load failures and keep fallback UI.
-        }
+        } catch {}
       };
 
       void loadMapLibrary();

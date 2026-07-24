@@ -53,15 +53,6 @@ export async function waitForMapPage(page: Page): Promise<void> {
   });
 }
 
-/**
- * Returns the `select#graph-measure` locator once the DOM has settled to
- * exactly one instance. During App Router page load the trend panel can
- * briefly render twice, so the select momentarily resolves to 2 elements
- * before the duplicate self-heals within milliseconds. Waiting for the count
- * to settle to 1 tolerates that transient state (rather than tripping
- * Playwright's strict-mode violation) while still failing clearly if a
- * duplicate ever became permanent.
- */
 export async function getSettledGraphMeasureSelect(
   page: Page,
 ): Promise<Locator> {

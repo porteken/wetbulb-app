@@ -31,9 +31,7 @@ export const OptimizedMarker = memo<OptimizedMarkerProperties>(
 
       try {
         await onPrefetch(locationId);
-      } catch {
-        // Ignore prefetch failures
-      }
+      } catch {}
     }, [locationId, onPrefetch]);
 
     const handleMouseEnter = useCallback(() => {

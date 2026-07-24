@@ -214,9 +214,7 @@ const Home: FC<MapProperties> = ({
           basis: prefetchBasis,
           season: graphSeason,
         });
-      } catch {
-        // Ignore speculative prefetch failures.
-      }
+      } catch {}
     },
     [queryClient],
   );
