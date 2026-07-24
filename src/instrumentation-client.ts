@@ -10,6 +10,7 @@ const shouldEnableReplay =
 const tracesSampleRate = Number(
   process.env.NEXT_PUBLIC_SENTRY_TRACES_SAMPLE_RATE,
 );
+// noinspection JSUnusedGlobalSymbols -- Next.js reads this export to hook router transitions
 export { captureRouterTransitionStart as onRouterTransitionStart } from "@sentry/nextjs";
 init({
   debug: false,

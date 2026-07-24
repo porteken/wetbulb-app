@@ -91,10 +91,12 @@ vi.mock("next/navigation", () => ({
 }));
 
 vi.mock("@/components/app/unit-toggle", () => ({
+  // noinspection JSUnusedGlobalSymbols -- consumed by the mocked module
   UnitToggle: () => null,
 }));
 
 vi.mock("@/components/app/basis-toggle", () => ({
+  // noinspection JSUnusedGlobalSymbols -- consumed by the mocked module
   BasisToggle: () => null,
 }));
 
@@ -117,6 +119,7 @@ describe("headerBar", () => {
     const disconnect = mockFn();
     const observe = mockFn();
 
+    // noinspection JSUnusedGlobalSymbols -- ResizeObserver methods are invoked by React internals
     class MockResizeObserver {
       disconnect(): void {
         disconnect();

@@ -290,6 +290,7 @@ describe("fetch-server", () => {
 
         return {
           ...actual,
+          // noinspection JSUnusedGlobalSymbols -- overrides the mocked module member
           parseLocationRows: () => {
             throw new Error("Boom");
           },
