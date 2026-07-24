@@ -1,5 +1,10 @@
 import * as environment from "@/config/environment";
 import { DatabaseError } from "@/lib/utils/errors";
+import {
+  createDbError,
+  createFakeQuery,
+  type FakeQuery,
+} from "@/testing/db-query-helpers";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import {
@@ -20,27 +25,6 @@ vi.mock("../kysely", async (importOriginal) => {
 
 const { getDb } = await import("../kysely");
 const mockedGetDb = vi.mocked(getDb);
-
-const createDbError = (code: string, message: string) =>
-  Object.assign(new Error(message), { code });
-
-interface FakeQuery {
-  execute: () => Promise<unknown>;
-  orderBy: (...args: unknown[]) => FakeQuery;
-  select: (...args: unknown[]) => FakeQuery;
-  where: (...args: unknown[]) => FakeQuery;
-}
-
-const createFakeQuery = (execute: () => Promise<unknown>): FakeQuery => {
-  const select = vi.fn<(...args: unknown[]) => FakeQuery>();
-  const orderBy = vi.fn<(...args: unknown[]) => FakeQuery>();
-  const where = vi.fn<(...args: unknown[]) => FakeQuery>();
-  const query: FakeQuery = { execute, orderBy, select, where };
-  select.mockReturnValue(query);
-  where.mockReturnValue(query);
-  orderBy.mockReturnValue(query);
-  return query;
-};
 
 const mockSelectFromQueue = (executes: Array<() => Promise<unknown>>) => {
   const queries = executes.map((execute) => createFakeQuery(execute));

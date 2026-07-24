@@ -472,6 +472,20 @@ describe("setRankingsWetbulbLevel", () => {
   });
 });
 
+const setupSecureCookieTest = async () => {
+  vi.doMock("next/headers", () => ({
+    cookies: mockFn().mockResolvedValue({ set: mockFn() }),
+  }));
+  vi.doMock("next/cache", () => ({ revalidatePath: mockFn() }));
+
+  const actionsModule = await import("../actions");
+  const { cookies } = await import("next/headers");
+  const cookiesResult = await cookies();
+  const mockSet = vi.mocked(cookiesResult.set);
+
+  return { actionsModule, mockSet };
+};
+
 describe("cookie security", () => {
   afterEach(() => {
     vi.resetModules();
@@ -483,15 +497,7 @@ describe("cookie security", () => {
     vi.stubEnv("NODE_ENV", "production");
     vi.stubEnv("NEXT_PUBLIC_E2E_TEST", "false");
 
-    vi.doMock("next/headers", () => ({
-      cookies: mockFn().mockResolvedValue({ set: mockFn() }),
-    }));
-    vi.doMock("next/cache", () => ({ revalidatePath: mockFn() }));
-
-    const actionsModule = await import("../actions");
-    const { cookies } = await import("next/headers");
-    const cookiesResult = await cookies();
-    const mockSet = vi.mocked(cookiesResult.set);
+    const { actionsModule, mockSet } = await setupSecureCookieTest();
 
     await actionsModule.setGraphMeasure("avg");
 
@@ -507,15 +513,7 @@ describe("cookie security", () => {
     vi.stubEnv("NODE_ENV", "production");
     vi.stubEnv("NEXT_PUBLIC_E2E_TEST", "true");
 
-    vi.doMock("next/headers", () => ({
-      cookies: mockFn().mockResolvedValue({ set: mockFn() }),
-    }));
-    vi.doMock("next/cache", () => ({ revalidatePath: mockFn() }));
-
-    const actionsModule = await import("../actions");
-    const { cookies } = await import("next/headers");
-    const cookiesResult = await cookies();
-    const mockSet = vi.mocked(cookiesResult.set);
+    const { actionsModule, mockSet } = await setupSecureCookieTest();
 
     await actionsModule.setGraphMeasure("avg");
 

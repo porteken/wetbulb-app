@@ -1,5 +1,10 @@
 import * as environment from "@/config/environment";
 import { DatabaseError } from "@/lib/utils/errors";
+import {
+  createDbError,
+  createFakeQuery,
+  type FakeQuery,
+} from "@/testing/db-query-helpers";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { fetchForecastRows } from "../queries";
@@ -19,33 +24,12 @@ const mockedGetDb = vi.mocked(getDb);
 
 const queryWindow = { lastHistoricalYear: 2020, targetYear: 2030 };
 
-const createDbError = (code: string, message: string) =>
-  Object.assign(new Error(message), { code });
-
 interface ForecastRow {
   lower: number;
   upper: number;
   wetbulb: number;
   year: number;
 }
-
-interface FakeQuery {
-  execute: () => Promise<unknown>;
-  orderBy: (...args: unknown[]) => FakeQuery;
-  select: (...args: unknown[]) => FakeQuery;
-  where: (...args: unknown[]) => FakeQuery;
-}
-
-const createFakeQuery = (execute: () => Promise<unknown>): FakeQuery => {
-  const select = vi.fn<(...args: unknown[]) => FakeQuery>();
-  const orderBy = vi.fn<(...args: unknown[]) => FakeQuery>();
-  const where = vi.fn<(...args: unknown[]) => FakeQuery>();
-  const query: FakeQuery = { execute, orderBy, select, where };
-  select.mockReturnValue(query);
-  where.mockReturnValue(query);
-  orderBy.mockReturnValue(query);
-  return query;
-};
 
 describe("fetchForecastRows retry and fallback behavior", () => {
   beforeEach(() => {

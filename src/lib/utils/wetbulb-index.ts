@@ -27,12 +27,7 @@ interface WetbulbIndexLegendItem {
   colorClass: string;
   fillClass: string;
   level: WetbulbIndexLevel;
-  /** Upper bound in °C — the DB stores wetbulb values in Celsius, so
-   * classification always compares against this, regardless of display unit. */
   max?: number;
-  /** Clean Fahrenheit range label — sourced independently from the °C
-   * thresholds (rounded to the nearest °F), not derived from `max` at
-   * render time, to avoid rounding drift. */
   rangeLabelC: string;
   rangeLabelF: string;
 }

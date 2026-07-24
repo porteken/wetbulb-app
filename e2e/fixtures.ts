@@ -44,16 +44,6 @@ const isSameOrigin = (url: string, baseURL: string | undefined): boolean => {
 
 const WEBKIT_ACCESS_CONTROL_SUFFIX = "due to access control checks.";
 
-/**
- * WebKit surfaces fetches that were aborted by client-side navigation (a
- * Next.js RSC prefetch, or the in-flight document request cancelled by a
- * reload) as an access-control failure instead of an AbortError. This is a
- * WebKit/Next.js cancellation quirk, not an application error. A same-origin
- * request cannot genuinely fail a CORS/access-control check, so any
- * access-control message that points at the app's own origin is this false
- * positive. RSC prefetch messages additionally carry an `_rsc` query param,
- * but the cancelled-document variant reports only the bare route.
- */
 const isWebKitAccessControlAbort = (
   message: string,
   baseURL: string | undefined,
