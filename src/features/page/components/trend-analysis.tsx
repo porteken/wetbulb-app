@@ -174,7 +174,7 @@ const TrendAnalysisComponent: React.FC<TrendAnalysisProperties> = ({
 
     const result = deriveTrendAnalysis(
       trendQuery.data,
-      forecastQuery.data ?? undefined,
+      forecastEnabled ? (forecastQuery.data ?? undefined) : undefined,
       selectedGraphMeasure,
       { season: graphSeason, unit },
     );
@@ -187,6 +187,7 @@ const TrendAnalysisComponent: React.FC<TrendAnalysisProperties> = ({
   }, [
     trendQuery.data,
     forecastQuery.data,
+    forecastEnabled,
     selectedGraphMeasure,
     graphSeason,
     unit,
