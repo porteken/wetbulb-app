@@ -163,9 +163,13 @@ const getRuntimeReferenceRows = (
 
   const mapped =
     basis === "avg"
-      ? filtered
-          .filter((row) => row.wetbulb_avg !== null)
-          .map((row) => ({ ...row, wetbulb: row.wetbulb_avg }))
+      ? filtered.map((row) => ({
+          date: row.date,
+          location_id: row.location_id,
+          wetbulb: row.wetbulb_avg,
+          wetbulb_avg: row.wetbulb_avg,
+          year: row.year,
+        }))
       : filtered;
 
   return sortBy(mapped, "date");
