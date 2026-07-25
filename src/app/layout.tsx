@@ -3,6 +3,7 @@ import "./globals.css";
 import { AppProviders } from "@/components/app/providers";
 import { cn } from "@/lib/utils";
 import { Analytics } from "@vercel/analytics/next";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Geist } from "next/font/google";
 import * as React from "react";
 
@@ -30,7 +31,10 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <body className="min-h-screen app-shell" suppressHydrationWarning>
-        <AppProviders>{children}</AppProviders>
+        <AppProviders>
+          {children}
+          <SpeedInsights />
+        </AppProviders>
         {!IS_E2E_TEST_ENVIRONMENT && <Analytics />}
       </body>
     </html>
