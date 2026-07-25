@@ -9,6 +9,12 @@ const withBundleAnalyzer = initializeBundleAnalyzer({
 const projectRoot = import.meta.dirname;
 
 const nextConfig: NextConfig = {
+  // Inlines the render-blocking stylesheet into the streamed HTML, removing a
+  // round trip that cost ~450ms of FCP on a cold cache: the 15KB stylesheet was
+  // competing for bandwidth with ~437KB gz of async JS requested from <head>.
+  experimental: {
+    inlineCss: true,
+  },
   output: "standalone",
   outputFileTracingRoot: projectRoot,
   serverExternalPackages: ["pg"],

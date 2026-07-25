@@ -34,6 +34,7 @@ import {
   fetchTrendGraphRows,
 } from "@/lib/db/queries";
 import { DatabaseError } from "@/lib/utils/errors";
+import { groupLocationsByState } from "@/lib/utils/location-options";
 import {
   validateLocationId,
   validateTrendOption,
@@ -43,7 +44,6 @@ import { unstable_cache } from "next/cache";
 
 import type {
   FetchLocationProperties,
-  LocationOptionSection,
   ReferenceGraphDataProperties,
   TrendGraphDataProperties,
 } from "@/types/types";
@@ -169,27 +169,10 @@ async function fetchLocationsUncached(): Promise<FetchLocationProperties> {
     sanitizedLocations,
   );
 
-  const groupedByState = new Map<
-    string,
-    Array<{ key: number; title: string }>
-  >();
-  for (const { city, location_id, state } of validatedLocations) {
-    const stateLocations = groupedByState.get(state);
-    if (stateLocations) {
-      stateLocations.push({ key: location_id, title: city });
-    } else {
-      groupedByState.set(state, [{ key: location_id, title: city }]);
-    }
-  }
-
-  const LocationOptions: LocationOptionSection[] = [...groupedByState.entries()]
-    .toSorted((a, b) => a[0].localeCompare(b[0]))
-    .map(([state, stateLocations]) => ({
-      items: stateLocations.toSorted((a, b) => a.title.localeCompare(b.title)),
-      title: state,
-    }));
-
-  return { LocationOptions, locations: validatedLocations };
+  return {
+    LocationOptions: groupLocationsByState(validatedLocations),
+    locations: validatedLocations,
+  };
 }
 
 interface ForecastDataFilters {

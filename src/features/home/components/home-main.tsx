@@ -13,6 +13,7 @@ import {
 } from "@/lib/actions/actions";
 import { prefetchTrendGraphData, queryKeys } from "@/lib/api/query-client";
 import { normalizeGraphSeason, type GraphSeason } from "@/lib/constants";
+import { groupLocationsByState } from "@/lib/utils/location-options";
 import { GraphOptions, SeasonOptions } from "@/lib/utils/select-options";
 import { deriveTrendAnalysis } from "@/lib/utils/trend-analysis";
 import { useQueryClient } from "@tanstack/react-query";
@@ -47,7 +48,6 @@ const Home: FC<MapProperties> = ({
   initialForecastYearsAhead,
   initialGraphMeasure,
   initialGraphSeason,
-  LocationOptions,
   locations,
 }: MapProperties) => {
   const queryClient = useQueryClient();
@@ -87,6 +87,14 @@ const Home: FC<MapProperties> = ({
 
   const locationMap = useMemo(
     () => new Map(locations.map((loc) => [loc.location_id, loc])),
+    [locations],
+  );
+
+  // Derived here rather than passed from the server: `locations` already
+  // carries every city name and id, so serializing the grouped options too
+  // duplicated that data in the RSC payload.
+  const LocationOptions = useMemo(
+    () => groupLocationsByState(locations),
     [locations],
   );
 

@@ -92,7 +92,6 @@ describe("page Component", () => {
       initialForecastYearsAhead: 10,
       initialGraphMeasure: "temperature",
       initialGraphSeason: "Annual",
-      LocationOptions: mockLocationData.LocationOptions,
       locations: mockLocationData.locations,
     });
   });
@@ -187,7 +186,6 @@ describe("page Component", () => {
       initialForecastYearsAhead: 10,
       initialGraphMeasure: "temperature",
       initialGraphSeason: "Annual",
-      LocationOptions: [],
       locations: [],
     });
   });
