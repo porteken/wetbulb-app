@@ -6,6 +6,18 @@ import {
 } from "./utils/custom-select";
 import { waitForLocationDetailsPage } from "./utils/map-page";
 
+import type { Locator } from "@playwright/test";
+
+// The App Router streams this page inside the Suspense boundary that
+// `src/app/loading.tsx` creates, so the real markup is delivered in a trailing
+// `<div id="S:0" hidden>` and then moved into place. When the client renders
+// the boundary before that HTML lands, React orphans the server copy and a
+// second, invisible copy of the page (`<main>`, filters, table and all) stays
+// in the DOM. CSS-based locators still match inside it, so scope to the copy
+// the user can actually see rather than letting strict mode trip over orphans.
+const onlyVisible = (locator: Locator): Locator =>
+  locator.filter({ visible: true });
+
 test.describe("Rankings Page", () => {
   test("should display rankings table with data", async ({ page }) => {
     await page.goto("/rankings");
@@ -34,11 +46,17 @@ test.describe("Rankings Page", () => {
       timeout: 10_000,
     });
 
-    await expect(page.getByTestId("rankings-year-filter")).toBeVisible();
-    await expect(page.getByTestId("rankings-season-filter")).toBeVisible();
-    await expect(page.getByTestId("rankings-state-filter")).toBeVisible();
     await expect(
-      page.getByTestId("rankings-wetbulb-level-filter"),
+      onlyVisible(page.getByTestId("rankings-year-filter")),
+    ).toBeVisible();
+    await expect(
+      onlyVisible(page.getByTestId("rankings-season-filter")),
+    ).toBeVisible();
+    await expect(
+      onlyVisible(page.getByTestId("rankings-state-filter")),
+    ).toBeVisible();
+    await expect(
+      onlyVisible(page.getByTestId("rankings-wetbulb-level-filter")),
     ).toBeVisible();
   });
 
@@ -67,7 +85,7 @@ test.describe("Rankings Page", () => {
       timeout: 10_000,
     });
 
-    const yearSelect = page.getByTestId("rankings-year-filter");
+    const yearSelect = onlyVisible(page.getByTestId("rankings-year-filter"));
     await expect(yearSelect).toContainText("2010", { timeout: 10_000 });
 
     await selectCustomOption(page, yearSelect, /^2015$/u);
@@ -79,7 +97,9 @@ test.describe("Rankings Page", () => {
       timeout: 10_000,
     });
 
-    const seasonSelect = page.getByTestId("rankings-season-filter");
+    const seasonSelect = onlyVisible(
+      page.getByTestId("rankings-season-filter"),
+    );
     await selectCustomOption(page, seasonSelect, /^Summer$/u);
     await expect(seasonSelect).toContainText("Summer");
     await expect(page.locator("table tbody tr").first()).toBeVisible({
@@ -140,11 +160,11 @@ test.describe("Rankings Page", () => {
       timeout: 15_000,
     });
 
-    await expect(page.getByTestId("rankings-state-filter")).toBeVisible({
+    const stateSelect = onlyVisible(page.getByTestId("rankings-state-filter"));
+    await expect(stateSelect).toBeVisible({
       timeout: 10_000,
     });
 
-    const stateSelect = page.getByTestId("rankings-state-filter");
     await openCustomSelect(page, stateSelect);
     const firstStateOption = getOpenCustomSelectOptions(page).first();
     const firstStateOptionText = await firstStateOption.textContent();
@@ -154,12 +174,13 @@ test.describe("Rankings Page", () => {
 
     await expect(stateSelect).toContainText(stateLabel ?? "");
 
-    await expect(page.locator("table tbody tr")).toHaveCount(1, {
+    const stateFilteredRows = onlyVisible(page.locator("table tbody tr"));
+    await expect(stateFilteredRows).toHaveCount(1, {
       timeout: 10_000,
     });
-    await expect(
-      page.locator("table tbody tr").first().locator("td").nth(2),
-    ).toContainText(stateLabel ?? "");
+    await expect(stateFilteredRows.first().locator("td").nth(2)).toContainText(
+      stateLabel ?? "",
+    );
     await expect(page.getByText("Showing 1-1 of 1 cities")).toBeVisible();
 
     const clearStateButton = stateSelect
@@ -167,7 +188,7 @@ test.describe("Rankings Page", () => {
       .getByRole("button", { name: "Clear" });
     await clearStateButton.click();
 
-    await expect(page.locator("table tbody tr")).toHaveCount(6, {
+    await expect(stateFilteredRows).toHaveCount(6, {
       timeout: 10_000,
     });
   });
@@ -181,15 +202,13 @@ test.describe("Rankings Page", () => {
       timeout: 15_000,
     });
 
-    await expect(page.getByTestId("rankings-wetbulb-level-filter")).toBeVisible(
-      {
-        timeout: 10_000,
-      },
+    const wetbulbLevelSelect = onlyVisible(
+      page.getByTestId("rankings-wetbulb-level-filter"),
     );
+    await expect(wetbulbLevelSelect).toBeVisible({
+      timeout: 10_000,
+    });
 
-    const wetbulbLevelSelect = page.getByTestId(
-      "rankings-wetbulb-level-filter",
-    );
     await openCustomSelect(page, wetbulbLevelSelect);
     const firstOption = getOpenCustomSelectOptions(page).first();
     const firstOptionText = await firstOption.textContent();
