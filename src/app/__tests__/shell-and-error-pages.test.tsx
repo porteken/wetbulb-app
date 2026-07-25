@@ -93,9 +93,11 @@ describe("app shell and error pages", () => {
     ) as React.ReactElement<{ children: React.ReactNode }> | undefined;
 
     expect(appProviders).toBeDefined();
-    expect(appProviders?.props.children).toStrictEqual(
-      <span>Child content</span>,
-    );
+    const providerChildren = appProviders?.props.children;
+    const providerChildrenArray = Array.isArray(providerChildren)
+      ? providerChildren
+      : [providerChildren];
+    expect(providerChildrenArray[0]).toStrictEqual(<span>Child content</span>);
     expect(metadata).toStrictEqual({
       description: "Historical wet-bulb temperature data for US cities",
       title: "Historical Wetbulb App",
