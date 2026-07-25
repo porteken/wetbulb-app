@@ -33,7 +33,7 @@ export default function RootLayout({
       <body className="min-h-screen app-shell" suppressHydrationWarning>
         <AppProviders>
           {children}
-          <SpeedInsights />
+          {!IS_E2E_TEST_ENVIRONMENT && <SpeedInsights />}
         </AppProviders>
         {!IS_E2E_TEST_ENVIRONMENT && <Analytics />}
       </body>
