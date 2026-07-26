@@ -15,9 +15,10 @@ import type { CSSProperties } from "react";
 
 type MapLibreModule = typeof MapLibreGL;
 type StyleSpecification = MapLibreGL.StyleSpecification;
-const MAP_CENTER_LAT = 39.5;
-const MAP_CENTER_LNG = -98.35;
-const INITIAL_ZOOM = 5;
+const INITIAL_MAP_BOUNDS: [[number, number], [number, number]] = [
+  [-125, 24.4],
+  [-66.9, 53.55],
+];
 const LIGHT_TILE_URLS = [
   "https://a.tile.openstreetmap.org/{z}/{x}/{y}.png",
   "https://b.tile.openstreetmap.org/{z}/{x}/{y}.png",
@@ -69,9 +70,8 @@ interface E2EMarkerButtonProperties {
 }
 
 const INITIAL_VIEW_STATE = {
-  latitude: MAP_CENTER_LAT,
-  longitude: MAP_CENTER_LNG,
-  zoom: INITIAL_ZOOM,
+  bounds: INITIAL_MAP_BOUNDS,
+  fitBoundsOptions: { padding: 20 },
 };
 const MAP_STYLE: CSSProperties = { height: "100%", width: "100%" };
 const MAP_CONTAINER_TEST_ID = "map-container";

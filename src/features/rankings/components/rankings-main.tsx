@@ -387,10 +387,10 @@ const RankingsFilters = memo(
             data={stateOptions}
             data-testid="rankings-state-filter"
             disabled={isPending}
-            label="State"
+            label="State/Province"
             onChange={handleStateChange}
             onClear={handleStateClear}
-            placeholder="All states"
+            placeholder="All states/provinces"
             value={stateFilter}
           />
           <Select
@@ -811,7 +811,7 @@ export function RankingsMain({
                       currentColumn={sortColumn}
                       currentDirection={sortDirection}
                       dispatch={dispatch}
-                      label="State"
+                      label="State/Province"
                     />
                     <SortHeader
                       column="avg_wetbulb"

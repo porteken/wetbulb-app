@@ -469,7 +469,7 @@ describe("rankingsMain", () => {
       render(<RankingsMain {...defaultProps} />);
 
       expect(screen.getByTestId("season-select")).toBeInTheDocument();
-      expect(screen.getByTestId("state-select")).toBeInTheDocument();
+      expect(screen.getByTestId("state/province-select")).toBeInTheDocument();
       expect(
         screen.getByTestId("avg-wetbulb-level-select"),
       ).toBeInTheDocument();
@@ -573,7 +573,9 @@ describe("rankingsMain", () => {
     it("should show all states in the filter dropdown", () => {
       render(<RankingsMain {...defaultProps} />);
 
-      expect(screen.getByRole("option", { name: "All states" })).toBeVisible();
+      expect(
+        screen.getByRole("option", { name: "All states/provinces" }),
+      ).toBeVisible();
     });
 
     it("should filter rankings by state", () => {
@@ -582,7 +584,7 @@ describe("rankingsMain", () => {
       expect(screen.getByText("Austin")).toBeInTheDocument();
       expect(screen.getByText("Phoenix")).toBeInTheDocument();
 
-      const stateSelect = screen.getByTestId("state-select");
+      const stateSelect = screen.getByTestId("state/province-select");
       fireEvent.change(stateSelect, { target: { value: "TX" } });
 
       expect(screen.getByText("Austin")).toBeInTheDocument();
@@ -665,12 +667,12 @@ describe("rankingsMain", () => {
       expect(rows[1]).toHaveTextContent("Eugene");
     });
 
-    it("should sort by state when State header is clicked", () => {
+    it("should sort by state when State/Province header is clicked", () => {
       render(<RankingsMain {...defaultProps} />);
 
       const table = screen.getByRole("table");
       const stateHeader = requireElement(
-        within(table).getByText("State").closest("th"),
+        within(table).getByText("State/Province").closest("th"),
       );
       fireEvent.click(within(stateHeader).getByRole("button"));
 
@@ -834,7 +836,7 @@ describe("rankingsMain", () => {
     it("should apply state filter correctly", () => {
       render(<RankingsMain {...defaultProps} />);
 
-      const stateSelect = screen.getByTestId("state-select");
+      const stateSelect = screen.getByTestId("state/province-select");
       fireEvent.change(stateSelect, { target: { value: "AZ" } });
 
       expect(screen.getByText("Phoenix")).toBeInTheDocument();
@@ -853,7 +855,7 @@ describe("rankingsMain", () => {
         />,
       );
 
-      const stateSelect = screen.getByTestId("state-select");
+      const stateSelect = screen.getByTestId("state/province-select");
       const seasonSelect = screen.getByTestId("season-select");
 
       expect(
@@ -884,7 +886,7 @@ describe("rankingsMain", () => {
         />,
       );
 
-      const stateSelect = screen.getByTestId("state-select");
+      const stateSelect = screen.getByTestId("state/province-select");
       const yearSelect = screen.getByTestId("year-select");
 
       expect(

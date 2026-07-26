@@ -21,6 +21,9 @@ vi.mock("../lib/webgl-support", () => ({
 vi.mock("react-map-gl/maplibre", () => {
   interface MockComponentProperties {
     children?: React.ReactNode;
+    initialViewState: {
+      bounds: readonly [readonly [number, number], readonly [number, number]];
+    };
     mapStyle: {
       sources: {
         basemap: {
@@ -36,8 +39,13 @@ vi.mock("react-map-gl/maplibre", () => {
   }
   return {
     __esModule: true,
-    default: ({ children, mapStyle }: MockComponentProperties) => (
+    default: ({
+      children,
+      initialViewState,
+      mapStyle,
+    }: MockComponentProperties) => (
       <div
+        data-initial-bounds={JSON.stringify(initialViewState.bounds)}
         data-style-url={mapStyle.sources.basemap.tiles[0]}
         data-testid="maplibre-map"
       >
@@ -136,6 +144,13 @@ describe("mapComponent", () => {
     await screen.findByTestId("map-container");
 
     expect(screen.getByTestId("maplibre-map")).toBeInTheDocument();
+    expect(screen.getByTestId("maplibre-map")).toHaveAttribute(
+      "data-initial-bounds",
+      JSON.stringify([
+        [-125, 24.4],
+        [-66.9, 53.55],
+      ]),
+    );
     const markers = screen.getAllByLabelText(/open details for/iu);
     expect(markers).toHaveLength(mockLocations.length);
     expect(screen.queryByText("Loading map...")).not.toBeInTheDocument();
