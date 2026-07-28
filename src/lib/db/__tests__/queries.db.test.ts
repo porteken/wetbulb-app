@@ -1,3 +1,4 @@
+import { EU_LOCATION_ID_MIN } from "@/lib/constants";
 import { describe, expect, it } from "vitest";
 
 import {
@@ -69,4 +70,15 @@ describe("db queries", () => {
     const rows = await fetchCityRankingsRows(2024, "Summer", "avg");
     expect(rows).toBeInstanceOf(Array);
   });
+
+  it.each(["max", "avg"] as const)(
+    "excludes eu locations from the na rankings on the %s basis",
+    async (basis) => {
+      const rows = await fetchCityRankingsRows(2024, "Summer", basis, "na");
+      expect(rows.length).toBeGreaterThan(0);
+      expect(
+        rows.every((row) => row.location_id < EU_LOCATION_ID_MIN),
+      ).toBeTruthy();
+    },
+  );
 });

@@ -23,14 +23,17 @@ import type {
 
 export type TrendMetricOption = "avg" | "max";
 type LocationIdentifierColumn = "id" | "location_id";
+const NA_CITY_RANKINGS_VIEW = "wetbulb_city_rankings_view" as const;
+const EU_CITY_RANKINGS_VIEW = "wetbulb_eu_city_rankings_view" as const;
 type CityRankingsView =
-  | "wetbulb_city_rankings_view"
-  | "wetbulb_eu_city_rankings_view";
+  | typeof EU_CITY_RANKINGS_VIEW
+  | typeof NA_CITY_RANKINGS_VIEW;
 
 const getCityRankingsView = (region: DataRegion): CityRankingsView =>
-  region === "eu"
-    ? "wetbulb_eu_city_rankings_view"
-    : "wetbulb_city_rankings_view";
+  region === "eu" ? EU_CITY_RANKINGS_VIEW : NA_CITY_RANKINGS_VIEW;
+
+const excludesEuLocations = (view: CityRankingsView) =>
+  view === NA_CITY_RANKINGS_VIEW;
 
 export interface ForecastQueryWindow {
   lastHistoricalYear: number;
@@ -285,6 +288,10 @@ const buildMaxBasisRankingsQuery = (
     ])
     .where("year", "=", year);
 
+  if (excludesEuLocations(view)) {
+    query = query.where("location_id", "<", EU_LOCATION_ID_MIN);
+  }
+
   if (selectedSeason !== undefined) {
     query = query.where("season", "=", selectedSeason);
   }
@@ -336,6 +343,10 @@ const buildAvgBasisRankingsQuery = (
       useLegacyBounds ? ["p10", "p90"] : ["p10_avg as p10", "p90_avg as p90"],
     )
     .where("year", "=", year);
+
+  if (excludesEuLocations(view)) {
+    query = query.where("location_id", "<", EU_LOCATION_ID_MIN);
+  }
 
   if (selectedSeason !== undefined) {
     query = query.where("season", "=", selectedSeason);
