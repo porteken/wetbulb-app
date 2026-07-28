@@ -70,6 +70,7 @@ export interface WetbulbYearStatsTable {
 
 export interface Database {
   wetbulb_city_rankings_view: WetbulbCityRankingsViewTable;
+  wetbulb_eu_city_rankings_view: WetbulbCityRankingsViewTable;
   locations: LocationsTable;
   wetbulb: WetbulbTable;
   wetbulb_forecast: WetbulbForecastTable;

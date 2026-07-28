@@ -80,6 +80,7 @@ describe("fetch-server", () => {
         2024,
         "Annual",
         "max",
+        "na",
       );
       expect(result[0]).toStrictEqual({
         avg_wetbulb: 35.5,
@@ -144,7 +145,7 @@ describe("fetch-server", () => {
 
       const result = await fetchServer.FetchLocations();
 
-      expect(mockDbQueries.fetchLocationRows).toHaveBeenCalledWith("id");
+      expect(mockDbQueries.fetchLocationRows).toHaveBeenCalledWith("id", "na");
       expect(result.locations).toStrictEqual([
         {
           city: "Boston",

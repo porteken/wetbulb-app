@@ -2,6 +2,7 @@ import { LocationErrorHandler } from "@/components/app/error-handlers";
 import Home from "@/features/home";
 import { HomeQueryProvider } from "@/features/home/components/home-query-provider";
 import {
+  getDataRegionFromCookies,
   getForecastPreferencesFromCookies,
   getGraphMeasureFromCookies,
   getGraphSeasonFromCookies,
@@ -10,6 +11,7 @@ import {
 
 const HomePage = async () => {
   try {
+    const region = await getDataRegionFromCookies();
     const [
       initialGraphMeasure,
       initialGraphSeason,
@@ -19,7 +21,7 @@ const HomePage = async () => {
       getGraphMeasureFromCookies(),
       getGraphSeasonFromCookies(),
       getForecastPreferencesFromCookies(),
-      getLocationData(),
+      getLocationData(region),
     ]);
 
     return (
@@ -30,6 +32,7 @@ const HomePage = async () => {
           initialGraphMeasure={initialGraphMeasure}
           initialGraphSeason={initialGraphSeason}
           locations={locations}
+          region={region}
         />
       </HomeQueryProvider>
     );

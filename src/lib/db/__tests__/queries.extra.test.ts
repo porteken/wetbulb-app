@@ -38,6 +38,41 @@ describe("db queries extra coverage", () => {
     vi.restoreAllMocks();
   });
 
+  it("splits locations and rankings by region", async () => {
+    vi.spyOn(environment, "shouldUseRuntimeDbMocks").mockReturnValue(true);
+
+    const northAmericanLocations = await fetchLocationRows("id", "na");
+    const europeanLocations = await fetchLocationRows("id", "eu");
+
+    expect(northAmericanLocations.length).toBeGreaterThan(0);
+    expect(europeanLocations.length).toBeGreaterThan(0);
+    expect(northAmericanLocations.every((row) => Number(row.id) < 1000)).toBe(
+      true,
+    );
+    expect(europeanLocations.every((row) => Number(row.id) >= 1000)).toBe(true);
+
+    const northAmericanRankings = await fetchCityRankingsRows(
+      2024,
+      "Annual",
+      "max",
+      "na",
+    );
+    const europeanRankings = await fetchCityRankingsRows(
+      2024,
+      "Annual",
+      "max",
+      "eu",
+    );
+
+    expect(northAmericanRankings.every((row) => row.location_id < 1000)).toBe(
+      true,
+    );
+    expect(europeanRankings.length).toBeGreaterThan(0);
+    expect(europeanRankings.every((row) => row.location_id >= 1000)).toBe(true);
+
+    vi.restoreAllMocks();
+  });
+
   it("returns distinct values for the avg vs max wetbulb basis", async () => {
     vi.spyOn(environment, "shouldUseRuntimeDbMocks").mockReturnValue(true);
 

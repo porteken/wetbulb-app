@@ -1,7 +1,10 @@
 import { shouldUseRuntimeDbMocks } from "@/config/environment";
 import {
+  DEFAULT_DATA_REGION,
   DEFAULT_FORECAST_SCENARIO,
   DEFAULT_WETBULB_BASIS,
+  EU_LOCATION_ID_MIN,
+  regionForLocationId,
 } from "@/lib/constants";
 import { sortBy } from "@/lib/sort-by";
 import { classifyDbError } from "@/lib/utils/errors";
@@ -12,6 +15,7 @@ import { getDb, withDbRetry } from "./kysely";
 
 import type { NumericLike } from "./types";
 import type {
+  DataRegion,
   ForecastScenario,
   GraphSeason,
   WetbulbBasis,
@@ -19,6 +23,14 @@ import type {
 
 export type TrendMetricOption = "avg" | "max";
 type LocationIdentifierColumn = "id" | "location_id";
+type CityRankingsView =
+  | "wetbulb_city_rankings_view"
+  | "wetbulb_eu_city_rankings_view";
+
+const getCityRankingsView = (region: DataRegion): CityRankingsView =>
+  region === "eu"
+    ? "wetbulb_eu_city_rankings_view"
+    : "wetbulb_city_rankings_view";
 
 export interface ForecastQueryWindow {
   lastHistoricalYear: number;
@@ -85,13 +97,16 @@ const getRuntimeCityRankingsRows = (
   year: number,
   season?: GraphSeason,
   basis: WetbulbBasis = DEFAULT_WETBULB_BASIS,
+  region: DataRegion = DEFAULT_DATA_REGION,
 ) => {
   const rows = getRuntimeMockTableRows("wetbulb_city_rankings_view");
 
   return rows
     .filter(
       (row) =>
-        row.year === year && (season === undefined || row.season === season),
+        row.year === year &&
+        regionForLocationId(row.location_id) === region &&
+        (season === undefined || row.season === season),
     )
     .map((row) => {
       if (basis === "avg") {
@@ -110,16 +125,21 @@ const getRuntimeCityRankingsRows = (
     });
 };
 
-const getRuntimeLocationRows = (column: LocationIdentifierColumn) => {
+const getRuntimeLocationRows = (
+  column: LocationIdentifierColumn,
+  region: DataRegion = DEFAULT_DATA_REGION,
+) => {
   const rows = getRuntimeMockTableRows("locations");
 
-  return rows.map((row) => ({
-    city: row.city,
-    lat: row.lat,
-    lng: row.lng,
-    [column]: row[column],
-    state: row.state,
-  }));
+  return rows
+    .filter((row) => regionForLocationId(row[column]) === region)
+    .map((row) => ({
+      city: row.city,
+      lat: row.lat,
+      lng: row.lng,
+      [column]: row[column],
+      state: row.state,
+    }));
 };
 
 const getRuntimeTrendRows = (
@@ -193,14 +213,22 @@ const getRuntimeHistoricalYearRow = (
   return row ? { year: row.year } : undefined;
 };
 
-const buildLocationRowsQuery = (selectedColumn: LocationIdentifierColumn) =>
-  getDb()
+const buildLocationRowsQuery = (
+  selectedColumn: LocationIdentifierColumn,
+  region: DataRegion,
+) => {
+  const query = getDb()
     .selectFrom("locations")
     .select(
       selectedColumn === "id"
         ? ["city", "lat", "lng", "id", "state"]
         : ["city", "lat", "lng", "location_id", "state"],
     );
+
+  return region === "eu"
+    ? query.where(selectedColumn, ">=", EU_LOCATION_ID_MIN)
+    : query.where(selectedColumn, "<", EU_LOCATION_ID_MIN);
+};
 
 const getRuntimeForecastRows = (
   locationId: number,
@@ -236,11 +264,12 @@ const getRuntimeForecastRows = (
 };
 
 const buildMaxBasisRankingsQuery = (
+  view: CityRankingsView,
   year: number,
   selectedSeason?: GraphSeason,
 ) => {
   let query = getDb()
-    .selectFrom("wetbulb_city_rankings_view")
+    .selectFrom(view)
     .select([
       "avg_wetbulb",
       "change_from_2000",
@@ -263,14 +292,21 @@ const buildMaxBasisRankingsQuery = (
   return query;
 };
 
+interface LegacyRankingsColumns {
+  bounds?: boolean;
+  mixed?: boolean;
+}
+
 const buildAvgBasisRankingsQuery = (
+  view: CityRankingsView,
   year: number,
   selectedSeason?: GraphSeason,
-  useLegacyMixed = false,
-  useLegacyBounds = false,
+  legacy: LegacyRankingsColumns = {},
 ) => {
+  const { bounds: useLegacyBounds = false, mixed: useLegacyMixed = false } =
+    legacy;
   let query = getDb()
-    .selectFrom("wetbulb_city_rankings_view")
+    .selectFrom(view)
     .select(
       useLegacyMixed
         ? [
@@ -308,46 +344,40 @@ const buildAvgBasisRankingsQuery = (
   return query;
 };
 
-const isMissingRankingsBoundsColumnError = (error: unknown) =>
-  isMissingColumnError(error, "wetbulb_city_rankings_view", "p10_avg") ||
-  isMissingColumnError(error, "wetbulb_city_rankings_view", "p90_avg");
+const isMissingRankingsBoundsColumnError = (
+  error: unknown,
+  view: CityRankingsView,
+) =>
+  isMissingColumnError(error, view, "p10_avg") ||
+  isMissingColumnError(error, view, "p90_avg");
 
-const isMissingAvgBasisRankingsColumnError = (error: unknown) =>
-  isMissingColumnError(
-    error,
-    "wetbulb_city_rankings_view",
-    "max_wetbulb_avg",
-  ) ||
-  isMissingColumnError(
-    error,
-    "wetbulb_city_rankings_view",
-    "change_from_2000_avg",
-  ) ||
-  isMissingColumnError(
-    error,
-    "wetbulb_city_rankings_view",
-    "future_lower_avg",
-  ) ||
-  isMissingColumnError(error, "wetbulb_city_rankings_view", "future_upper_avg");
+const isMissingAvgBasisRankingsColumnError = (
+  error: unknown,
+  view: CityRankingsView,
+) =>
+  isMissingColumnError(error, view, "max_wetbulb_avg") ||
+  isMissingColumnError(error, view, "change_from_2000_avg") ||
+  isMissingColumnError(error, view, "future_lower_avg") ||
+  isMissingColumnError(error, view, "future_upper_avg");
 
 const isMissingRankingsSeasonColumnError = (
   error: unknown,
+  view: CityRankingsView,
   season: GraphSeason | undefined,
-) =>
-  season !== undefined &&
-  isMissingColumnError(error, "wetbulb_city_rankings_view", "season");
+) => season !== undefined && isMissingColumnError(error, view, "season");
 
 async function fetchCityRankingsMaxBasisRows(
+  view: CityRankingsView,
   year: number,
   season?: GraphSeason,
 ) {
   try {
     return await withDbRetry(() =>
-      buildMaxBasisRankingsQuery(year, season).execute(),
+      buildMaxBasisRankingsQuery(view, year, season).execute(),
     );
   } catch (error) {
-    if (isMissingRankingsSeasonColumnError(error, season)) {
-      return buildMaxBasisRankingsQuery(year).execute();
+    if (isMissingRankingsSeasonColumnError(error, view, season)) {
+      return buildMaxBasisRankingsQuery(view, year).execute();
     }
 
     throw classifyDbError(error);
@@ -355,46 +385,62 @@ async function fetchCityRankingsMaxBasisRows(
 }
 
 function fetchCityRankingsAvgBasisLegacyRows(
+  view: CityRankingsView,
   year: number,
   season: GraphSeason | undefined,
   legacyError: unknown,
 ) {
-  if (isMissingRankingsSeasonColumnError(legacyError, season)) {
-    return buildAvgBasisRankingsQuery(year, undefined, true).execute();
+  if (isMissingRankingsSeasonColumnError(legacyError, view, season)) {
+    return buildAvgBasisRankingsQuery(view, year, undefined, {
+      mixed: true,
+    }).execute();
   }
 
-  if (isMissingRankingsBoundsColumnError(legacyError)) {
-    return buildAvgBasisRankingsQuery(year, season, true, true).execute();
+  if (isMissingRankingsBoundsColumnError(legacyError, view)) {
+    return buildAvgBasisRankingsQuery(view, year, season, {
+      bounds: true,
+      mixed: true,
+    }).execute();
   }
 
   throw classifyDbError(legacyError);
 }
 
 async function fetchCityRankingsAvgBasisRows(
+  view: CityRankingsView,
   year: number,
   season?: GraphSeason,
 ) {
   try {
     return await withDbRetry(() =>
-      buildAvgBasisRankingsQuery(year, season).execute(),
+      buildAvgBasisRankingsQuery(view, year, season).execute(),
     );
   } catch (error) {
-    if (isMissingRankingsSeasonColumnError(error, season)) {
-      return buildAvgBasisRankingsQuery(year).execute();
+    if (isMissingRankingsSeasonColumnError(error, view, season)) {
+      return buildAvgBasisRankingsQuery(view, year).execute();
     }
 
-    if (isMissingAvgBasisRankingsColumnError(error)) {
+    if (isMissingAvgBasisRankingsColumnError(error, view)) {
       try {
         return await withDbRetry(() =>
-          buildAvgBasisRankingsQuery(year, season, true).execute(),
+          buildAvgBasisRankingsQuery(view, year, season, {
+            mixed: true,
+          }).execute(),
         );
       } catch (legacyError) {
-        return fetchCityRankingsAvgBasisLegacyRows(year, season, legacyError);
+        return fetchCityRankingsAvgBasisLegacyRows(
+          view,
+          year,
+          season,
+          legacyError,
+        );
       }
     }
 
-    if (isMissingRankingsBoundsColumnError(error)) {
-      return buildAvgBasisRankingsQuery(year, season, false, true).execute();
+    if (isMissingRankingsBoundsColumnError(error, view)) {
+      return buildAvgBasisRankingsQuery(view, year, season, {
+        bounds: true,
+      }).execute();
     }
 
     throw classifyDbError(error);
@@ -405,26 +451,36 @@ export function fetchCityRankingsRows(
   year: number,
   season?: GraphSeason,
   basis: WetbulbBasis = DEFAULT_WETBULB_BASIS,
+  region: DataRegion = DEFAULT_DATA_REGION,
 ) {
   if (shouldUseRuntimeDbMocks()) {
-    return Promise.resolve(getRuntimeCityRankingsRows(year, season, basis));
+    return Promise.resolve(
+      getRuntimeCityRankingsRows(year, season, basis, region),
+    );
   }
 
+  const view = getCityRankingsView(region);
+
   return basis === "max"
-    ? fetchCityRankingsMaxBasisRows(year, season)
-    : fetchCityRankingsAvgBasisRows(year, season);
+    ? fetchCityRankingsMaxBasisRows(view, year, season)
+    : fetchCityRankingsAvgBasisRows(view, year, season);
 }
 
-export async function fetchLocationRows(column: LocationIdentifierColumn) {
+export async function fetchLocationRows(
+  column: LocationIdentifierColumn,
+  region: DataRegion = DEFAULT_DATA_REGION,
+) {
   if (shouldUseRuntimeDbMocks()) {
-    return getRuntimeLocationRows(column);
+    return getRuntimeLocationRows(column, region);
   }
 
   try {
-    return await withDbRetry(() => buildLocationRowsQuery(column).execute());
+    return await withDbRetry(() =>
+      buildLocationRowsQuery(column, region).execute(),
+    );
   } catch (error) {
     if (column === "id" && isMissingColumnError(error, "locations", "id")) {
-      return buildLocationRowsQuery("location_id").execute();
+      return buildLocationRowsQuery("location_id", region).execute();
     }
 
     throw classifyDbError(error);

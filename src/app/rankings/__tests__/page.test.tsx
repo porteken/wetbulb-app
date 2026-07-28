@@ -85,7 +85,12 @@ describe("rankings page", () => {
       description: "City rankings by wet-bulb temperature values",
       title: "City Rankings - Wetbulb Index",
     });
-    expect(mockFetchCityRankings).toHaveBeenCalledWith(2031, "Winter", "max");
+    expect(mockFetchCityRankings).toHaveBeenCalledWith(
+      2031,
+      "Winter",
+      "max",
+      "na",
+    );
     expect(screen.getByTestId("rankings-main")).toBeInTheDocument();
     expect(mockRankingsMain).toHaveBeenCalledWith(
       {
@@ -108,6 +113,7 @@ describe("rankings page", () => {
             state: "Arizona",
           },
         ],
+        region: "na",
         shouldPersistInitialSeason: false,
       },
       undefined,
@@ -127,7 +133,12 @@ describe("rankings page", () => {
       }),
     );
 
-    expect(mockFetchCityRankings).toHaveBeenCalledWith(2028, "Annual", "max");
+    expect(mockFetchCityRankings).toHaveBeenCalledWith(
+      2028,
+      "Annual",
+      "max",
+      "na",
+    );
     expect(mockRankingsMain).toHaveBeenCalledWith(
       expect.objectContaining({
         initialWetbulbLevel: "",
@@ -149,7 +160,12 @@ describe("rankings page", () => {
       }),
     );
 
-    expect(mockFetchCityRankings).toHaveBeenCalledWith(2025, "Annual", "max");
+    expect(mockFetchCityRankings).toHaveBeenCalledWith(
+      2025,
+      "Annual",
+      "max",
+      "na",
+    );
     expect(mockRankingsMain).toHaveBeenCalledWith(
       expect.objectContaining({
         initialSeason: "Annual",
@@ -173,7 +189,12 @@ describe("rankings page", () => {
       }),
     );
 
-    expect(mockFetchCityRankings).toHaveBeenCalledWith(2025, "Annual", "max");
+    expect(mockFetchCityRankings).toHaveBeenCalledWith(
+      2025,
+      "Annual",
+      "max",
+      "na",
+    );
     expect(mockRankingsMain).toHaveBeenCalledWith(
       expect.objectContaining({
         initialSeason: "Annual",

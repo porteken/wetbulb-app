@@ -13,8 +13,10 @@ import {
   setRankingsYear,
 } from "@/lib/actions/actions";
 import {
+  DATA_REGION_LABELS,
   GRAPH_SEASONS,
   normalizeGraphSeason,
+  type DataRegion,
   type GraphSeason,
   type TemperatureUnit,
 } from "@/lib/constants";
@@ -184,6 +186,7 @@ interface RankingsMainProperties {
   initialYear: number;
   LocationOptions: LocationOptionSection[];
   rankings: RankingItem[];
+  region: DataRegion;
   shouldPersistInitialSeason?: boolean;
 }
 
@@ -280,6 +283,7 @@ interface RankingsFiltersProperties {
   wetbulbLevelOptions: SelectOption[];
   isPending: boolean;
   persist: PersistAction;
+  region: DataRegion;
   selectedSeason: GraphSeason;
   selectedYear: number;
   stateFilter: string;
@@ -293,6 +297,7 @@ const RankingsFilters = memo(
     wetbulbLevelOptions,
     isPending,
     persist,
+    region,
     selectedSeason,
     selectedYear,
     stateFilter,
@@ -387,10 +392,10 @@ const RankingsFilters = memo(
             data={stateOptions}
             data-testid="rankings-state-filter"
             disabled={isPending}
-            label="State/Province"
+            label={DATA_REGION_LABELS[region].subdivision}
             onChange={handleStateChange}
             onClear={handleStateClear}
-            placeholder="All states/provinces"
+            placeholder={DATA_REGION_LABELS[region].subdivisionPlaceholder}
             value={stateFilter}
           />
           <Select
@@ -590,6 +595,7 @@ export function RankingsMain({
   initialYear,
   LocationOptions,
   rankings,
+  region,
   shouldPersistInitialSeason = false,
 }: Readonly<RankingsMainProperties>) {
   const router = useRouter();
@@ -737,6 +743,7 @@ export function RankingsMain({
           wetbulbLevelOptions={wetbulbLevelOptions}
           isPending={isPending}
           persist={persist}
+          region={region}
           selectedSeason={selectedSeason}
           selectedYear={selectedYear}
           stateFilter={stateFilter}
@@ -811,7 +818,7 @@ export function RankingsMain({
                       currentColumn={sortColumn}
                       currentDirection={sortDirection}
                       dispatch={dispatch}
-                      label="State/Province"
+                      label={DATA_REGION_LABELS[region].subdivision}
                     />
                     <SortHeader
                       column="avg_wetbulb"

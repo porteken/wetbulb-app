@@ -100,6 +100,11 @@ vi.mock("@/components/app/basis-toggle", () => ({
   BasisToggle: () => null,
 }));
 
+vi.mock("@/components/app/region-toggle", () => ({
+  // noinspection JSUnusedGlobalSymbols -- consumed by the mocked module
+  RegionToggle: () => null,
+}));
+
 describe("headerBar", () => {
   beforeAll(() => {
     Object.defineProperty(globalThis, "matchMedia", {

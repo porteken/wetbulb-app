@@ -268,7 +268,7 @@ describe("page-helpers", () => {
       const mockFetchLocations = await getMockFetchLocations();
       mockFetchLocations.mockResolvedValue(mockLocationData);
 
-      const result = await getLocationData();
+      const result = await getLocationData("na");
 
       expect(result).toStrictEqual(mockLocationData);
       expect(mockFetchLocations).toHaveBeenCalled();
@@ -283,7 +283,7 @@ describe("page-helpers", () => {
       const mockFetchLocations = await getMockFetchLocations();
       mockFetchLocations.mockResolvedValue(mockLocationData);
 
-      await expect(getLocationData()).rejects.toThrow(
+      await expect(getLocationData("na")).rejects.toThrow(
         "No location data available",
       );
       expect(mockFetchLocations).toHaveBeenCalled();
@@ -303,7 +303,7 @@ describe("page-helpers", () => {
       const mockFetchLocations = await getMockFetchLocations();
       mockFetchLocations.mockResolvedValue(mockLocationData);
 
-      await expect(getLocationData()).rejects.toThrow(
+      await expect(getLocationData("na")).rejects.toThrow(
         "No location data available",
       );
       expect(mockFetchLocations).toHaveBeenCalled();
@@ -323,7 +323,7 @@ describe("page-helpers", () => {
       const mockFetchLocations = await getMockFetchLocations();
       mockFetchLocations.mockResolvedValue(mockLocationData);
 
-      await expect(getLocationData()).rejects.toThrow(
+      await expect(getLocationData("na")).rejects.toThrow(
         "No location data available",
       );
       expect(mockFetchLocations).toHaveBeenCalled();
@@ -334,7 +334,7 @@ describe("page-helpers", () => {
       const mockFetchLocations = await getMockFetchLocations();
       mockFetchLocations.mockRejectedValue(fetchError);
 
-      await expect(getLocationData()).rejects.toThrow("Network error");
+      await expect(getLocationData("na")).rejects.toThrow("Network error");
       expect(mockFetchLocations).toHaveBeenCalled();
     });
 
@@ -407,7 +407,7 @@ describe("page-helpers", () => {
           mockFetchLocations.mockClear();
           mockFetchLocations.mockResolvedValue(data);
 
-          const result = await getLocationData();
+          const result = await getLocationData("na");
 
           return { data, result };
         }),
@@ -441,7 +441,7 @@ describe("page-helpers", () => {
       const mockFetchLocations = await getMockFetchLocations();
       mockFetchLocations.mockResolvedValue(mockLocationData);
 
-      const result = await getLocationData();
+      const result = await getLocationData("na");
 
       expect(result).toStrictEqual(mockLocationData);
       expect(mockFetchLocations).toHaveBeenCalled();
@@ -460,7 +460,7 @@ describe("page-helpers", () => {
       const mockFetchLocations = await getMockFetchLocations();
       mockFetchLocations.mockResolvedValue(malformedData);
 
-      await expect(getLocationData()).rejects.toThrow(
+      await expect(getLocationData("na")).rejects.toThrow(
         "No location data available",
       );
       expect(mockFetchLocations).toHaveBeenCalled();
@@ -480,7 +480,7 @@ describe("page-helpers", () => {
       const mockFetchLocations = await getMockFetchLocations();
       mockFetchLocations.mockResolvedValue(mockLocationData);
 
-      await expect(getLocationData()).rejects.toThrow(
+      await expect(getLocationData("na")).rejects.toThrow(
         "No location data available",
       );
       expect(mockFetchLocations).toHaveBeenCalled();
@@ -510,7 +510,7 @@ describe("page-helpers", () => {
 
       const [graphMeasure, locationData] = await Promise.all([
         getGraphMeasureFromCookies(),
-        getLocationData(),
+        getLocationData("na"),
       ]);
 
       expect(graphMeasure).toBe("pressure");
@@ -526,7 +526,7 @@ describe("page-helpers", () => {
 
       const [cookieResult, locationResult] = await Promise.allSettled([
         getGraphMeasureFromCookies(),
-        getLocationData(),
+        getLocationData("na"),
       ]);
 
       expect(cookieResult.status).toBe("rejected");

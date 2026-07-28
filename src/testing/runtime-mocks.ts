@@ -120,6 +120,33 @@ const LOCATIONS = [
     trendPerYear: 0.04,
     year2000Avg: 16.7,
   },
+  {
+    city: "London",
+    lat: 51.5085,
+    lng: -0.1257,
+    location_id: 1000,
+    state: "United Kingdom",
+    trendPerYear: 0.04,
+    year2000Avg: 13.2,
+  },
+  {
+    city: "Madrid",
+    lat: 40.4165,
+    lng: -3.7026,
+    location_id: 1001,
+    state: "Spain",
+    trendPerYear: 0.06,
+    year2000Avg: 15.9,
+  },
+  {
+    city: "Athens",
+    lat: 37.9795,
+    lng: 23.7162,
+    location_id: 1002,
+    state: "Greece",
+    trendPerYear: 0.07,
+    year2000Avg: 19.4,
+  },
 ] as const;
 
 const round = (value: number) => Math.round(value * 100) / 100;

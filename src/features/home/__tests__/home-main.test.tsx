@@ -238,6 +238,7 @@ const defaultProps: React.ComponentProps<typeof Home> = {
   initialGraphMeasure: "avg",
   initialGraphSeason: "Annual",
   locations: mockLocations,
+  region: "na",
 };
 
 const buildForecastData = ({

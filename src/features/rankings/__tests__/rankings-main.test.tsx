@@ -426,6 +426,7 @@ const defaultProps = {
   initialYear: 2020,
   LocationOptions: mockLocationOptions,
   rankings: mockRankings,
+  region: "na" as const,
   shouldPersistInitialSeason: false,
 };
 

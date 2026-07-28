@@ -139,6 +139,35 @@ describe("loadLocationPageData", () => {
     });
   });
 
+  it("falls back to the default region when an out-of-range id maps to an empty region", async () => {
+    const northAmericanLocations = [
+      {
+        city: "Boston",
+        lat: 42.3601,
+        lng: -71.0589,
+        location_id: 3,
+        state: "Massachusetts",
+      },
+    ];
+
+    mockFetchLocations.mockImplementation((region?: string) =>
+      Promise.resolve({
+        LocationOptions: [],
+        locations: region === "eu" ? [] : northAmericanLocations,
+      }),
+    );
+
+    await expect(loadLocationPageData("999999")).resolves.toStrictEqual({
+      payload: {
+        message: "The requested location could not be found.",
+        title: "Location not found",
+      },
+      status: "invalid-location",
+    });
+    expect(mockFetchLocations).toHaveBeenCalledWith("eu");
+    expect(mockFetchLocations).toHaveBeenCalledWith("na");
+  });
+
   it("returns the page with empty trend data when trend graph fetching fails", async () => {
     mockFetchLocations.mockResolvedValue({
       LocationOptions: [],

@@ -2,6 +2,7 @@ import "./globals.css";
 
 import { AppProviders } from "@/components/app/providers";
 import { cn } from "@/lib/utils";
+import { getDataRegionFromCookies } from "@/lib/utils/app/page-helpers";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Geist } from "next/font/google";
@@ -19,11 +20,13 @@ export const metadata: Metadata = {
   title: "Historical Wetbulb App",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const initialRegion = await getDataRegionFromCookies();
+
   return (
     <html
       className={cn("font-sans", geist.variable)}
@@ -31,7 +34,7 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <body className="min-h-screen app-shell" suppressHydrationWarning>
-        <AppProviders>
+        <AppProviders initialRegion={initialRegion}>
           {children}
           {!IS_E2E_TEST_ENVIRONMENT && <SpeedInsights />}
         </AppProviders>

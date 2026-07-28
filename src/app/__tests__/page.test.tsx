@@ -4,6 +4,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import Page from "../page";
 
 const {
+  mockGetDataRegionFromCookies,
   mockGetForecastPreferencesFromCookies,
   mockGetGraphMeasureFromCookies,
   mockGetGraphSeasonFromCookies,
@@ -12,6 +13,7 @@ const {
   mockLocationErrorHandler,
   mockPageLoader,
 } = vi.hoisted(() => ({
+  mockGetDataRegionFromCookies: mockFn(),
   mockGetForecastPreferencesFromCookies: mockFn(),
   mockGetGraphMeasureFromCookies: mockFn(),
   mockGetGraphSeasonFromCookies: mockFn(),
@@ -30,6 +32,7 @@ vi.mock("@/features/home", () => ({
 }));
 
 vi.mock("@/lib/utils/app/page-helpers", () => ({
+  getDataRegionFromCookies: mockGetDataRegionFromCookies,
   getForecastPreferencesFromCookies: mockGetForecastPreferencesFromCookies,
   getGraphMeasureFromCookies: mockGetGraphMeasureFromCookies,
   getGraphSeasonFromCookies: mockGetGraphSeasonFromCookies,
@@ -62,6 +65,7 @@ vi.mock("next/dynamic", () => ({
 describe("page Component", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockGetDataRegionFromCookies.mockResolvedValue("na");
   });
 
   it("renders Home component with correct props when data is available", async () => {
@@ -93,6 +97,7 @@ describe("page Component", () => {
       initialGraphMeasure: "temperature",
       initialGraphSeason: "Annual",
       locations: mockLocationData.locations,
+      region: "na",
     });
   });
 
@@ -187,6 +192,7 @@ describe("page Component", () => {
       initialGraphMeasure: "temperature",
       initialGraphSeason: "Annual",
       locations: [],
+      region: "na",
     });
   });
 });

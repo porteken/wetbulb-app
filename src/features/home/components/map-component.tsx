@@ -10,15 +10,23 @@ import Map from "react-map-gl/maplibre";
 import { isWebglSupported } from "../lib/webgl-support";
 import { OptimizedMarker } from "./optimized-marker";
 
+import type { DataRegion } from "@/lib/constants";
 import type * as MapLibreGL from "maplibre-gl";
 import type { CSSProperties } from "react";
 
 type MapLibreModule = typeof MapLibreGL;
 type StyleSpecification = MapLibreGL.StyleSpecification;
-const INITIAL_MAP_BOUNDS: [[number, number], [number, number]] = [
-  [-125, 24.4],
-  [-66.9, 53.55],
-];
+type MapBounds = [[number, number], [number, number]];
+const REGION_MAP_BOUNDS: Record<DataRegion, MapBounds> = {
+  eu: [
+    [-11, 34],
+    [34.5, 66],
+  ],
+  na: [
+    [-125, 24.4],
+    [-66.9, 53.55],
+  ],
+};
 const LIGHT_TILE_URLS = [
   "https://a.tile.openstreetmap.org/{z}/{x}/{y}.png",
   "https://b.tile.openstreetmap.org/{z}/{x}/{y}.png",
@@ -50,6 +58,7 @@ interface MapComponentProperties {
   locations: Location[];
   onMarkerClick: (_locationId: number) => void;
   onMarkerPrefetch?: (_locationId: number) => Promise<void> | void;
+  region: DataRegion;
 }
 
 interface E2EMarkerSurfaceProperties {
@@ -69,10 +78,16 @@ interface E2EMarkerButtonProperties {
   position: E2EMarkerPosition;
 }
 
-const INITIAL_VIEW_STATE = {
-  bounds: INITIAL_MAP_BOUNDS,
-  fitBoundsOptions: { padding: 20 },
-};
+const REGION_INITIAL_VIEW_STATE = {
+  eu: {
+    bounds: REGION_MAP_BOUNDS.eu,
+    fitBoundsOptions: { padding: 20 },
+  },
+  na: {
+    bounds: REGION_MAP_BOUNDS.na,
+    fitBoundsOptions: { padding: 20 },
+  },
+} as const satisfies Record<DataRegion, unknown>;
 const MAP_STYLE: CSSProperties = { height: "100%", width: "100%" };
 const MAP_CONTAINER_TEST_ID = "map-container";
 const E2E_MARKER_WIDTH = 30;
@@ -425,7 +440,7 @@ class MapErrorBoundary extends React.Component<
 }
 
 export const MapComponent = memo<MapComponentProperties>(
-  ({ locations, onMarkerClick, onMarkerPrefetch }) => {
+  ({ locations, onMarkerClick, onMarkerPrefetch, region }) => {
     const { resolvedTheme } = useTheme();
     const [mapLib, setMapLib] = useState<MapLibreModule | null>(null);
     const [webglSupported, setWebglSupported] = useState<boolean | null>(null);
@@ -571,7 +586,8 @@ export const MapComponent = memo<MapComponentProperties>(
           >
             <Map
               dragRotate={false}
-              initialViewState={INITIAL_VIEW_STATE}
+              initialViewState={REGION_INITIAL_VIEW_STATE[region]}
+              key={region}
               mapLib={mapLib}
               mapStyle={mapStyleDefinition}
               scrollZoom

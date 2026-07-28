@@ -1,5 +1,6 @@
 import { FetchLocations } from "@/lib/api/fetch-server";
 import {
+  DATA_REGION_COOKIE_NAME,
   DEFAULT_FORECAST_ENABLED,
   DEFAULT_FORECAST_YEARS_AHEAD,
   DEFAULT_GRAPH_MEASURE,
@@ -11,7 +12,9 @@ import {
   GRAPH_SEASON_COOKIE_NAME,
   MAX_FORECAST_YEARS_AHEAD,
   MIN_FORECAST_YEARS_AHEAD,
+  normalizeDataRegion,
   normalizeGraphSeason,
+  type DataRegion,
 } from "@/lib/constants";
 import { getLatestCookieValue } from "@/lib/utils/server-cookies";
 import { cookies } from "next/headers";
@@ -64,8 +67,16 @@ export const getForecastPreferencesFromCookies = async (): Promise<{
   };
 };
 
-export const getLocationData = async () => {
-  const { LocationOptions, locations } = await FetchLocations();
+export const getDataRegionFromCookies = async (): Promise<DataRegion> => {
+  const cookieStore = await cookies();
+
+  return normalizeDataRegion(
+    getLatestCookieValue(cookieStore, DATA_REGION_COOKIE_NAME),
+  );
+};
+
+export const getLocationData = async (region: DataRegion) => {
+  const { LocationOptions, locations } = await FetchLocations(region);
 
   if (!Array.isArray(locations) || locations.length === 0) {
     throw new Error(ERROR_MESSAGES.NO_DATA);

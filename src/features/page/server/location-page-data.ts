@@ -8,6 +8,7 @@ import {
   DEFAULT_REFERENCE_YEAR,
   DEFAULT_GRAPH_SEASON,
   DEFAULT_FORECAST_ENABLED,
+  DEFAULT_DATA_REGION,
   DEFAULT_FORECAST_YEARS_AHEAD,
   DEFAULT_GRAPH_MEASURE,
   DEFAULT_WETBULB_BASIS,
@@ -21,6 +22,8 @@ import {
   MIN_FORECAST_YEARS_AHEAD,
   normalizeGraphSeason,
   normalizeWetbulbBasis,
+  regionForLocationId,
+  type DataRegion,
   type GraphSeason,
   type WetbulbBasis,
   WETBULB_BASIS_COOKIE_NAME,
@@ -256,7 +259,9 @@ const fetchGraphData = async ({
   };
 };
 
-const fetchLocationData = async (): Promise<
+const fetchLocationData = async (
+  region: DataRegion,
+): Promise<
   | undefined
   | {
       LocationOptions: LocationOptionSection[];
@@ -264,10 +269,18 @@ const fetchLocationData = async (): Promise<
     }
 > => {
   try {
-    const result = await FetchLocations();
+    const result = await FetchLocations(region);
+    if (result.locations.length > 0 || region === DEFAULT_DATA_REGION) {
+      return {
+        LocationOptions: result.LocationOptions,
+        locations: result.locations,
+      };
+    }
+
+    const fallback = await FetchLocations(DEFAULT_DATA_REGION);
     return {
-      LocationOptions: result.LocationOptions,
-      locations: result.locations,
+      LocationOptions: fallback.LocationOptions,
+      locations: fallback.locations,
     };
   } catch {
     return undefined;
@@ -304,7 +317,7 @@ export const loadLocationPageData = async (
   const preferences = await getPreferencesFromCookies();
 
   const [locationData, graphData] = await Promise.all([
-    fetchLocationData(),
+    fetchLocationData(regionForLocationId(locationId)),
     fetchGraphData({
       basis: preferences.initialWetbulbBasis,
       forecastEnabled: preferences.initialForecastEnabled,

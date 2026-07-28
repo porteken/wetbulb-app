@@ -49,6 +49,7 @@ const Home: FC<MapProperties> = ({
   initialGraphMeasure,
   initialGraphSeason,
   locations,
+  region,
 }: MapProperties) => {
   const queryClient = useQueryClient();
   const ignorePersistenceError = useIgnorePersistenceError();
@@ -270,6 +271,7 @@ const Home: FC<MapProperties> = ({
           locations={locations}
           onMarkerClick={handleMarkerClick}
           onMarkerPrefetch={handleMarkerPrefetch}
+          region={region}
         />
       </PageShell>
       <Modal

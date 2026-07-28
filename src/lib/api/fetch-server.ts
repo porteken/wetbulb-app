@@ -16,11 +16,14 @@ import {
   parseTrendGraphRows,
 } from "@/lib/api/schemas";
 import {
+  DEFAULT_DATA_REGION,
   DEFAULT_GRAPH_SEASON,
   DEFAULT_FORECAST_SCENARIO,
   DEFAULT_WETBULB_BASIS,
+  type DataRegion,
   type GraphSeason,
   type ForecastScenario,
+  normalizeDataRegion,
   normalizeGraphSeason,
   normalizeWetbulbBasis,
   type WetbulbBasis,
@@ -92,6 +95,7 @@ async function fetchCityRankingsUncached(
   year: number,
   season: GraphSeason = DEFAULT_GRAPH_SEASON,
   basis: WetbulbBasis = DEFAULT_WETBULB_BASIS,
+  region: DataRegion = DEFAULT_DATA_REGION,
 ): Promise<
   Array<{
     avg_wetbulb: number;
@@ -109,6 +113,7 @@ async function fetchCityRankingsUncached(
 > {
   const resolvedSeason = normalizeGraphSeason(season);
   const resolvedBasis = normalizeWetbulbBasis(basis);
+  const resolvedRegion = normalizeDataRegion(region);
 
   if (!year || Number.isNaN(year) || year < MIN_YEAR || year > MAX_YEAR) {
     throw new DatabaseError(
@@ -118,7 +123,12 @@ async function fetchCityRankingsUncached(
 
   let rows;
   try {
-    rows = await fetchCityRankingsRows(year, resolvedSeason, resolvedBasis);
+    rows = await fetchCityRankingsRows(
+      year,
+      resolvedSeason,
+      resolvedBasis,
+      resolvedRegion,
+    );
   } catch (error) {
     throw new DatabaseError(
       "Failed to fetch city rankings from database",
@@ -149,10 +159,12 @@ async function fetchCityRankingsUncached(
     }));
 }
 
-async function fetchLocationsUncached(): Promise<FetchLocationProperties> {
+async function fetchLocationsUncached(
+  region: DataRegion = DEFAULT_DATA_REGION,
+): Promise<FetchLocationProperties> {
   let locations;
   try {
-    locations = await fetchLocationRows("id");
+    locations = await fetchLocationRows("id", normalizeDataRegion(region));
   } catch (error) {
     throw new DatabaseError(
       "Failed to fetch location data from database",

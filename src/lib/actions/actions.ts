@@ -1,6 +1,7 @@
 "use server";
 
 import {
+  DATA_REGION_COOKIE_NAME,
   FORECAST_ENABLED_COOKIE_NAME,
   FORECAST_YEARS_AHEAD_COOKIE_NAME,
   GRAPH_CONFIG,
@@ -8,6 +9,7 @@ import {
   GRAPH_SEASON_COOKIE_NAME,
   MAX_FORECAST_YEARS_AHEAD,
   MIN_FORECAST_YEARS_AHEAD,
+  normalizeDataRegion,
   normalizeGraphSeason,
   normalizeTemperatureUnit,
   normalizeWetbulbBasis,
@@ -124,6 +126,20 @@ export async function setWetbulbBasis(basis: string) {
     httpOnly: false,
   });
   revalidatePath("/rankings");
+}
+
+export async function setDataRegion(region: string) {
+  if (normalizeDataRegion(region) !== region) {
+    return;
+  }
+
+  const cookieStore = await cookies();
+  cookieStore.set(DATA_REGION_COOKIE_NAME, region, {
+    ...PREFERENCE_COOKIE_OPTIONS,
+    httpOnly: false,
+  });
+  cookieStore.set(RANKINGS_STATE_COOKIE_NAME, "", RANKINGS_COOKIE_OPTIONS);
+  revalidatePath("/", "layout");
 }
 
 export const setRankingsWetbulbLevel = async (wetbulbLevel: string) => {

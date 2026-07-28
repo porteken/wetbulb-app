@@ -51,6 +51,50 @@ export const normalizeWetbulbBasis = (
   return DEFAULT_WETBULB_BASIS;
 };
 
+export const DATA_REGION_COOKIE_NAME = "data-region" as const;
+const DATA_REGIONS = ["na", "eu"] as const;
+export type DataRegion = (typeof DATA_REGIONS)[number];
+export const DEFAULT_DATA_REGION: DataRegion = "na";
+
+export const EU_LOCATION_ID_MIN = 1000;
+
+const isDataRegion = (value: string): value is DataRegion =>
+  (DATA_REGIONS as readonly string[]).includes(value);
+
+export const normalizeDataRegion = (value: string | undefined): DataRegion => {
+  if (value && isDataRegion(value)) {
+    return value;
+  }
+
+  return DEFAULT_DATA_REGION;
+};
+
+export const regionForLocationId = (locationId: number): DataRegion =>
+  locationId >= EU_LOCATION_ID_MIN ? "eu" : "na";
+
+export const DATA_REGION_LABELS = {
+  eu: {
+    name: "Europe",
+    short: "Europe",
+    subdivision: "Country",
+    subdivisionPlaceholder: "All countries",
+  },
+  na: {
+    name: "North America",
+    short: "N. America",
+    subdivision: "State/Province",
+    subdivisionPlaceholder: "All states/provinces",
+  },
+} as const satisfies Record<
+  DataRegion,
+  {
+    name: string;
+    short: string;
+    subdivision: string;
+    subdivisionPlaceholder: string;
+  }
+>;
+
 export const GRAPH_MEASURE_COOKIE_NAME = "graph-measure" as const;
 export const GRAPH_SEASON_COOKIE_NAME = "graph-season" as const;
 export const REFERENCE_YEAR_COOKIE_NAME = "reference-year" as const;

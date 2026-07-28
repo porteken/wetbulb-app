@@ -24,6 +24,10 @@ vi.mock("@/components/app/providers", () => ({
   AppProviders: mockAppProviders,
 }));
 
+vi.mock("@/lib/utils/app/page-helpers", () => ({
+  getDataRegionFromCookies: () => Promise.resolve("na"),
+}));
+
 vi.mock("@sentry/nextjs", () => ({
   captureException: captureExceptionMock,
 }));
@@ -76,8 +80,8 @@ describe("app shell and error pages", () => {
     );
   });
 
-  it("renders the root layout metadata and children", () => {
-    const layout = RootLayout({
+  it("renders the root layout metadata and children", async () => {
+    const layout = await RootLayout({
       children: <span>Child content</span>,
     });
 

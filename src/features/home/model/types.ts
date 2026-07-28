@@ -1,4 +1,4 @@
-import type { GraphSeason } from "@/lib/constants";
+import type { DataRegion, GraphSeason } from "@/lib/constants";
 import type { LocationProperties } from "@/types/types";
 
 export interface MapProperties {
@@ -7,4 +7,5 @@ export interface MapProperties {
   initialGraphMeasure: string;
   initialGraphSeason: GraphSeason;
   locations: LocationProperties[];
+  region: DataRegion;
 }

@@ -114,6 +114,7 @@ describe("mapComponent", () => {
       <MapComponent
         locations={emptyLocations}
         onMarkerClick={noopMarkerClick}
+        region="na"
       />,
     );
     expect(screen.getByText("Loading map...")).toBeInTheDocument();
@@ -124,6 +125,7 @@ describe("mapComponent", () => {
       <MapComponent
         locations={emptyLocations}
         onMarkerClick={noopMarkerClick}
+        region="na"
       />,
     );
 
@@ -138,6 +140,7 @@ describe("mapComponent", () => {
       <MapComponent
         locations={mockLocations}
         onMarkerClick={noopMarkerClick}
+        region="na"
       />,
     );
 
@@ -156,6 +159,26 @@ describe("mapComponent", () => {
     expect(screen.queryByText("Loading map...")).not.toBeInTheDocument();
   });
 
+  it("should frame europe when the region is eu", async () => {
+    renderWithQueryClient(
+      <MapComponent
+        locations={mockLocations}
+        onMarkerClick={noopMarkerClick}
+        region="eu"
+      />,
+    );
+
+    await screen.findByTestId("map-container");
+
+    expect(screen.getByTestId("maplibre-map")).toHaveAttribute(
+      "data-initial-bounds",
+      JSON.stringify([
+        [-11, 34],
+        [34.5, 66],
+      ]),
+    );
+  });
+
   it("should use a dark basemap when dark mode is active", async () => {
     mockUseTheme.mockReturnValue({ resolvedTheme: "dark" });
 
@@ -163,6 +186,7 @@ describe("mapComponent", () => {
       <MapComponent
         locations={mockLocations}
         onMarkerClick={noopMarkerClick}
+        region="na"
       />,
     );
 
@@ -176,7 +200,11 @@ describe("mapComponent", () => {
   it("should call onMarkerClick with the correct location_id when a marker is clicked", async () => {
     const onMarkerClick = mockFn();
     renderWithQueryClient(
-      <MapComponent locations={mockLocations} onMarkerClick={onMarkerClick} />,
+      <MapComponent
+        locations={mockLocations}
+        onMarkerClick={onMarkerClick}
+        region="na"
+      />,
     );
 
     const markers = await screen.findAllByLabelText(/open details for/iu);
@@ -202,6 +230,7 @@ describe("mapComponent", () => {
       <MapComponent
         locations={mockLocations}
         onMarkerClick={noopMarkerClick}
+        region="na"
       />,
     );
 
@@ -224,7 +253,11 @@ describe("mapComponent", () => {
     const onMarkerClick = mockFn();
 
     renderWithQueryClient(
-      <MapComponent locations={mockLocations} onMarkerClick={onMarkerClick} />,
+      <MapComponent
+        locations={mockLocations}
+        onMarkerClick={onMarkerClick}
+        region="na"
+      />,
     );
 
     const cityButton = await screen.findByRole("button", {
@@ -243,6 +276,7 @@ describe("mapComponent", () => {
       <MapComponent
         locations={emptyLocations}
         onMarkerClick={noopMarkerClick}
+        region="na"
       />,
     );
 
@@ -255,6 +289,7 @@ describe("mapComponent", () => {
       <MapComponent
         locations={mockLocations}
         onMarkerClick={noopMarkerClick}
+        region="na"
       />,
     );
 
