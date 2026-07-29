@@ -2,6 +2,7 @@ import { RankingsMain } from "@/features/rankings";
 import {
   setRankingsWetbulbLevel,
   setRankingsSeason,
+  setRankingsState,
   setRankingsYear,
 } from "@/lib/actions/actions";
 import {
@@ -65,6 +66,50 @@ class MockSelectControl extends React.PureComponent<{
           data-testid={testId}
           disabled={disabled}
           id={testId}
+          onChange={this.handleChange}
+          value={value}
+        >
+          {placeholder && <option value="">{placeholder}</option>}
+          {data.map((option) => (
+            <option key={option.value} value={option.value}>
+              {option.label}
+            </option>
+          ))}
+        </select>
+      </div>
+    );
+  }
+}
+
+class MockMultiSelectControl extends React.PureComponent<{
+  data: Array<{ label: string; value: string }>;
+  disabled?: boolean;
+  label?: string;
+  onChange?: (value: string[]) => void;
+  placeholder?: string;
+  value: string[];
+}> {
+  private readonly handleChange = (
+    event: React.ChangeEvent<HTMLSelectElement>,
+  ) => {
+    const selectedValues = [...event.target.selectedOptions].map(
+      (option) => option.value,
+    );
+    this.props.onChange?.(selectedValues);
+  };
+
+  public render(): React.ReactNode {
+    const { data, disabled, label, placeholder, value } = this.props;
+    const testId = `${label?.toLowerCase().replaceAll(/\s/gu, "-") ?? "multi"}-select`;
+
+    return (
+      <div>
+        {label && <label htmlFor={testId}>{label}</label>}
+        <select
+          data-testid={testId}
+          disabled={disabled}
+          id={testId}
+          multiple
           onChange={this.handleChange}
           value={value}
         >
@@ -152,6 +197,14 @@ vi.mock("@/components/ui/select", () => ({
   Select: mockFn((props: React.ComponentProps<typeof MockSelectControl>) => (
     <MockSelectControl {...props} />
   )),
+}));
+
+vi.mock("@/components/ui/multi-select", () => ({
+  MultiSelect: mockFn(
+    (props: React.ComponentProps<typeof MockMultiSelectControl>) => (
+      <MockMultiSelectControl {...props} />
+    ),
+  ),
 }));
 
 vi.mock("@/components/ui/pagination", () => ({
@@ -590,6 +643,24 @@ describe("rankingsMain", () => {
 
       expect(screen.getByText("Austin")).toBeInTheDocument();
     });
+
+    it("should filter rankings by multiple states", () => {
+      render(<RankingsMain {...defaultProps} />);
+
+      const stateSelect = screen.getByTestId("state/province-select");
+      for (const value of ["TX", "AZ"]) {
+        const option = stateSelect.querySelector<HTMLOptionElement>(
+          `option[value="${value}"]`,
+        );
+        if (option) option.selected = true;
+      }
+      fireEvent.change(stateSelect);
+
+      expect(screen.getByText("Austin")).toBeInTheDocument();
+      expect(screen.getByText("Phoenix")).toBeInTheDocument();
+      expect(screen.queryByText("Seattle")).not.toBeInTheDocument();
+      expect(setRankingsState).toHaveBeenCalledWith("AZ,TX");
+    });
   });
 
   describe("wetbulb Level Filtering", () => {
@@ -619,6 +690,23 @@ describe("rankingsMain", () => {
       });
 
       expect(screen.getByText("Seattle")).toBeInTheDocument();
+    });
+
+    it("should filter rankings by multiple wetbulb levels", () => {
+      render(<RankingsMain {...defaultProps} />);
+
+      const wetbulbLevelSelect = screen.getByTestId("avg-wetbulb-level-select");
+      for (const value of ["None", "Extreme Risk"]) {
+        const option = wetbulbLevelSelect.querySelector<HTMLOptionElement>(
+          `option[value="${value}"]`,
+        );
+        if (option) option.selected = true;
+      }
+      fireEvent.change(wetbulbLevelSelect);
+
+      expect(screen.getByText("Seattle")).toBeInTheDocument();
+      expect(screen.getByText("Phoenix")).toBeInTheDocument();
+      expect(setRankingsWetbulbLevel).toHaveBeenCalledWith("None,Extreme Risk");
     });
   });
 
@@ -870,7 +958,7 @@ describe("rankingsMain", () => {
         expect(setRankingsSeason).toHaveBeenCalledWith("Winter");
       });
 
-      expect(stateSelect).toHaveValue("TX");
+      expect(stateSelect).toHaveValue(["TX"]);
       expect(screen.getByText("Austin")).toBeInTheDocument();
       expect(
         screen.queryByText("No cities match the current filters."),
@@ -901,7 +989,7 @@ describe("rankingsMain", () => {
         expect(setRankingsYear).toHaveBeenCalledWith(2025);
       });
 
-      expect(stateSelect).toHaveValue("TX");
+      expect(stateSelect).toHaveValue(["TX"]);
       expect(yearSelect).toHaveValue("2025");
       expect(screen.getByText("Austin")).toBeInTheDocument();
       expect(

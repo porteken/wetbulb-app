@@ -1,10 +1,10 @@
 # Historical Wetbulb App
 
-A comprehensive web application hosted [here](https://wetbulb-app.vercel.app/) that visualizes wet-bulb temperature data for the top 500 largest cities in the Contiguous United States from 2000 to 2025. The data pipeline for getting the data is [here](https://github.com/porteken/pet-data).
+A comprehensive web application hosted [here](https://wetbulb-app.vercel.app/) that visualizes wet-bulb temperature data from 2000 to 2025 for the top 500 largest cities across Canada and the contiguous United States, plus the top 500 largest cities in Europe. The data pipeline for getting the data is [here](https://github.com/porteken/pet-data).
 
 ## Features
 
-- **Contiguous US City Map**: View wet-bulb temperature data across 500+ cities.
+- **North American and European City Maps**: Explore wet-bulb temperature data for 1,000 cities across Canada, the contiguous United States, and Europe.
 - **City Trend Charts**: Open a city modal from the map and view wet-bulb temperature trends.
 - **Seasonal Analysis**: Switch between annual, spring, summer, fall, and winter views.
 - **Measure Selection**: Switch between average and maximum wet-bulb temperature.
@@ -12,8 +12,8 @@ A comprehensive web application hosted [here](https://wetbulb-app.vercel.app/) t
 - **Wetbulb Index Context**: See wetbulb index descriptions and legend details alongside trend data.
 - **City Detail Pages**: Open a city page with trend and reference charts.
 - **Reference Comparison**: Compare the current year's wet-bulb temperature with a selected historical year.
-- **Rankings**: View cities ranked by wet-bulb temperature with year, season, state, and wetbulb index filters.
-- **Theme Support**: Toggle between light and dark themes.
+- **Rankings**: View cities ranked by wet-bulb temperature with year, season, state/province or country, and wetbulb index filters.
+- **Theme Support**: Choose light, dark, or system mode, which follows your operating system preference.
 
 ## What is Wetbulb?
 

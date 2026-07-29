@@ -43,7 +43,7 @@ const RANKINGS_COOKIE_OPTIONS = {
   secure: isSecureCookieEnvironment(),
 } as const;
 
-const RANKINGS_STATE_PATTERN = /^[A-Za-z .]{0,30}$/u;
+const RANKINGS_STATE_PATTERN = /^[\p{L} .'-]{1,60}$/u;
 const VALID_WETBULB_LEVELS = new Set(
   WETBULB_INDEX_LEGEND_ITEMS.map((item) => item.level as string),
 );
@@ -143,7 +143,8 @@ export async function setDataRegion(region: string) {
 }
 
 export const setRankingsWetbulbLevel = async (wetbulbLevel: string) => {
-  if (wetbulbLevel !== "" && !VALID_WETBULB_LEVELS.has(wetbulbLevel)) {
+  const wetbulbLevels = wetbulbLevel.split(",").filter(Boolean);
+  if (wetbulbLevels.some((level) => !VALID_WETBULB_LEVELS.has(level))) {
     return;
   }
 
@@ -167,7 +168,8 @@ export const setRankingsSeason = async (season: GraphSeason) => {
 };
 
 export const setRankingsState = async (state: string) => {
-  if (!RANKINGS_STATE_PATTERN.test(state)) {
+  const states = state.split(",").filter(Boolean);
+  if (states.some((value) => !RANKINGS_STATE_PATTERN.test(value))) {
     return;
   }
 

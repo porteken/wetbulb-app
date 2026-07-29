@@ -150,8 +150,8 @@ describe("mapComponent", () => {
     expect(screen.getByTestId("maplibre-map")).toHaveAttribute(
       "data-initial-bounds",
       JSON.stringify([
-        [-125, 24.4],
-        [-66.9, 53.55],
+        [-125, 25.4],
+        [-66.9, 54.55],
       ]),
     );
     const markers = screen.getAllByLabelText(/open details for/iu);

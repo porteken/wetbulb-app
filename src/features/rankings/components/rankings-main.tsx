@@ -3,6 +3,7 @@
 import { PageShell } from "@/components/app/page-shell";
 import { useTemperatureUnit } from "@/components/app/unit-provider";
 import { WetbulbIndexLegend } from "@/components/app/wetbulb-index-legend";
+import { MultiSelect } from "@/components/ui/multi-select";
 import { Pagination } from "@/components/ui/pagination";
 import { Select } from "@/components/ui/select";
 import { useToast } from "@/components/ui/toast";
@@ -142,15 +143,15 @@ function compareRankingItems(
 
 function filterRanking(
   item: RankingItem,
-  stateFilter: string,
-  wetbulbLevelFilter: string,
+  stateFilter: string[],
+  wetbulbLevelFilter: string[],
 ): boolean {
-  if (stateFilter !== "" && item.state !== stateFilter) {
+  if (stateFilter.length > 0 && !stateFilter.includes(item.state)) {
     return false;
   }
-  if (wetbulbLevelFilter !== "") {
+  if (wetbulbLevelFilter.length > 0) {
     const wetbulbInfo = getWetbulbInfo(item.avg_wetbulb);
-    if (wetbulbInfo.level !== wetbulbLevelFilter) {
+    if (!wetbulbLevelFilter.includes(wetbulbInfo.level)) {
       return false;
     }
   }
@@ -192,20 +193,20 @@ interface RankingsMainProperties {
 
 interface RankingsState {
   currentPage: number;
-  wetbulbLevelFilter: string;
+  wetbulbLevelFilter: string[];
   selectedSeason: GraphSeason;
   selectedYear: number;
   sortColumn: SortColumn;
   sortDirection: "asc" | "desc";
-  stateFilter: string;
+  stateFilter: string[];
 }
 
 type RankingsAction =
   | { column: SortColumn; type: "SET_SORT" }
-  | { wetbulbLevel: string; type: "SET_WETBULB_LEVEL_FILTER" }
+  | { wetbulbLevels: string[]; type: "SET_WETBULB_LEVEL_FILTER" }
   | { page: number; type: "SET_PAGE" }
   | { season: GraphSeason; type: "SET_SEASON" }
-  | { state: string; type: "SET_STATE_FILTER" }
+  | { states: string[]; type: "SET_STATE_FILTER" }
   | { type: "SET_YEAR"; year: number };
 
 type RankingsDispatch = React.Dispatch<RankingsAction>;
@@ -218,12 +219,12 @@ const createInitialRankingsState = (properties: {
   initialYear: number;
 }): RankingsState => ({
   currentPage: 1,
-  wetbulbLevelFilter: properties.initialWetbulbLevel,
+  wetbulbLevelFilter: properties.initialWetbulbLevel.split(",").filter(Boolean),
   selectedSeason: properties.initialSeason,
   selectedYear: properties.initialYear,
   sortColumn: "rank",
   sortDirection: "asc",
-  stateFilter: properties.initialState,
+  stateFilter: properties.initialState.split(",").filter(Boolean),
 });
 
 function rankingsReducer(
@@ -232,24 +233,24 @@ function rankingsReducer(
 ): RankingsState {
   switch (action.type) {
     case "SET_YEAR": {
-      return { ...state, wetbulbLevelFilter: "", selectedYear: action.year };
+      return { ...state, wetbulbLevelFilter: [], selectedYear: action.year };
     }
     case "SET_SEASON": {
       return {
         ...state,
         currentPage: 1,
-        wetbulbLevelFilter: "",
+        wetbulbLevelFilter: [],
         selectedSeason: action.season,
       };
     }
     case "SET_STATE_FILTER": {
-      return { ...state, currentPage: 1, stateFilter: action.state };
+      return { ...state, currentPage: 1, stateFilter: action.states };
     }
     case "SET_WETBULB_LEVEL_FILTER": {
       return {
         ...state,
         currentPage: 1,
-        wetbulbLevelFilter: action.wetbulbLevel,
+        wetbulbLevelFilter: action.wetbulbLevels,
       };
     }
     case "SET_SORT": {
@@ -279,14 +280,14 @@ function rankingsReducer(
 
 interface RankingsFiltersProperties {
   dispatch: RankingsDispatch;
-  wetbulbLevelFilter: string;
+  wetbulbLevelFilter: string[];
   wetbulbLevelOptions: SelectOption[];
   isPending: boolean;
   persist: PersistAction;
   region: DataRegion;
   selectedSeason: GraphSeason;
   selectedYear: number;
-  stateFilter: string;
+  stateFilter: string[];
   stateOptions: SelectOption[];
 }
 
@@ -310,7 +311,7 @@ const RankingsFilters = memo(
         }
 
         const year = Number(value);
-        const shouldResetWetbulbLevel = wetbulbLevelFilter !== "";
+        const shouldResetWetbulbLevel = wetbulbLevelFilter.length > 0;
 
         dispatch({ type: "SET_YEAR", year });
         persist(
@@ -326,7 +327,7 @@ const RankingsFilters = memo(
     const handleSeasonChange = useCallback(
       (value: string) => {
         const season = normalizeGraphSeason(value);
-        const shouldResetWetbulbLevel = wetbulbLevelFilter !== "";
+        const shouldResetWetbulbLevel = wetbulbLevelFilter.length > 0;
 
         dispatch({ season, type: "SET_SEASON" });
         persist(
@@ -340,30 +341,23 @@ const RankingsFilters = memo(
     );
 
     const handleStateChange = useCallback(
-      (value: string) => {
-        dispatch({ state: value, type: "SET_STATE_FILTER" });
-        persist(() => setRankingsState(value));
+      (value: string[]) => {
+        dispatch({ states: value, type: "SET_STATE_FILTER" });
+        persist(() => setRankingsState(value.join(",")));
       },
       [dispatch, persist],
     );
-
-    const handleStateClear = useCallback(() => {
-      dispatch({ state: "", type: "SET_STATE_FILTER" });
-      persist(() => setRankingsState(""));
-    }, [dispatch, persist]);
 
     const handleWetbulbLevelChange = useCallback(
-      (value: string) => {
-        dispatch({ wetbulbLevel: value, type: "SET_WETBULB_LEVEL_FILTER" });
-        persist(() => setRankingsWetbulbLevel(value));
+      (value: string[]) => {
+        dispatch({
+          type: "SET_WETBULB_LEVEL_FILTER",
+          wetbulbLevels: value,
+        });
+        persist(() => setRankingsWetbulbLevel(value.join(",")));
       },
       [dispatch, persist],
     );
-
-    const handleWetbulbLevelClear = useCallback(() => {
-      dispatch({ wetbulbLevel: "", type: "SET_WETBULB_LEVEL_FILTER" });
-      persist(() => setRankingsWetbulbLevel(""));
-    }, [dispatch, persist]);
 
     return (
       <section className="mb-6 fade-in-up rounded-3xl p-4 glass-panel [animation-delay:80ms] sm:p-5">
@@ -386,27 +380,24 @@ const RankingsFilters = memo(
             onChange={handleSeasonChange}
             value={selectedSeason}
           />
-          <Select
+          <MultiSelect
             className="w-full"
-            clearable
             data={stateOptions}
             data-testid="rankings-state-filter"
             disabled={isPending}
             label={DATA_REGION_LABELS[region].subdivision}
             onChange={handleStateChange}
-            onClear={handleStateClear}
             placeholder={DATA_REGION_LABELS[region].subdivisionPlaceholder}
+            searchable
             value={stateFilter}
           />
-          <Select
+          <MultiSelect
             className="w-full"
-            clearable
             data={wetbulbLevelOptions}
             data-testid="rankings-wetbulb-level-filter"
             disabled={isPending}
             label="Avg Wetbulb Level"
             onChange={handleWetbulbLevelChange}
-            onClear={handleWetbulbLevelClear}
             placeholder="All levels"
             value={wetbulbLevelFilter}
           />
@@ -656,11 +647,12 @@ export function RankingsMain({
   const itemsPerPage = 20;
 
   const stateOptions = useMemo(() => {
-    const filteredByWetbulbLevel = wetbulbLevelFilter
-      ? rankings.filter(
-          (r) => getWetbulbInfo(r.avg_wetbulb).level === wetbulbLevelFilter,
-        )
-      : rankings;
+    const filteredByWetbulbLevel =
+      wetbulbLevelFilter.length > 0
+        ? rankings.filter((r) =>
+            wetbulbLevelFilter.includes(getWetbulbInfo(r.avg_wetbulb).level),
+          )
+        : rankings;
 
     const uniqueStates = [
       ...new Set(filteredByWetbulbLevel.map((r) => r.state)),
@@ -669,9 +661,10 @@ export function RankingsMain({
   }, [rankings, wetbulbLevelFilter]);
 
   const wetbulbLevelOptions = useMemo(() => {
-    const filteredByState = stateFilter
-      ? rankings.filter((r) => r.state === stateFilter)
-      : rankings;
+    const filteredByState =
+      stateFilter.length > 0
+        ? rankings.filter((r) => stateFilter.includes(r.state))
+        : rankings;
 
     const availableLevels = new Set(
       filteredByState.map((r) => getWetbulbInfo(r.avg_wetbulb).level),

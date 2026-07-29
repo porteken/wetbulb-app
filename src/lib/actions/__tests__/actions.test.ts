@@ -320,6 +320,16 @@ describe("setRankingsYear", () => {
     expect(revalidatePath).toHaveBeenCalledWith("/rankings");
   });
 
+  it("persists multiple states", async () => {
+    await setRankingsState("TX,AZ");
+
+    expect(mockSet).toHaveBeenCalledWith(
+      "rankings-state",
+      "TX,AZ",
+      expect.any(Object),
+    );
+  });
+
   it("ignores a year outside the configured range without setting a cookie", async () => {
     const { revalidatePath } = await import("next/cache");
 
@@ -362,6 +372,16 @@ describe("setRankingsState", () => {
     await setRankingsState("NY");
 
     expect(revalidatePath).toHaveBeenCalledWith("/rankings");
+  });
+
+  it("persists multiple wetbulb levels", async () => {
+    await setRankingsWetbulbLevel("Moderate Risk,High Risk");
+
+    expect(mockSet).toHaveBeenCalledWith(
+      "rankings-wetbulb-level",
+      "Moderate Risk,High Risk",
+      expect.any(Object),
+    );
   });
 
   it("ignores a state value with disallowed characters without setting a cookie", async () => {

@@ -23,8 +23,8 @@ const REGION_MAP_BOUNDS: Record<DataRegion, MapBounds> = {
     [34.5, 66],
   ],
   na: [
-    [-125, 24.4],
-    [-66.9, 53.55],
+    [-125, 25.4],
+    [-66.9, 54.55],
   ],
 };
 const LIGHT_TILE_URLS = [
