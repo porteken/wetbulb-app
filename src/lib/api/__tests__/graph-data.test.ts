@@ -1,6 +1,34 @@
 import { describe, expect, it } from "vitest";
 
-import { mapTrendRowsToGraphData } from "../graph-data";
+import {
+  alignReferenceGraphData,
+  mapTrendRowsToGraphData,
+} from "../graph-data";
+
+describe("alignReferenceGraphData", () => {
+  it("aligns a complete reference year to available current-year days", () => {
+    const result = alignReferenceGraphData(
+      {
+        dates: [new Date("2026-01-01"), new Date("2026-01-03")],
+        wetbulbs: [1, 3],
+      },
+      {
+        dates: [
+          new Date("2025-01-01"),
+          new Date("2025-01-02"),
+          new Date("2025-01-03"),
+        ],
+        wetbulbs: [10, 20, 30],
+      },
+    );
+
+    expect(result).toStrictEqual({
+      dates: [new Date("2026-01-01"), new Date("2026-01-03")],
+      referenceWetbulbs: [10, 30],
+      wetbulbs: [1, 3],
+    });
+  });
+});
 
 describe("mapTrendRowsToGraphData", () => {
   it("preserves valid negative yearly WETBULB values", () => {

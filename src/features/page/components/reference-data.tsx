@@ -5,6 +5,7 @@ import { ChartSkeleton } from "@/components/app/chart-skeleton";
 import { useTemperatureUnit } from "@/components/app/unit-provider";
 import { ErrorGraphDisplay } from "@/features/home/components/error-graph-display";
 import { useIsMobileViewport } from "@/hooks/use-is-mobile-viewport";
+import { alignReferenceGraphData } from "@/lib/api/graph-data";
 import { getReferenceGraphQueryOptions } from "@/lib/api/query-client";
 import {
   DEFAULT_GRAPH_SEASON,
@@ -114,11 +115,25 @@ const ReferenceDataComponent: React.FC<ReferenceDataProperties> = ({
     initialData: isInitialBasis ? initialCurrentData : undefined,
   });
 
-  const currentWetbulbs = currentQuery.data?.wetbulbs ?? CurrentWetbulbs;
   const referenceGraphSnapshot = referenceQuery.data;
+  const currentGraphSnapshot = currentQuery.data;
+  const alignedGraphSnapshot = React.useMemo(
+    () =>
+      currentGraphSnapshot && referenceGraphSnapshot
+        ? alignReferenceGraphData(currentGraphSnapshot, referenceGraphSnapshot)
+        : undefined,
+    [currentGraphSnapshot, referenceGraphSnapshot],
+  );
+  const currentWetbulbs =
+    alignedGraphSnapshot?.wetbulbs ??
+    currentGraphSnapshot?.wetbulbs ??
+    CurrentWetbulbs;
   const hasReferenceError =
     referenceQuery.isError || (initialHasError && !referenceQuery.data);
-  const referencePointCount = referenceGraphSnapshot?.dates.length ?? 0;
+  const referencePointCount =
+    alignedGraphSnapshot?.dates.length ??
+    referenceGraphSnapshot?.dates.length ??
+    0;
   const needsHorizontalScroll =
     referencePointCount >= REFERENCE_SCROLL_HINT_THRESHOLD;
   const referenceChartMinWidth = React.useMemo(() => {
@@ -195,6 +210,11 @@ const ReferenceDataComponent: React.FC<ReferenceDataProperties> = ({
         >
           {(() => {
             if (referenceGraphSnapshot) {
+              const graphDates =
+                alignedGraphSnapshot?.dates ?? referenceGraphSnapshot.dates;
+              const graphReferenceWetbulbs =
+                alignedGraphSnapshot?.referenceWetbulbs ??
+                referenceGraphSnapshot.wetbulbs;
               return (
                 <div className="relative flex min-h-0 min-w-0 flex-1 flex-col">
                   <div
@@ -206,9 +226,9 @@ const ReferenceDataComponent: React.FC<ReferenceDataProperties> = ({
                       <GenerateReferenceGraph
                         currentWetbulbs={currentWetbulbs}
                         currentYear={GRAPH_CONFIG.YEAR_RANGE.END}
-                        dates={referenceGraphSnapshot.dates}
+                        dates={graphDates}
                         isMobileViewport={isMobileViewport}
-                        referenceWetbulbs={referenceGraphSnapshot.wetbulbs}
+                        referenceWetbulbs={graphReferenceWetbulbs}
                         referenceYear={referenceYear}
                         season={DEFAULT_GRAPH_SEASON}
                         showLegend={showReferenceLegend}

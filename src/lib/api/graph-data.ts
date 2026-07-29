@@ -57,6 +57,37 @@ export const mapReferenceRowsToGraphData = (
   return { dates, wetbulbs };
 };
 
+export const alignReferenceGraphData = (
+  currentData: ReferenceGraphDataProperties,
+  referenceData: ReferenceGraphDataProperties,
+) => {
+  const referenceByCalendarDay = new Map(
+    referenceData.dates.map((date, index) => [
+      date.toISOString().slice(5, 10),
+      referenceData.wetbulbs[index],
+    ]),
+  );
+  const dates: Date[] = [];
+  const wetbulbs: number[] = [];
+  const referenceWetbulbs: number[] = [];
+
+  currentData.dates.forEach((date, index) => {
+    const referenceWetbulb = referenceByCalendarDay.get(
+      date.toISOString().slice(5, 10),
+    );
+    const currentWetbulb = currentData.wetbulbs[index];
+    if (referenceWetbulb === undefined || currentWetbulb === undefined) {
+      return;
+    }
+
+    dates.push(date);
+    wetbulbs.push(currentWetbulb);
+    referenceWetbulbs.push(referenceWetbulb);
+  });
+
+  return { dates, referenceWetbulbs, wetbulbs };
+};
+
 export const mapTrendRowsToGraphData = (
   rows: TrendGraphRow[],
 ): TrendGraphDataProperties => {
