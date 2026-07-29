@@ -42,7 +42,7 @@ const { mockHeaderBar } = vi.hoisted(() => ({
 }));
 
 class MockSelectControl extends React.PureComponent<{
-  data: Array<{ label: string; value: string }>;
+  data: Array<{ disabled?: boolean; label: string; value: string }>;
   disabled?: boolean;
   label?: string;
   onChange?: (value: string) => void;
@@ -71,7 +71,11 @@ class MockSelectControl extends React.PureComponent<{
         >
           {placeholder && <option value="">{placeholder}</option>}
           {data.map((option) => (
-            <option key={option.value} value={option.value}>
+            <option
+              disabled={option.disabled}
+              key={option.value}
+              value={option.value}
+            >
               {option.label}
             </option>
           ))}
@@ -586,6 +590,14 @@ describe("rankingsMain", () => {
       expect(yearSelect).toHaveValue("2020");
     });
 
+    it("always shows the current year regardless of the selected season", () => {
+      render(<RankingsMain {...defaultProps} initialSeason="Annual" />);
+
+      expect(
+        within(screen.getByTestId("year-select")).getByText("2026"),
+      ).toBeEnabled();
+    });
+
     it("should call setRankingsYear when year changes", async () => {
       render(<RankingsMain {...defaultProps} />);
 
@@ -606,6 +618,34 @@ describe("rankingsMain", () => {
       await waitFor(() => {
         expect(setRankingsSeason).toHaveBeenCalledWith("Winter");
       });
+    });
+
+    it("disables seasons with insufficient data for the current year", () => {
+      vi.useFakeTimers();
+      vi.setSystemTime(new Date("2026-07-28T12:00:00Z"));
+
+      render(
+        <RankingsMain
+          {...defaultProps}
+          initialSeason="Summer"
+          initialYear={2026}
+        />,
+      );
+
+      const seasonSelect = screen.getByTestId("season-select");
+      expect(within(seasonSelect).getByText("Spring")).toBeInTheDocument();
+      expect(within(seasonSelect).getByText("Summer")).toBeInTheDocument();
+      expect(
+        within(seasonSelect).getByText("Annual (Insufficient data)"),
+      ).toBeDisabled();
+      expect(
+        within(seasonSelect).getByText("Fall (Insufficient data)"),
+      ).toBeDisabled();
+      expect(
+        within(seasonSelect).getByText("Winter (Insufficient data)"),
+      ).toBeDisabled();
+
+      vi.useRealTimers();
     });
 
     it("should persist the default annual season when requested", async () => {

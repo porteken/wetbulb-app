@@ -15,12 +15,14 @@ import {
 } from "@/lib/actions/actions";
 import {
   DATA_REGION_LABELS,
+  GRAPH_CONFIG,
   GRAPH_SEASONS,
   normalizeGraphSeason,
   type DataRegion,
   type GraphSeason,
   type TemperatureUnit,
 } from "@/lib/constants";
+import { isCurrentYearRankingAvailable } from "@/lib/utils/season-availability";
 import { YearOptions } from "@/lib/utils/select-options";
 import {
   celsiusDeltaToFahrenheit,
@@ -74,19 +76,9 @@ interface SelectOption {
   value: string;
 }
 
-const YEAR_OPTIONS = YearOptions().map(({ key, label }) => ({
-  label,
-  value: key,
-}));
-
 const RANKINGS_WETBULB_LEVELS = WETBULB_INDEX_LEGEND_ITEMS.map((item) => ({
   label: item.level,
   value: item.level,
-}));
-
-const SEASON_OPTIONS = GRAPH_SEASONS.map((season) => ({
-  label: season,
-  value: season,
 }));
 
 interface RankingItem {
@@ -304,6 +296,25 @@ const RankingsFilters = memo(
     stateFilter,
     stateOptions,
   }: RankingsFiltersProperties) => {
+    const yearOptions = useMemo(
+      () => YearOptions().map(({ key, label }) => ({ label, value: key })),
+      [],
+    );
+    const seasonOptions = useMemo(
+      () =>
+        GRAPH_SEASONS.map((season) => {
+          const unavailable =
+            selectedYear === GRAPH_CONFIG.YEAR_RANGE.END &&
+            !isCurrentYearRankingAvailable(season);
+
+          return {
+            disabled: unavailable,
+            label: unavailable ? `${season} (Insufficient data)` : season,
+            value: season,
+          };
+        }),
+      [selectedYear],
+    );
     const handleYearChange = useCallback(
       (value: string) => {
         if (!value) {
@@ -312,32 +323,54 @@ const RankingsFilters = memo(
 
         const year = Number(value);
         const shouldResetWetbulbLevel = wetbulbLevelFilter.length > 0;
+        const shouldSelectAvailableSeason =
+          year === GRAPH_CONFIG.YEAR_RANGE.END &&
+          !isCurrentYearRankingAvailable(selectedSeason);
+        const availableSeason = shouldSelectAvailableSeason
+          ? GRAPH_SEASONS.filter((season) =>
+              isCurrentYearRankingAvailable(season),
+            ).at(-1)
+          : undefined;
 
         dispatch({ type: "SET_YEAR", year });
+        if (availableSeason) {
+          dispatch({ season: availableSeason, type: "SET_SEASON" });
+        }
         persist(
           ...(shouldResetWetbulbLevel
             ? [() => setRankingsWetbulbLevel("")]
             : []),
           () => setRankingsYear(year),
+          ...(availableSeason
+            ? [() => setRankingsSeason(availableSeason)]
+            : []),
         );
       },
-      [dispatch, wetbulbLevelFilter, persist],
+      [dispatch, wetbulbLevelFilter, persist, selectedSeason],
     );
 
     const handleSeasonChange = useCallback(
       (value: string) => {
         const season = normalizeGraphSeason(value);
         const shouldResetWetbulbLevel = wetbulbLevelFilter.length > 0;
+        const shouldResetYear =
+          selectedYear === GRAPH_CONFIG.YEAR_RANGE.END &&
+          !isCurrentYearRankingAvailable(season);
+        const nextYear = GRAPH_CONFIG.YEAR_RANGE.END - 1;
 
         dispatch({ season, type: "SET_SEASON" });
+        if (shouldResetYear) {
+          dispatch({ type: "SET_YEAR", year: nextYear });
+        }
         persist(
           ...(shouldResetWetbulbLevel
             ? [() => setRankingsWetbulbLevel("")]
             : []),
           () => setRankingsSeason(season),
+          ...(shouldResetYear ? [() => setRankingsYear(nextYear)] : []),
         );
       },
-      [dispatch, wetbulbLevelFilter, persist],
+      [dispatch, wetbulbLevelFilter, persist, selectedYear],
     );
 
     const handleStateChange = useCallback(
@@ -364,7 +397,7 @@ const RankingsFilters = memo(
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <Select
             className="w-full"
-            data={YEAR_OPTIONS}
+            data={yearOptions}
             data-testid="rankings-year-filter"
             disabled={isPending}
             label="Year"
@@ -373,7 +406,7 @@ const RankingsFilters = memo(
           />
           <Select
             className="w-full"
-            data={SEASON_OPTIONS}
+            data={seasonOptions}
             data-testid="rankings-season-filter"
             disabled={isPending}
             label="Season"

@@ -11,10 +11,12 @@ import { useIgnorePersistenceError } from "@/hooks/use-ignore-persistence-error"
 import { useIsMobileViewport } from "@/hooks/use-is-mobile-viewport";
 import { setForecastPreferences } from "@/lib/actions/actions";
 import {
+  GRAPH_CONFIG,
   normalizeGraphSeason,
   type GraphSeason,
   type WetbulbBasis,
 } from "@/lib/constants";
+import { isCurrentYearTrendAvailable } from "@/lib/utils/season-availability";
 import {
   deriveTrendAnalysis,
   type ForecastGraphData,
@@ -263,6 +265,12 @@ const TrendAnalysisComponent: React.FC<TrendAnalysisProperties> = ({
                 <option value="Fall">Fall</option>
                 <option value="Winter">Winter</option>
               </select>
+              {!isCurrentYearTrendAvailable(graphSeason) && (
+                <p className="mt-1.5 text-xs text-muted-foreground">
+                  {GRAPH_CONFIG.YEAR_RANGE.END} point unavailable — insufficient
+                  data for this season.
+                </p>
+              )}
             </div>
             <div>
               <label

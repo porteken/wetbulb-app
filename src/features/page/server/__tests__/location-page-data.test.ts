@@ -361,7 +361,7 @@ describe("loadLocationPageData", () => {
     );
     expect(mockFetchReferenceGraphData).toHaveBeenNthCalledWith(
       1,
-      "2025",
+      "2026",
       7,
       "Annual",
       "max",
@@ -472,7 +472,7 @@ describe("loadLocationPageData", () => {
     );
     expect(mockFetchReferenceGraphData).toHaveBeenNthCalledWith(
       1,
-      "2025",
+      "2026",
       0,
       "Annual",
       "max",
@@ -528,7 +528,7 @@ describe("loadLocationPageData", () => {
     });
     expect(mockFetchReferenceGraphData).toHaveBeenNthCalledWith(
       1,
-      "2025",
+      "2026",
       7,
       "Annual",
       "max",
@@ -538,7 +538,7 @@ describe("loadLocationPageData", () => {
   it("falls back when the reference year cookie is the latest configured data year", async () => {
     mockCookies.mockResolvedValue(
       createCookieStore({
-        [REFERENCE_YEAR_COOKIE_NAME]: "2025",
+        [REFERENCE_YEAR_COOKIE_NAME]: "2026",
       }),
     );
     mockFetchLocations.mockResolvedValue({

@@ -1,6 +1,6 @@
 # Historical Wetbulb App
 
-A comprehensive web application hosted [here](https://wetbulb-app.vercel.app/) that visualizes wet-bulb temperature data from 2000 to 2025 for the top 500 largest cities across Canada and the contiguous United States, plus the top 500 largest cities in Europe. The data pipeline for getting the data is [here](https://github.com/porteken/pet-data).
+A comprehensive web application hosted [here](https://wetbulb-app.vercel.app/) that visualizes wet-bulb temperature data from 2000 through 2026 YTD for the top 500 largest cities across Canada and the contiguous United States, plus the top 500 largest cities in Europe. The data pipeline for getting the data is [here](https://github.com/porteken/wetbulb-data).
 
 ## Features
 

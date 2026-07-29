@@ -47,7 +47,7 @@ interface RuntimeMockTables {
   wetbulb_year_stats: Array<WetbulbYearStatsTable & MockRow>;
 }
 
-const YEARS = Array.from({ length: 26 }, (_, index) => 2000 + index);
+const YEARS = Array.from({ length: 27 }, (_, index) => 2000 + index);
 const FORECAST_YEARS = Array.from({ length: 75 }, (_, index) => 2026 + index);
 const GRAPH_SEASONS = ["Annual", "Spring", "Summer", "Fall", "Winter"] as const;
 const SEASONAL_AVG_OFFSETS = {
@@ -169,7 +169,8 @@ const buildWetbulbYearRows = (): RuntimeWetbulbRow[] => {
     for (const year of YEARS) {
       const seasonalBase = getAverageWetbulb(location.location_id, year);
 
-      for (let index = 0; index < 10; index++) {
+      const pointCount = year === 2026 ? 8 : 10;
+      for (let index = 0; index < pointCount; index++) {
         const month = 6 + Math.floor(index / 4);
         const day = 1 + (index % 4) * 7;
         const date = `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;

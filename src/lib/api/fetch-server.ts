@@ -20,6 +20,7 @@ import {
   DEFAULT_GRAPH_SEASON,
   DEFAULT_FORECAST_SCENARIO,
   DEFAULT_WETBULB_BASIS,
+  GRAPH_CONFIG,
   type DataRegion,
   type GraphSeason,
   type ForecastScenario,
@@ -38,6 +39,10 @@ import {
 } from "@/lib/db/queries";
 import { DatabaseError } from "@/lib/utils/errors";
 import { groupLocationsByState } from "@/lib/utils/location-options";
+import {
+  isCurrentYearRankingAvailable,
+  isCurrentYearTrendAvailable,
+} from "@/lib/utils/season-availability";
 import {
   validateLocationId,
   validateTrendOption,
@@ -119,6 +124,13 @@ async function fetchCityRankingsUncached(
     throw new DatabaseError(
       `Invalid year: ${year}. Must be between ${MIN_YEAR} and ${MAX_YEAR}.`,
     );
+  }
+
+  if (
+    year === GRAPH_CONFIG.YEAR_RANGE.END &&
+    !isCurrentYearRankingAvailable(resolvedSeason)
+  ) {
+    return [];
   }
 
   let rows;
@@ -368,8 +380,11 @@ async function fetchTrendGraphDataUncached(
     parseTrendGraphRows,
     rows,
   );
+  const availableRows = isCurrentYearTrendAvailable(resolvedSeason)
+    ? validatedRows
+    : validatedRows.filter(({ year }) => year < GRAPH_CONFIG.YEAR_RANGE.END);
 
-  return mapTrendRowsToGraphData(validatedRows);
+  return mapTrendRowsToGraphData(availableRows);
 }
 
 export const FetchCityRankings = unstable_cache(

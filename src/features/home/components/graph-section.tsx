@@ -2,10 +2,12 @@ import { ForecastControls } from "@/components/app/forecast-controls";
 import { Button } from "@/components/ui/button";
 import { Select } from "@/components/ui/select";
 import {
+  GRAPH_CONFIG,
   type GraphSeason,
   normalizeGraphSeason,
   type TemperatureUnit,
 } from "@/lib/constants";
+import { isCurrentYearTrendAvailable } from "@/lib/utils/season-availability";
 import { Loader2 } from "lucide-react";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
@@ -261,14 +263,22 @@ const GraphControlsPanel = memo(
 
     return (
       <div className="w-full max-w-md space-y-3 sm:space-y-4">
-        <Select
-          className="w-full"
-          data={seasonOptions}
-          label="Season"
-          onChange={handleSeasonChange}
-          size="sm"
-          value={selectedGraphSeason}
-        />
+        <div>
+          <Select
+            className="w-full"
+            data={seasonOptions}
+            label="Season"
+            onChange={handleSeasonChange}
+            size="sm"
+            value={selectedGraphSeason}
+          />
+          {!isCurrentYearTrendAvailable(selectedGraphSeason) && (
+            <p className="mt-1.5 text-xs text-muted-foreground">
+              {GRAPH_CONFIG.YEAR_RANGE.END} point unavailable — insufficient
+              data for this season.
+            </p>
+          )}
+        </div>
         <Select
           className="w-full"
           data={selectOptions}

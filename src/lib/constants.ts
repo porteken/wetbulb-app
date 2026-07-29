@@ -168,7 +168,7 @@ export const GRAPH_CONFIG = {
     MAX: "max",
   },
   YEAR_RANGE: {
-    END: 2025,
+    END: 2026,
     START: 2000,
   },
 } as const;

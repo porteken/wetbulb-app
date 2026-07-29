@@ -13,6 +13,7 @@ import {
   RANKINGS_YEAR_COOKIE_NAME,
   WETBULB_BASIS_COOKIE_NAME,
 } from "@/lib/constants";
+import { isCurrentYearRankingAvailable } from "@/lib/utils/season-availability";
 import { cookies } from "next/headers";
 
 import type { Metadata } from "next";
@@ -55,7 +56,12 @@ export default async function RankingsPage({
   const initialSeason = normalizeGraphSeason(seasonFromCookie);
   const shouldPersistInitialSeason =
     seasonFromCookie !== undefined && seasonFromCookie !== initialSeason;
-  const year = yearMapping(parameters.year, yearFromCookie);
+  const requestedYear = yearMapping(parameters.year, yearFromCookie);
+  const year =
+    requestedYear === GRAPH_CONFIG.YEAR_RANGE.END &&
+    !isCurrentYearRankingAvailable(initialSeason)
+      ? GRAPH_CONFIG.YEAR_RANGE.END - 1
+      : requestedYear;
   const basis = normalizeWetbulbBasis(basisFromCookie ?? DEFAULT_WETBULB_BASIS);
   const [rankings, { LocationOptions }] = await Promise.all([
     FetchCityRankings(year, initialSeason, basis, region),

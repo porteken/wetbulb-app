@@ -205,10 +205,7 @@ const ReferenceDataComponent: React.FC<ReferenceDataProperties> = ({
                     <div className="h-full min-w-full" style={containerStyle}>
                       <GenerateReferenceGraph
                         currentWetbulbs={currentWetbulbs}
-                        currentYear={
-                          CurrentDates.at(-1)?.getUTCFullYear() ??
-                          GRAPH_CONFIG.YEAR_RANGE.END
-                        }
+                        currentYear={GRAPH_CONFIG.YEAR_RANGE.END}
                         dates={referenceGraphSnapshot.dates}
                         isMobileViewport={isMobileViewport}
                         referenceWetbulbs={referenceGraphSnapshot.wetbulbs}

@@ -164,7 +164,8 @@ describe("pageMain", () => {
       expect(selectElement).toHaveValue("2000");
       expect(optionValues).toContain("2000");
       expect(optionValues).toContain("2024");
-      expect(optionValues).not.toContain("2025");
+      expect(optionValues).toContain("2025");
+      expect(optionValues).not.toContain("2026");
     });
 
     it("should render collapsible thermal stress legend popup", async () => {

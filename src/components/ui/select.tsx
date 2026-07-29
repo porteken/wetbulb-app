@@ -185,6 +185,7 @@ function SelectScrollDownButton({
 }
 
 interface SelectOption {
+  disabled?: boolean;
   key?: string;
   label: string;
   value?: string;
@@ -333,6 +334,7 @@ const Select = ({
                     {item.items.map((subItem, subIndex) => (
                       <SelectItem
                         data-testid="searchable-select-option"
+                        disabled={subItem.disabled}
                         key={subItem.key ?? subItem.value ?? `item-${subIndex}`}
                         value={subItem.value ?? subItem.key ?? ""}
                       >
@@ -345,6 +347,7 @@ const Select = ({
               return (
                 <SelectItem
                   data-testid="searchable-select-option"
+                  disabled={item.disabled}
                   key={item.key ?? item.value ?? `item-${index}`}
                   value={item.value ?? item.key ?? ""}
                 >

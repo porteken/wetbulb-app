@@ -106,6 +106,18 @@ const waitForInitialTrendAnalysisRender = async () => {
 };
 
 describe("trendAnalysis", () => {
+  it("indicates when the selected season has no current-year point", () => {
+    renderWithQueryClient(
+      <TrendAnalysis {...defaultProps} graphSeason="Fall" />,
+    );
+
+    expect(
+      screen.getByText(
+        "2026 point unavailable — insufficient data for this season.",
+      ),
+    ).toBeInTheDocument();
+  });
+
   beforeEach(() => {
     vi.clearAllMocks();
     Object.defineProperty(globalThis, "matchMedia", {

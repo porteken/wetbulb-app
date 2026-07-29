@@ -181,10 +181,10 @@ describe("wetbulb-index", () => {
       expect(result.colorClass).toBe("text-orange-600");
     });
 
-    it("should use default year 2025 when not provided", () => {
+    it("should use default year 2026 when not provided", () => {
       const result = getWetbulbDescription(22, "avg", { unit: "C" });
       expect(result.prefix).toBe(
-        "The 2025 annual average wetbulb temperature is",
+        "The 2026 annual average wetbulb temperature is",
       );
     });
 

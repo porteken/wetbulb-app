@@ -151,7 +151,7 @@ describe("rankings page", () => {
     );
   });
 
-  it("defaults to 2025 when neither search params nor cookies provide a year", async () => {
+  it("defaults to the previous year for annual rankings", async () => {
     mockCookies.mockResolvedValue(createCookieStore({}));
 
     render(

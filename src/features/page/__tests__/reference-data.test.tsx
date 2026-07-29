@@ -168,7 +168,7 @@ describe("referenceData", () => {
     });
   });
 
-  it("should pass the current year using UTC-safe date handling", async () => {
+  it("should use the configured current year for the comparison series", async () => {
     renderWithQueryClient(
       <ReferenceData
         {...defaultProps}
@@ -182,7 +182,7 @@ describe("referenceData", () => {
       const calls = vi.mocked(GenerateReferenceGraph).mock.calls;
       expect(calls.at(-1)?.[0]).toStrictEqual(
         expect.objectContaining({
-          currentYear: 2025,
+          currentYear: 2026,
         }),
       );
     });

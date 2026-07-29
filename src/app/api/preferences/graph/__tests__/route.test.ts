@@ -185,7 +185,7 @@ describe("pOST /api/preferences/graph", () => {
   it("returns 400 when reference year is the latest configured year", async () => {
     const request = new Request("http://localhost/api/preferences/graph", {
       method: "POST",
-      body: JSON.stringify({ referenceYear: "2025" }),
+      body: JSON.stringify({ referenceYear: "2026" }),
     });
 
     const response = await POST(request);

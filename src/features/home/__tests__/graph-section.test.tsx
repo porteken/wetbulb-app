@@ -135,6 +135,11 @@ describe("graphSection", () => {
       expect(screen.getByTestId("measure-select")).toBeInTheDocument();
       expect(screen.getByText("Measure")).toBeInTheDocument();
       expect(screen.getByText("Season")).toBeInTheDocument();
+      expect(
+        screen.getByText(
+          "2026 point unavailable — insufficient data for this season.",
+        ),
+      ).toBeInTheDocument();
     });
 
     it("should render view details button", () => {
