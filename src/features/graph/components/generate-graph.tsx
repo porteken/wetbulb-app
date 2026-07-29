@@ -529,7 +529,12 @@ const TrendChartBody = ({
   const yAxisDomain = React.useMemo(
     () =>
       getYAxisDomain(
-        chartData.flatMap((point) => [point.wetbulb, point.forecast]),
+        chartData.flatMap((point) => [
+          point.wetbulb,
+          point.forecast,
+          point.confidenceLow,
+          point.confidenceHigh,
+        ]),
       ),
     [chartData],
   );

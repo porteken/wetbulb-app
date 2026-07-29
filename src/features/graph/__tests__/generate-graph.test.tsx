@@ -99,7 +99,7 @@ describe("graph Components", () => {
     );
   });
 
-  it("keeps the forecast y-axis tight to historical and forecast lines", () => {
+  it("includes the forecast confidence interval in the y-axis domain", () => {
     render(
       <GenerateTrendGraph
         forecastData={mockForecastData2}
@@ -116,7 +116,7 @@ describe("graph Components", () => {
     expect(yAxisMock).toHaveBeenCalledWith(
       expect.objectContaining({
         allowDataOverflow: true,
-        domain: [16, 32],
+        domain: [16, 40],
       }),
       undefined,
     );
