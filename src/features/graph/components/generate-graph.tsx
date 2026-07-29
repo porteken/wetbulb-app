@@ -157,8 +157,6 @@ const TICK_FONT_SIZE_MOBILE = 12;
 const TICK_FONT_SIZE_DESKTOP = 13;
 const DOT_RADIUS_MOBILE = 2.5;
 const DOT_RADIUS_DESKTOP = 3;
-const TICK_COUNT_MOBILE = 6;
-const TICK_COUNT_DESKTOP = 8;
 const Y_AXIS_WIDTH_MOBILE = 42;
 const Y_AXIS_WIDTH_DESKTOP = 56;
 const MARGIN_TOP = 8;
@@ -167,8 +165,6 @@ const MARGIN_LEFT_MOBILE = -18;
 const MARGIN_LEFT_DESKTOP = -10;
 const MARGIN_RIGHT_MOBILE = 4;
 const MARGIN_RIGHT_DESKTOP = 12;
-const MIN_TICK_GAP_REFERENCE_MOBILE = 28;
-const MIN_TICK_GAP_REFERENCE_DESKTOP = 16;
 const Y_AXIS_STEP = 2;
 const Y_AXIS_LOWER_PADDING = 2;
 const Y_AXIS_UPPER_PADDING = 1;
@@ -223,6 +219,32 @@ const useInitialChartAnimation = (): boolean => {
 
   return animationsAllowed && !hasRenderedRef.current;
 };
+
+const getDecadeTicks = (years: number[]): number[] => {
+  const firstYear = years.at(0);
+  const lastYear = years.at(-1);
+  if (firstYear === undefined || lastYear === undefined) {
+    return [];
+  }
+
+  const firstDecade = Math.ceil(firstYear / 10) * 10;
+  const lastDecade = Math.floor(lastYear / 10) * 10;
+  if (firstDecade > lastDecade) {
+    return [firstYear];
+  }
+
+  return Array.from(
+    { length: (lastDecade - firstDecade) / 10 + 1 },
+    (_, index) => firstDecade + index * 10,
+  );
+};
+
+const getMonthlyTicks = (chartData: ReferenceChartPoint[]): string[] =>
+  chartData
+    .filter(({ label }) => label.endsWith(" 1"))
+    .map(({ label }) => label);
+
+const formatMonthTick = (label: string): string => label.split(" ")[0] ?? label;
 
 const buildReferenceChartData = (
   dates: Date[],
@@ -317,12 +339,9 @@ const hasTrendGraphData = (years: number[], yearWetbulbs: number[]): boolean =>
 
 const hasReferenceGraphData = (
   dates: Date[],
-  currentWetbulbs: number[],
+  _currentWetbulbs: number[],
   referenceWetbulbs: number[],
-): boolean =>
-  dates.length > 0 &&
-  referenceWetbulbs.length > 0 &&
-  currentWetbulbs.length > 0;
+): boolean => dates.length > 0 && referenceWetbulbs.length > 0;
 
 const roundDownToStep = (value: number, step: number): number =>
   Math.floor(value / step) * step;
@@ -526,6 +545,10 @@ const TrendChartBody = ({
   showLegend,
   unit,
 }: TrendChartBodyProperties): React.ReactElement => {
+  const xAxisTicks = React.useMemo(
+    () => getDecadeTicks(chartData.map(({ year }) => year)),
+    [chartData],
+  );
   const yAxisDomain = React.useMemo(
     () =>
       getYAxisDomain(
@@ -586,10 +609,8 @@ const TrendChartBody = ({
             domain={CHART_DOMAIN}
             minTickGap={24}
             tick={tickStyle}
-            tickCount={
-              isMobileViewport ? TICK_COUNT_MOBILE : TICK_COUNT_DESKTOP
-            }
             tickLine={false}
+            ticks={xAxisTicks}
             type="number"
           />
           <YAxis
@@ -635,6 +656,10 @@ const ReferenceChartBody = ({
   showLegend,
   unit,
 }: ReferenceChartBodyProperties): React.ReactElement => {
+  const xAxisTicks = React.useMemo(
+    () => getMonthlyTicks(chartData),
+    [chartData],
+  );
   const yAxisDomain = React.useMemo(
     () =>
       getYAxisDomain(
@@ -681,14 +706,11 @@ const ReferenceChartBody = ({
           <XAxis
             axisLine={false}
             dataKey="label"
-            interval="preserveStartEnd"
-            minTickGap={
-              isMobileViewport
-                ? MIN_TICK_GAP_REFERENCE_MOBILE
-                : MIN_TICK_GAP_REFERENCE_DESKTOP
-            }
+            interval={0}
             tick={tickStyle}
+            tickFormatter={formatMonthTick}
             tickLine={false}
+            ticks={xAxisTicks}
           />
           <YAxis
             allowDataOverflow

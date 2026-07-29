@@ -3,12 +3,15 @@ import { render, screen } from "@testing-library/react";
 import React from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const { areaMock, lineMock, yAxisMock } = vi.hoisted(() => ({
+const { areaMock, lineMock, xAxisMock, yAxisMock } = vi.hoisted(() => ({
   areaMock: vi.fn<(props: Record<string, any>) => React.ReactNode>(
     ({ children }) => <div data-testid="recharts-area">{children}</div>,
   ),
   lineMock: vi.fn<(props: Record<string, any>) => React.ReactNode>(
     ({ children }) => <div data-testid="recharts-line">{children}</div>,
+  ),
+  xAxisMock: vi.fn<(props: Record<string, any>) => React.ReactNode>(
+    ({ children }) => <div data-testid="recharts-x-axis">{children}</div>,
   ),
   yAxisMock: vi.fn<(props: Record<string, any>) => React.ReactNode>(
     ({ children }) => <div data-testid="recharts-y-axis">{children}</div>,
@@ -29,7 +32,7 @@ vi.mock("recharts", async () => ({
   Line: lineMock,
   ResponsiveContainer: createRechartsStub("recharts-responsive-container"),
   Tooltip: createRechartsStub("recharts-tooltip"),
-  XAxis: createRechartsStub("recharts-x-axis"),
+  XAxis: xAxisMock,
   YAxis: yAxisMock,
 }));
 
@@ -74,7 +77,61 @@ describe("graph Components", () => {
   beforeEach(() => {
     areaMock.mockClear();
     lineMock.mockClear();
+    xAxisMock.mockClear();
     yAxisMock.mockClear();
+  });
+
+  it("uses decade ticks through the final forecast year", () => {
+    const years = Array.from({ length: 101 }, (_, index) => 2000 + index);
+    const values = years.map((year) => year - 1980);
+
+    render(
+      <GenerateTrendGraph
+        increasePerYear={0.1}
+        option="avg"
+        trendlineWetbulbs={values}
+        yearWetbulbs={values}
+        years={years}
+      />,
+    );
+
+    expect(xAxisMock.mock.calls.at(-1)?.[0].ticks).toStrictEqual([
+      2000, 2010, 2020, 2030, 2040, 2050, 2060, 2070, 2080, 2090, 2100,
+    ]);
+  });
+
+  it("uses monthly date ticks from January through December", () => {
+    const dates = Array.from(
+      { length: 365 },
+      (_, index) => new Date(Date.UTC(2025, 0, index + 1)),
+    );
+    const values = dates.map((_, index) => index / 10);
+
+    render(
+      <GenerateReferenceGraph
+        currentWetbulbs={values}
+        dates={dates}
+        referenceWetbulbs={values}
+        referenceYear="2000"
+      />,
+    );
+
+    expect(xAxisMock.mock.calls.at(-1)?.[0].ticks).toStrictEqual([
+      "Jan 1",
+      "Feb 1",
+      "Mar 1",
+      "Apr 1",
+      "May 1",
+      "Jun 1",
+      "Jul 1",
+      "Aug 1",
+      "Sep 1",
+      "Oct 1",
+      "Nov 1",
+      "Dec 1",
+    ]);
+    expect(xAxisMock.mock.calls.at(-1)?.[0].tickFormatter("Jan 1")).toBe("Jan");
+    expect(xAxisMock.mock.calls.at(-1)?.[0].tickFormatter("Dec 1")).toBe("Dec");
   });
 
   it("sets a tighter y-axis domain around trend data", () => {
@@ -303,6 +360,19 @@ describe("graph Components", () => {
       expect(
         screen.getByText("No data available for the selected parameters."),
       ).toBeInTheDocument();
+    });
+
+    it("renders reference data when the current-year series is unavailable", () => {
+      render(
+        <GenerateReferenceGraph
+          currentWetbulbs={emptyWetbulbs}
+          dates={mockDates}
+          referenceWetbulbs={mockReferenceWetbulbs}
+          referenceYear="2000"
+        />,
+      );
+
+      expect(screen.getByTestId("reference-chart")).toBeInTheDocument();
     });
   });
 });

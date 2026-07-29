@@ -4,7 +4,6 @@ import {
   FetchReferenceGraphData,
   FetchTrendGraphData,
 } from "@/lib/api/fetch-server";
-import { alignReferenceGraphData } from "@/lib/api/graph-data";
 import {
   DEFAULT_REFERENCE_YEAR,
   DEFAULT_GRAPH_SEASON,
@@ -110,11 +109,10 @@ const resolveReferenceGraphData = (
     };
   }
 
-  const alignedData = alignReferenceGraphData(currentData, referenceData);
   return {
-    dates: alignedData.dates,
-    wetbulbs: alignedData.wetbulbs,
-    reference_wetbulbs: alignedData.referenceWetbulbs,
+    dates: referenceData.dates,
+    wetbulbs: currentData.wetbulbs,
+    reference_wetbulbs: referenceData.wetbulbs,
   };
 };
 

@@ -6,7 +6,7 @@ import {
 } from "../graph-data";
 
 describe("alignReferenceGraphData", () => {
-  it("aligns a complete reference year to available current-year days", () => {
+  it("uses the complete reference-year timeline and gaps missing current days", () => {
     const result = alignReferenceGraphData(
       {
         dates: [new Date("2026-01-01"), new Date("2026-01-03")],
@@ -23,10 +23,33 @@ describe("alignReferenceGraphData", () => {
     );
 
     expect(result).toStrictEqual({
-      dates: [new Date("2026-01-01"), new Date("2026-01-03")],
-      referenceWetbulbs: [10, 30],
-      wetbulbs: [1, 3],
+      dates: [
+        new Date("2025-01-01"),
+        new Date("2025-01-02"),
+        new Date("2025-01-03"),
+      ],
+      referenceWetbulbs: [10, 20, 30],
+      wetbulbs: [1, Number.NaN, 3],
     });
+  });
+
+  it("does not shift calendar-day alignment across leap day", () => {
+    const result = alignReferenceGraphData(
+      {
+        dates: [new Date("2025-02-28"), new Date("2025-03-01")],
+        wetbulbs: [1, 2],
+      },
+      {
+        dates: [
+          new Date("2024-02-28"),
+          new Date("2024-02-29"),
+          new Date("2024-03-01"),
+        ],
+        wetbulbs: [10, 11, 12],
+      },
+    );
+
+    expect(result.wetbulbs).toStrictEqual([1, Number.NaN, 2]);
   });
 });
 
