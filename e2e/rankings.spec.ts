@@ -1,9 +1,5 @@
 import { expect, test } from "./fixtures";
-import {
-  getOpenCustomSelectOptions,
-  openCustomSelect,
-  selectCustomOption,
-} from "./utils/custom-select";
+import { selectCustomOption } from "./utils/custom-select";
 import { waitForLocationDetailsPage } from "./utils/map-page";
 
 import type { Locator } from "@playwright/test";
@@ -17,6 +13,18 @@ import type { Locator } from "@playwright/test";
 // the user can actually see rather than letting strict mode trip over orphans.
 const onlyVisible = (locator: Locator): Locator =>
   locator.filter({ visible: true });
+
+const openMultiSelect = async (trigger: Locator): Promise<Locator> => {
+  await trigger.click();
+  await expect(trigger).toHaveAttribute("aria-expanded", "true");
+
+  const options = onlyVisible(
+    trigger.page().locator('button[aria-pressed="false"]'),
+  );
+  await expect(options.first()).toBeVisible();
+
+  return options;
+};
 
 test.describe("Rankings Page", () => {
   test("should display rankings table with data", async ({ page }) => {
@@ -164,9 +172,11 @@ test.describe("Rankings Page", () => {
     await expect(stateSelect).toBeVisible({
       timeout: 10_000,
     });
+    const stateFilteredRows = onlyVisible(page.locator("table tbody tr"));
+    await expect(stateFilteredRows.first()).toBeVisible();
+    const initialRowCount = await stateFilteredRows.count();
 
-    await openCustomSelect(page, stateSelect);
-    const firstStateOption = getOpenCustomSelectOptions(page).first();
+    const firstStateOption = (await openMultiSelect(stateSelect)).first();
     const firstStateOptionText = await firstStateOption.textContent();
     const stateLabel = firstStateOptionText?.trim();
     expect(stateLabel).toBeTruthy();
@@ -174,21 +184,27 @@ test.describe("Rankings Page", () => {
 
     await expect(stateSelect).toContainText(stateLabel ?? "");
 
-    const stateFilteredRows = onlyVisible(page.locator("table tbody tr"));
-    await expect(stateFilteredRows).toHaveCount(1, {
+    await expect(stateFilteredRows).not.toHaveCount(initialRowCount, {
       timeout: 10_000,
     });
-    await expect(stateFilteredRows.first().locator("td").nth(2)).toContainText(
-      stateLabel ?? "",
-    );
-    await expect(page.getByText("Showing 1-1 of 1 cities")).toBeVisible();
+    await expect
+      .poll(async () => {
+        const states = await stateFilteredRows
+          .locator("td:nth-child(3)")
+          .allTextContents();
+        return [...new Set(states.map((state) => state.trim()))];
+      })
+      .toEqual([stateLabel]);
+    await expect(page.getByText(/Showing 1-\d+ of \d+ cities/u)).toBeVisible({
+      timeout: 10_000,
+    });
 
-    const clearStateButton = stateSelect
-      .locator("..")
-      .getByRole("button", { name: "Clear" });
+    const clearStateButton = onlyVisible(
+      page.getByRole("button", { name: "Clear all" }),
+    );
     await clearStateButton.click();
 
-    await expect(stateFilteredRows).toHaveCount(6, {
+    await expect(stateFilteredRows).toHaveCount(initialRowCount, {
       timeout: 10_000,
     });
   });
@@ -209,8 +225,7 @@ test.describe("Rankings Page", () => {
       timeout: 10_000,
     });
 
-    await openCustomSelect(page, wetbulbLevelSelect);
-    const firstOption = getOpenCustomSelectOptions(page).first();
+    const firstOption = (await openMultiSelect(wetbulbLevelSelect)).first();
     const firstOptionText = await firstOption.textContent();
     const optionLabel = firstOptionText?.trim();
     expect(optionLabel).toBeTruthy();
