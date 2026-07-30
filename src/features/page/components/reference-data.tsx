@@ -46,6 +46,90 @@ const GenerateReferenceGraph = dynamic(
   },
 );
 
+const shouldShowLegend = (
+  isMobileViewport: boolean,
+  isMobileLegendOpen: boolean,
+) => !isMobileViewport || isMobileLegendOpen;
+
+const hasCompleteInitialData = (
+  dates: Date[],
+  currentWetbulbs: number[],
+  referenceWetbulbs: number[],
+) =>
+  dates.length > 0 &&
+  currentWetbulbs.length === dates.length &&
+  referenceWetbulbs.length === dates.length;
+
+const selectCurrentWetbulbs = (
+  alignedSnapshot: ReturnType<typeof alignReferenceGraphData> | undefined,
+  currentSnapshot: { wetbulbs: number[] } | undefined,
+  initialWetbulbs: number[],
+) => alignedSnapshot?.wetbulbs ?? currentSnapshot?.wetbulbs ?? initialWetbulbs;
+
+interface ReferenceGraphContentProperties {
+  alignedSnapshot?: ReturnType<typeof alignReferenceGraphData>;
+  containerStyle: React.CSSProperties;
+  currentWetbulbs: number[];
+  hasError: boolean;
+  isMobileViewport: boolean;
+  referenceSnapshot?: { dates: Date[]; wetbulbs: number[] };
+  referenceYear: string;
+  showLegend: boolean;
+  unit: React.ComponentProps<typeof GenerateReferenceGraph>["unit"];
+}
+
+const ReferenceGraphContent = ({
+  alignedSnapshot,
+  containerStyle,
+  currentWetbulbs,
+  hasError,
+  isMobileViewport,
+  referenceSnapshot,
+  referenceYear,
+  showLegend,
+  unit,
+}: ReferenceGraphContentProperties) => {
+  if (!referenceSnapshot) {
+    return hasError ? (
+      <ErrorGraphDisplay message="Unable to load reference data" />
+    ) : (
+      <ChartSkeleton />
+    );
+  }
+
+  const graphDates = alignedSnapshot?.dates ?? referenceSnapshot.dates;
+  const graphReferenceWetbulbs =
+    alignedSnapshot?.referenceWetbulbs ?? referenceSnapshot.wetbulbs;
+
+  return (
+    <div className="relative flex min-h-0 min-w-0 flex-1 flex-col">
+      <div
+        aria-label="Scrollable reference graph"
+        className="-mx-4 min-h-0 min-w-0 flex-1 touch-pan-x overflow-x-auto overflow-y-hidden px-4 pb-2 sm:mx-0 sm:px-0"
+        data-testid="reference-graph-scroll-region"
+      >
+        <div className="h-full min-w-full" style={containerStyle}>
+          <GenerateReferenceGraph
+            currentWetbulbs={currentWetbulbs}
+            currentYear={GRAPH_CONFIG.YEAR_RANGE.END}
+            dates={graphDates}
+            isMobileViewport={isMobileViewport}
+            referenceWetbulbs={graphReferenceWetbulbs}
+            referenceYear={referenceYear}
+            season={DEFAULT_GRAPH_SEASON}
+            showLegend={showLegend}
+            unit={unit}
+          />
+        </div>
+      </div>
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-y-0 right-0 w-10 bg-linear-to-l from-(--graph-surface) to-transparent sm:hidden"
+      />
+    </div>
+  );
+};
+
 const ReferenceDataComponent: React.FC<ReferenceDataProperties> = ({
   CurrentDates,
   CurrentWetbulbs,
@@ -66,14 +150,18 @@ const ReferenceDataComponent: React.FC<ReferenceDataProperties> = ({
   const { unit } = useTemperatureUnit();
   const { basis } = useWetbulbBasis();
 
-  const showReferenceLegend = !isMobileViewport || isMobileLegendOpen;
+  const showReferenceLegend = shouldShowLegend(
+    isMobileViewport,
+    isMobileLegendOpen,
+  );
 
   const currentYearKey = String(GRAPH_CONFIG.YEAR_RANGE.END);
 
-  const hasValidInitialData =
-    CurrentDates.length > 0 &&
-    CurrentWetbulbs.length === CurrentDates.length &&
-    ReferenceWetbulbs.length === CurrentDates.length;
+  const hasValidInitialData = hasCompleteInitialData(
+    CurrentDates,
+    CurrentWetbulbs,
+    ReferenceWetbulbs,
+  );
   const isInitialBasis = basis === initialWetbulbBasis;
 
   const initialReferenceData = React.useMemo(
@@ -124,10 +212,11 @@ const ReferenceDataComponent: React.FC<ReferenceDataProperties> = ({
         : undefined,
     [currentGraphSnapshot, referenceGraphSnapshot],
   );
-  const currentWetbulbs =
-    alignedGraphSnapshot?.wetbulbs ??
-    currentGraphSnapshot?.wetbulbs ??
-    CurrentWetbulbs;
+  const currentWetbulbs = selectCurrentWetbulbs(
+    alignedGraphSnapshot,
+    currentGraphSnapshot,
+    CurrentWetbulbs,
+  );
   const hasReferenceError =
     referenceQuery.isError || (initialHasError && !referenceQuery.data);
   const referencePointCount =
@@ -208,50 +297,17 @@ const ReferenceDataComponent: React.FC<ReferenceDataProperties> = ({
           className="flex min-h-[clamp(220px,42vh,520px)] min-w-0 flex-1 flex-col overflow-hidden sm:min-h-[clamp(450px,70vh,850px)]"
           id="reference-data-graph"
         >
-          {(() => {
-            if (referenceGraphSnapshot) {
-              const graphDates =
-                alignedGraphSnapshot?.dates ?? referenceGraphSnapshot.dates;
-              const graphReferenceWetbulbs =
-                alignedGraphSnapshot?.referenceWetbulbs ??
-                referenceGraphSnapshot.wetbulbs;
-              return (
-                <div className="relative flex min-h-0 min-w-0 flex-1 flex-col">
-                  <div
-                    aria-label="Scrollable reference graph"
-                    className="-mx-4 min-h-0 min-w-0 flex-1 touch-pan-x overflow-x-auto overflow-y-hidden px-4 pb-2 sm:mx-0 sm:px-0"
-                    data-testid="reference-graph-scroll-region"
-                  >
-                    <div className="h-full min-w-full" style={containerStyle}>
-                      <GenerateReferenceGraph
-                        currentWetbulbs={currentWetbulbs}
-                        currentYear={GRAPH_CONFIG.YEAR_RANGE.END}
-                        dates={graphDates}
-                        isMobileViewport={isMobileViewport}
-                        referenceWetbulbs={graphReferenceWetbulbs}
-                        referenceYear={referenceYear}
-                        season={DEFAULT_GRAPH_SEASON}
-                        showLegend={showReferenceLegend}
-                        unit={unit}
-                      />
-                    </div>
-                  </div>
-                  <div
-                    aria-hidden="true"
-                    className="pointer-events-none absolute inset-y-0 right-0 w-10 bg-linear-to-l from-(--graph-surface) to-transparent sm:hidden"
-                  />
-                </div>
-              );
-            }
-
-            if (hasReferenceError) {
-              return (
-                <ErrorGraphDisplay message="Unable to load reference data" />
-              );
-            }
-
-            return <ChartSkeleton />;
-          })()}
+          <ReferenceGraphContent
+            alignedSnapshot={alignedGraphSnapshot}
+            containerStyle={containerStyle}
+            currentWetbulbs={currentWetbulbs}
+            hasError={hasReferenceError}
+            isMobileViewport={isMobileViewport}
+            referenceSnapshot={referenceGraphSnapshot}
+            referenceYear={referenceYear}
+            showLegend={showReferenceLegend}
+            unit={unit}
+          />
         </div>
       </div>
     </div>

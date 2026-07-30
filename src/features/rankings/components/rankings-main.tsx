@@ -327,9 +327,9 @@ const RankingsFilters = memo(
           year === GRAPH_CONFIG.YEAR_RANGE.END &&
           !isCurrentYearRankingAvailable(selectedSeason);
         const availableSeason = shouldSelectAvailableSeason
-          ? GRAPH_SEASONS.filter((season) =>
+          ? GRAPH_SEASONS.findLast((season) =>
               isCurrentYearRankingAvailable(season),
-            ).at(-1)
+            )
           : undefined;
 
         dispatch({ type: "SET_YEAR", year });

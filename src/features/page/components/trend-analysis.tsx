@@ -77,6 +77,50 @@ const matchesInitialForecastSelection = ({
   forecastEnabled === initialForecastEnabled &&
   forecastYearsAhead === initialForecastYearsAhead;
 
+const shouldShowLegend = (
+  isMobileViewport: boolean,
+  isMobileLegendOpen: boolean,
+) => !isMobileViewport || isMobileLegendOpen;
+
+interface TrendGraphContentProperties {
+  hasError: boolean;
+  isMobileViewport: boolean;
+  showLegend: boolean;
+  snapshot?: ReturnType<typeof deriveTrendAnalysis>["snapshot"];
+  unit: React.ComponentProps<typeof GenerateTrendGraph>["unit"];
+}
+
+const TrendGraphContent = ({
+  hasError,
+  isMobileViewport,
+  showLegend,
+  snapshot,
+  unit,
+}: TrendGraphContentProperties) => {
+  if (snapshot) {
+    return (
+      <GenerateTrendGraph
+        forecastData={snapshot.forecastData}
+        increasePerYear={snapshot.increase_per_year}
+        isMobileViewport={isMobileViewport}
+        option={snapshot.option}
+        season={snapshot.season}
+        showLegend={showLegend}
+        trendlineWetbulbs={snapshot.trendline_wetbulbs}
+        unit={unit}
+        yearWetbulbs={snapshot.year_wetbulbs}
+        years={snapshot.years}
+      />
+    );
+  }
+
+  return hasError ? (
+    <ErrorGraphDisplay message="Unable to load trend data" />
+  ) : (
+    <ChartSkeleton />
+  );
+};
+
 const TrendAnalysisComponent: React.FC<TrendAnalysisProperties> = ({
   graphSeason,
   id,
@@ -129,7 +173,10 @@ const TrendAnalysisComponent: React.FC<TrendAnalysisProperties> = ({
   const { unit } = useTemperatureUnit();
   const { basis } = useWetbulbBasis();
 
-  const showTrendLegend = !isMobileViewport || isMobileLegendOpen;
+  const showTrendLegend = shouldShowLegend(
+    isMobileViewport,
+    isMobileLegendOpen,
+  );
 
   const matchesInitialGraphSelection =
     selectedGraphMeasure === initialGraphMeasure &&
@@ -343,30 +390,13 @@ const TrendAnalysisComponent: React.FC<TrendAnalysisProperties> = ({
           className="min-h-[clamp(220px,42vh,520px)] min-w-0 flex-1 overflow-hidden sm:min-h-[clamp(450px,70vh,850px)]"
           id="trend-analysis-graph"
         >
-          {(() => {
-            if (trendGraphSnapshot) {
-              return (
-                <GenerateTrendGraph
-                  forecastData={trendGraphSnapshot.forecastData}
-                  increasePerYear={trendGraphSnapshot.increase_per_year}
-                  isMobileViewport={isMobileViewport}
-                  option={trendGraphSnapshot.option}
-                  season={trendGraphSnapshot.season}
-                  showLegend={showTrendLegend}
-                  trendlineWetbulbs={trendGraphSnapshot.trendline_wetbulbs}
-                  unit={unit}
-                  yearWetbulbs={trendGraphSnapshot.year_wetbulbs}
-                  years={trendGraphSnapshot.years}
-                />
-              );
-            }
-
-            if (hasTrendError) {
-              return <ErrorGraphDisplay message="Unable to load trend data" />;
-            }
-
-            return <ChartSkeleton />;
-          })()}
+          <TrendGraphContent
+            hasError={hasTrendError}
+            isMobileViewport={isMobileViewport}
+            showLegend={showTrendLegend}
+            snapshot={trendGraphSnapshot}
+            unit={unit}
+          />
         </div>
       </div>
     </div>

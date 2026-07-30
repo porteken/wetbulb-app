@@ -73,6 +73,14 @@ const mockYearWetbulbs4 = [18, 24, 28];
 const mockCurrentWetbulbs2 = [19, 31];
 const mockReferenceWetbulbs2 = [18, 28];
 
+const longRangeYears = Array.from({ length: 101 }, (_, index) => 2000 + index);
+const longRangeValues = longRangeYears.map((year) => year - 1980);
+const fullYearDates = Array.from(
+  { length: 365 },
+  (_, index) => new Date(Date.UTC(2025, 0, index + 1)),
+);
+const fullYearValues = fullYearDates.map((_, index) => index / 10);
+
 describe("graph Components", () => {
   beforeEach(() => {
     areaMock.mockClear();
@@ -82,16 +90,13 @@ describe("graph Components", () => {
   });
 
   it("uses decade ticks through the final forecast year", () => {
-    const years = Array.from({ length: 101 }, (_, index) => 2000 + index);
-    const values = years.map((year) => year - 1980);
-
     render(
       <GenerateTrendGraph
         increasePerYear={0.1}
         option="avg"
-        trendlineWetbulbs={values}
-        yearWetbulbs={values}
-        years={years}
+        trendlineWetbulbs={longRangeValues}
+        yearWetbulbs={longRangeValues}
+        years={longRangeYears}
       />,
     );
 
@@ -101,17 +106,11 @@ describe("graph Components", () => {
   });
 
   it("uses monthly date ticks from January through December", () => {
-    const dates = Array.from(
-      { length: 365 },
-      (_, index) => new Date(Date.UTC(2025, 0, index + 1)),
-    );
-    const values = dates.map((_, index) => index / 10);
-
     render(
       <GenerateReferenceGraph
-        currentWetbulbs={values}
-        dates={dates}
-        referenceWetbulbs={values}
+        currentWetbulbs={fullYearValues}
+        dates={fullYearDates}
+        referenceWetbulbs={fullYearValues}
         referenceYear="2000"
       />,
     );
