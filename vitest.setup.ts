@@ -42,8 +42,8 @@ vi.mock("next/font/google", () =>
 
 globalThis.mockFn = mockFn;
 
-const originalConsoleError = console.error;
-console.error = (...args: unknown[]) => {
+const originalConsoleError = globalThis.console.error;
+globalThis.console.error = (...args: unknown[]) => {
   if (
     typeof args[0] === "string" &&
     (args[0].includes("Cannot get CSS styles from text's parentNode") ||
@@ -55,8 +55,8 @@ console.error = (...args: unknown[]) => {
   originalConsoleError(...args);
 };
 
-const originalConsoleWarn = console.warn;
-console.warn = (...args: unknown[]) => {
+const originalConsoleWarn = globalThis.console.warn;
+globalThis.console.warn = (...args: unknown[]) => {
   if (
     typeof args[0] === "string" &&
     (args[0].includes("Cannot get CSS styles from text's parentNode") ||

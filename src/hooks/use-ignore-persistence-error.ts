@@ -14,7 +14,7 @@ export const useIgnorePersistenceError = (): IgnorePersistenceError => {
       try {
         await promise;
       } catch (error) {
-        console.warn("Failed to persist preference", error);
+        console.error("Failed to persist preference", error);
         Sentry.captureException(error, {
           tags: { errorSource: "persistPreference" },
         });
