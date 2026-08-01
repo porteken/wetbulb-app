@@ -110,8 +110,8 @@ async function fetchCityRankingsUncached(
     FutureValueUpper: number | undefined;
     location_id: number;
     max_wetbulb: number | undefined;
-    p10: number | undefined;
-    p90: number | undefined;
+    p5: number | undefined;
+    p95: number | undefined;
     rank: number;
     state: string;
   }>
@@ -164,8 +164,8 @@ async function fetchCityRankingsUncached(
       FutureValueUpper: row.future_upper ?? undefined,
       location_id: row.location_id,
       max_wetbulb: row.max_wetbulb ?? undefined,
-      p10: row.p10 ?? undefined,
-      p90: row.p90 ?? undefined,
+      p5: row.p5 ?? undefined,
+      p95: row.p95 ?? undefined,
       rank: index + 1,
       state: row.state,
     }));

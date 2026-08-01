@@ -119,8 +119,8 @@ const getRuntimeCityRankingsRows = (
           future_lower: row.future_lower_avg,
           future_upper: row.future_upper_avg,
           max_wetbulb: row.max_wetbulb_avg,
-          p10: row.p10_avg,
-          p90: row.p90_avg,
+          p5: row.p5_avg,
+          p95: row.p95_avg,
         });
       }
 
@@ -281,8 +281,8 @@ const buildMaxBasisRankingsQuery = (
       "future_upper",
       "location_id",
       "max_wetbulb",
-      "p10",
-      "p90",
+      "p5",
+      "p95",
       "state",
       "year",
     ])
@@ -340,7 +340,7 @@ const buildAvgBasisRankingsQuery = (
           ],
     )
     .select(
-      useLegacyBounds ? ["p10", "p90"] : ["p10_avg as p10", "p90_avg as p90"],
+      useLegacyBounds ? ["p5", "p95"] : ["p5_avg as p5", "p95_avg as p95"],
     )
     .where("year", "=", year);
 
@@ -359,8 +359,8 @@ const isMissingRankingsBoundsColumnError = (
   error: unknown,
   view: CityRankingsView,
 ) =>
-  isMissingColumnError(error, view, "p10_avg") ||
-  isMissingColumnError(error, view, "p90_avg");
+  isMissingColumnError(error, view, "p5_avg") ||
+  isMissingColumnError(error, view, "p95_avg");
 
 const isMissingAvgBasisRankingsColumnError = (
   error: unknown,

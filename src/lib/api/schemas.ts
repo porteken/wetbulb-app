@@ -53,8 +53,8 @@ const rankingViewRowSchema = z.object({
   future_upper: finiteNumberSchema.nullable(),
   location_id: nonNegativeIntegerSchema,
   max_wetbulb: finiteNumberSchema.nullable(),
-  p10: finiteNumberSchema.nullable(),
-  p90: finiteNumberSchema.nullable(),
+  p5: finiteNumberSchema.nullable(),
+  p95: finiteNumberSchema.nullable(),
   state: z.string().min(1),
   year: yearSchema,
 });

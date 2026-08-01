@@ -148,7 +148,7 @@ describe("fetchCityRankingsRows retry and fallback behavior", () => {
       expect(result).toBe(rows);
     });
 
-    it("falls back to legacy bounds when avg columns and p10/p90 are both missing", async () => {
+    it("falls back to non-avg bounds when avg columns and p5/p95 are both missing", async () => {
       const rows = [{ city: "Phoenix" }];
       mockSelectFromQueue([
         async () => {
@@ -158,7 +158,7 @@ describe("fetchCityRankingsRows retry and fallback behavior", () => {
           );
         },
         async () => {
-          throw missingColumnError("wetbulb_city_rankings_view", "p10_avg");
+          throw missingColumnError("wetbulb_city_rankings_view", "p5_avg");
         },
         async () => rows,
       ]);
@@ -186,11 +186,11 @@ describe("fetchCityRankingsRows retry and fallback behavior", () => {
       ).rejects.toBeInstanceOf(DatabaseError);
     });
 
-    it("falls back to legacy bounds columns when p10/p90 are missing", async () => {
+    it("falls back to non-avg bounds columns when p5/p95 are missing", async () => {
       const rows = [{ city: "Phoenix" }];
       mockSelectFromQueue([
         async () => {
-          throw missingColumnError("wetbulb_city_rankings_view", "p10_avg");
+          throw missingColumnError("wetbulb_city_rankings_view", "p5_avg");
         },
         async () => rows,
       ]);

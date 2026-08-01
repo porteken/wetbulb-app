@@ -15,8 +15,12 @@ export interface WetbulbCityRankingsViewTable {
   max_wetbulb_avg: NumericLike | null;
   p10: NumericLike | null;
   p10_avg: NumericLike | null;
+  p5: NumericLike | null;
+  p5_avg: NumericLike | null;
   p90: NumericLike | null;
   p90_avg: NumericLike | null;
+  p95: NumericLike | null;
+  p95_avg: NumericLike | null;
   season?: string | null;
   state: string;
   year: number;
@@ -62,8 +66,12 @@ export interface WetbulbYearStatsTable {
   max_wetbulb_avg: NumericLike | null;
   p10: NumericLike | null;
   p10_avg: NumericLike | null;
+  p5: NumericLike | null;
+  p5_avg: NumericLike | null;
   p90: NumericLike | null;
   p90_avg: NumericLike | null;
+  p95: NumericLike | null;
+  p95_avg: NumericLike | null;
   season?: string | null;
   year: number;
 }

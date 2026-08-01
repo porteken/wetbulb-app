@@ -237,8 +237,8 @@ const createMockRankingItem = (overrides = {}) => ({
   FutureValueUpper: 30,
   location_id: 1,
   max_wetbulb: 30,
-  p10: 20,
-  p90: 25,
+  p5: 19,
+  p95: 26,
   rank: 1,
   state: "TX",
   ...overrides,
@@ -436,7 +436,7 @@ const noDataCityRankings = [
 ];
 
 const rangeCityRankings = [
-  createMockRankingItem({ city: "Range City", p10: 18, p90: 25 }),
+  createMockRankingItem({ city: "Range City", p5: 18, p95: 25 }),
 ];
 
 const futureCityRankings = [
@@ -566,7 +566,7 @@ describe("rankingsMain", () => {
       expect(within(table).getByText("Avg Wetbulb")).toBeInTheDocument();
       expect(within(table).getByText("Max Wetbulb")).toBeInTheDocument();
       expect(
-        within(table).getByText("Wetbulb Range (10th-90th percentile)"),
+        within(table).getByText("Wetbulb Range (5th-95th percentile)"),
       ).toBeInTheDocument();
       expect(within(table).getByText("Change from 2000")).toBeInTheDocument();
       expect(

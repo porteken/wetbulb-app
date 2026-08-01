@@ -44,11 +44,11 @@ const RANK_THREE = 3;
 const formatWetbulbValue = (value: number, unit: TemperatureUnit): string =>
   `${convertFromCelsius(value, unit).toFixed(1)}°${unit}`;
 const getWetbulbRange = (
-  p10: number,
-  p90: number,
+  p5: number,
+  p95: number,
   unit: TemperatureUnit,
 ): string =>
-  `${convertFromCelsius(p10, unit).toFixed(1)}-${convertFromCelsius(p90, unit).toFixed(1)}`;
+  `${convertFromCelsius(p5, unit).toFixed(1)}-${convertFromCelsius(p95, unit).toFixed(1)}`;
 const convertChangeFrom2000 = (
   changeFrom2000: number | undefined,
   unit: TemperatureUnit,
@@ -89,8 +89,8 @@ interface RankingItem {
   FutureValueUpper: number | undefined;
   location_id: number;
   max_wetbulb: number | undefined;
-  p10: number | undefined;
-  p90: number | undefined;
+  p5: number | undefined;
+  p95: number | undefined;
   rank: number;
   state: string;
 }
@@ -508,8 +508,8 @@ const RankingRow = memo(({ item, push, rank, unit }: RankingRowProperties) => {
     FutureValueUpper,
     location_id,
     max_wetbulb,
-    p10,
-    p90,
+    p5,
+    p95,
     state,
   } = item;
 
@@ -569,8 +569,8 @@ const RankingRow = memo(({ item, push, rank, unit }: RankingRowProperties) => {
         )}
       </td>
       <td className="px-3 py-4 text-sm whitespace-nowrap text-muted-foreground">
-        {p10 !== undefined && p90 !== undefined ? (
-          `${getWetbulbRange(p10, p90, unit)}°${unit}`
+        {p5 !== undefined && p95 !== undefined ? (
+          `${getWetbulbRange(p5, p95, unit)}°${unit}`
         ) : (
           <span className="text-muted-foreground">N/A</span>
         )}
@@ -861,7 +861,7 @@ export function RankingsMain({
                       label="Max Wetbulb"
                     />
                     <th className="px-3 py-4 text-left text-xs font-medium tracking-[0.15em] text-muted-foreground uppercase">
-                      Wetbulb Range (10th-90th percentile)
+                      Wetbulb Range (5th-95th percentile)
                     </th>
                     <SortHeader
                       column="change"
