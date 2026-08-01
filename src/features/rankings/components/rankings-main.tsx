@@ -113,40 +113,27 @@ type SortColumn =
   | "state"
   | "wetbulb_range";
 
+const rankingComparators: Record<
+  SortColumn,
+  (a: RankingItem, b: RankingItem) => number
+> = {
+  avg_wetbulb: (a, b) => a.avg_wetbulb - b.avg_wetbulb,
+  change: (a, b) => (a.changeFrom2000 ?? 0) - (b.changeFrom2000 ?? 0),
+  city: (a, b) => a.city.localeCompare(b.city),
+  forecast_range: (a, b) =>
+    (a.FutureValueUpper ?? 0) - (b.FutureValueUpper ?? 0),
+  max_wetbulb: (a, b) => (a.max_wetbulb ?? 0) - (b.max_wetbulb ?? 0),
+  rank: (a, b) => b.avg_wetbulb - a.avg_wetbulb,
+  state: (a, b) => a.state.localeCompare(b.state),
+  wetbulb_range: (a, b) => (a.p95 ?? 0) - (b.p95 ?? 0),
+};
+
 function compareRankingItems(
   a: RankingItem,
   b: RankingItem,
   column: SortColumn,
 ): number {
-  switch (column) {
-    case "avg_wetbulb": {
-      return a.avg_wetbulb - b.avg_wetbulb;
-    }
-    case "change": {
-      return (a.changeFrom2000 ?? 0) - (b.changeFrom2000 ?? 0);
-    }
-    case "city": {
-      return a.city.localeCompare(b.city);
-    }
-    case "forecast_range": {
-      return (a.FutureValueUpper ?? 0) - (b.FutureValueUpper ?? 0);
-    }
-    case "max_wetbulb": {
-      return (a.max_wetbulb ?? 0) - (b.max_wetbulb ?? 0);
-    }
-    case "rank": {
-      return b.avg_wetbulb - a.avg_wetbulb;
-    }
-    case "state": {
-      return a.state.localeCompare(b.state);
-    }
-    case "wetbulb_range": {
-      return (a.p95 ?? 0) - (b.p95 ?? 0);
-    }
-    default: {
-      return 0;
-    }
-  }
+  return rankingComparators[column](a, b);
 }
 
 function filterRanking(
@@ -697,7 +684,7 @@ export function RankingsMain({
             try {
               await action();
             } catch (error) {
-              console.warn("Failed to persist rankings preference", error);
+              console.error("Failed to persist rankings preference", error);
               Sentry.captureException(error, {
                 tags: { errorSource: "persistPreference" },
               });

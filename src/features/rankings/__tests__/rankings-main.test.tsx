@@ -249,6 +249,36 @@ const createMockRankingItem = (overrides = {}) => ({
   ...overrides,
 });
 
+const forecastRangeRankings = [
+  createMockRankingItem({
+    city: "Higher Forecast",
+    FutureValueLower: 20,
+    FutureValueUpper: 40,
+    location_id: 101,
+  }),
+  createMockRankingItem({
+    city: "Lower Forecast",
+    FutureValueLower: 25,
+    FutureValueUpper: 30,
+    location_id: 102,
+  }),
+];
+
+const wetbulbRangeRankings = [
+  createMockRankingItem({
+    city: "Higher Wetbulb Range",
+    location_id: 103,
+    p5: 15,
+    p95: 35,
+  }),
+  createMockRankingItem({
+    city: "Lower Wetbulb Range",
+    location_id: 104,
+    p5: 20,
+    p95: 30,
+  }),
+];
+
 const mockRankings = [
   createMockRankingItem({
     avg_wetbulb: 22.5,
@@ -827,23 +857,7 @@ describe("rankingsMain", () => {
 
     it("should sort forecast ranges by their upper value", () => {
       render(
-        <RankingsMain
-          {...defaultProps}
-          rankings={[
-            createMockRankingItem({
-              city: "Higher Forecast",
-              FutureValueLower: 20,
-              FutureValueUpper: 40,
-              location_id: 101,
-            }),
-            createMockRankingItem({
-              city: "Lower Forecast",
-              FutureValueLower: 25,
-              FutureValueUpper: 30,
-              location_id: 102,
-            }),
-          ]}
-        />,
+        <RankingsMain {...defaultProps} rankings={forecastRangeRankings} />,
       );
 
       const table = screen.getByRole("table");
@@ -858,23 +872,7 @@ describe("rankingsMain", () => {
 
     it("should sort wetbulb ranges by their upper value", () => {
       render(
-        <RankingsMain
-          {...defaultProps}
-          rankings={[
-            createMockRankingItem({
-              city: "Higher Wetbulb Range",
-              location_id: 103,
-              p5: 15,
-              p95: 35,
-            }),
-            createMockRankingItem({
-              city: "Lower Wetbulb Range",
-              location_id: 104,
-              p5: 20,
-              p95: 30,
-            }),
-          ]}
-        />,
+        <RankingsMain {...defaultProps} rankings={wetbulbRangeRankings} />,
       );
 
       const table = screen.getByRole("table");
