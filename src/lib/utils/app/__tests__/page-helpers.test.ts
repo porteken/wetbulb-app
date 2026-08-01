@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
   getForecastPreferencesFromCookies,
   getGraphMeasureFromCookies,
+  getGraphSeasonFromCookies,
   getLocationData,
 } from "../page-helpers";
 
@@ -23,6 +24,7 @@ vi.mock("@/lib/constants", () => ({
   DEFAULT_FORECAST_ENABLED: false,
   DEFAULT_FORECAST_YEARS_AHEAD: 10,
   DEFAULT_GRAPH_MEASURE: "temperature",
+  GRAPH_SEASON_COOKIE_NAME: "graph-season",
   ERROR_MESSAGES: {
     NO_DATA: "No location data available",
   },
@@ -31,6 +33,12 @@ vi.mock("@/lib/constants", () => ({
   GRAPH_MEASURE_COOKIE_NAME: "graph-measure",
   MAX_FORECAST_YEARS_AHEAD: 75,
   MIN_FORECAST_YEARS_AHEAD: 5,
+  normalizeGraphSeason: (value: string | undefined) =>
+    value === "Summer" || value === "Winter" ? value : "Annual",
+}));
+
+vi.mock("@/lib/utils/season-availability", () => ({
+  getCurrentGraphSeason: () => "Summer",
 }));
 
 describe("page-helpers", () => {
@@ -146,6 +154,27 @@ describe("page-helpers", () => {
 
       expect(result).toBe("avg");
       expect(mockCookieStore.getAll).toHaveBeenCalledWith("graph-measure");
+    });
+  });
+
+  describe("getGraphSeasonFromCookies", () => {
+    it("uses the current season when no preference cookie is set", async () => {
+      const mockCookieStore = {
+        get: mockFn().mockReturnValue(),
+      };
+      mockCookies.mockResolvedValue(mockCookieStore);
+
+      await expect(getGraphSeasonFromCookies()).resolves.toBe("Summer");
+      expect(mockCookieStore.get).toHaveBeenCalledWith("graph-season");
+    });
+
+    it("uses the saved season preference when present", async () => {
+      const mockCookieStore = {
+        get: mockFn().mockReturnValue({ value: "Winter" }),
+      };
+      mockCookies.mockResolvedValue(mockCookieStore);
+
+      await expect(getGraphSeasonFromCookies()).resolves.toBe("Winter");
     });
   });
 

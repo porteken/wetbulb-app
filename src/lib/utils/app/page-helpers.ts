@@ -4,7 +4,6 @@ import {
   DEFAULT_FORECAST_ENABLED,
   DEFAULT_FORECAST_YEARS_AHEAD,
   DEFAULT_GRAPH_MEASURE,
-  DEFAULT_GRAPH_SEASON,
   ERROR_MESSAGES,
   FORECAST_ENABLED_COOKIE_NAME,
   FORECAST_YEARS_AHEAD_COOKIE_NAME,
@@ -16,6 +15,7 @@ import {
   normalizeGraphSeason,
   type DataRegion,
 } from "@/lib/constants";
+import { getCurrentGraphSeason } from "@/lib/utils/season-availability";
 import { getLatestCookieValue } from "@/lib/utils/server-cookies";
 import { cookies } from "next/headers";
 
@@ -30,7 +30,7 @@ export const getGraphSeasonFromCookies = async () => {
 
   return normalizeGraphSeason(
     getLatestCookieValue(cookieStore, GRAPH_SEASON_COOKIE_NAME) ??
-      DEFAULT_GRAPH_SEASON,
+      getCurrentGraphSeason(),
   );
 };
 

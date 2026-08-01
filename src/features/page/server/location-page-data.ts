@@ -28,6 +28,7 @@ import {
   type WetbulbBasis,
   WETBULB_BASIS_COOKIE_NAME,
 } from "@/lib/constants";
+import { getCurrentGraphSeason } from "@/lib/utils/season-availability";
 import { isSelectableReferenceYear } from "@/lib/utils/select-options";
 import { getLatestCookieValue } from "@/lib/utils/server-cookies";
 import { cookies } from "next/headers";
@@ -145,7 +146,7 @@ const getPreferencesFromCookies =
       DEFAULT_GRAPH_MEASURE;
     const initialGraphSeason = normalizeGraphSeason(
       getLatestCookieValue(cookieStore, GRAPH_SEASON_COOKIE_NAME) ??
-        DEFAULT_GRAPH_SEASON,
+        getCurrentGraphSeason(),
     );
     const rawReferenceYear = getLatestCookieValue(
       cookieStore,

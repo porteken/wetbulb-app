@@ -3,7 +3,6 @@ import {
   DEFAULT_FORECAST_ENABLED,
   DEFAULT_FORECAST_YEARS_AHEAD,
   DEFAULT_GRAPH_MEASURE,
-  DEFAULT_GRAPH_SEASON,
   DEFAULT_WETBULB_BASIS,
   FORECAST_ENABLED_COOKIE_NAME,
   FORECAST_YEARS_AHEAD_COOKIE_NAME,
@@ -11,6 +10,7 @@ import {
   GRAPH_SEASON_COOKIE_NAME,
   REFERENCE_YEAR_COOKIE_NAME,
 } from "@/lib/constants";
+import { getCurrentGraphSeason } from "@/lib/utils/season-availability";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { loadLocationPageData } from "../location-page-data";
@@ -207,7 +207,7 @@ describe("loadLocationPageData", () => {
         initialForecastEnabled: DEFAULT_FORECAST_ENABLED,
         initialForecastYearsAhead: DEFAULT_FORECAST_YEARS_AHEAD,
         initialGraphMeasure: DEFAULT_GRAPH_MEASURE,
-        initialGraphSeason: DEFAULT_GRAPH_SEASON,
+        initialGraphSeason: getCurrentGraphSeason(),
         initialReferenceYear: DEFAULT_REFERENCE_YEAR,
         initialWetbulbBasis: DEFAULT_WETBULB_BASIS,
         location: {
@@ -261,7 +261,7 @@ describe("loadLocationPageData", () => {
         initialForecastEnabled: DEFAULT_FORECAST_ENABLED,
         initialForecastYearsAhead: DEFAULT_FORECAST_YEARS_AHEAD,
         initialGraphMeasure: DEFAULT_GRAPH_MEASURE,
-        initialGraphSeason: DEFAULT_GRAPH_SEASON,
+        initialGraphSeason: getCurrentGraphSeason(),
         initialReferenceYear: DEFAULT_REFERENCE_YEAR,
         initialWetbulbBasis: DEFAULT_WETBULB_BASIS,
         location: {
@@ -467,7 +467,7 @@ describe("loadLocationPageData", () => {
     expect(mockFetchTrendGraphData).toHaveBeenCalledWith(
       "avg",
       0,
-      "Annual",
+      getCurrentGraphSeason(),
       "max",
     );
     expect(mockFetchReferenceGraphData).toHaveBeenNthCalledWith(
@@ -521,7 +521,7 @@ describe("loadLocationPageData", () => {
         initialForecastEnabled: DEFAULT_FORECAST_ENABLED,
         initialForecastYearsAhead: DEFAULT_FORECAST_YEARS_AHEAD,
         initialGraphMeasure: DEFAULT_GRAPH_MEASURE,
-        initialGraphSeason: DEFAULT_GRAPH_SEASON,
+        initialGraphSeason: getCurrentGraphSeason(),
         initialReferenceYear: DEFAULT_REFERENCE_YEAR,
       }),
       status: "success",
