@@ -30,10 +30,12 @@ describe("current-year season availability", () => {
     expect(isCurrentYearRankingAvailable("Summer", date(6))).toBe(true);
   });
 
-  it("treats winter as starting in December of the selected year", () => {
-    expect(isCurrentYearRankingAvailable("Winter", date(11, 30))).toBe(false);
+  it("exposes calendar-year winter from January onward", () => {
+    expect(isCurrentYearRankingAvailable("Winter", date(1))).toBe(true);
+    expect(isCurrentYearRankingAvailable("Winter", date(11, 30))).toBe(true);
     expect(isCurrentYearRankingAvailable("Winter", date(12))).toBe(true);
-    expect(isCurrentYearTrendAvailable("Winter", date(11, 30))).toBe(false);
+    expect(isCurrentYearTrendAvailable("Winter", date(1))).toBe(true);
+    expect(isCurrentYearTrendAvailable("Winter", date(11, 30))).toBe(true);
     expect(isCurrentYearTrendAvailable("Winter", date(12))).toBe(true);
   });
 

@@ -45,6 +45,12 @@ export const isCurrentYearRankingAvailable = (
     return true;
   }
 
+  // Winter is grouped by calendar year, so January and February make the
+  // current year's winter data available before December arrives.
+  if (season === "Winter") {
+    return true;
+  }
+
   return now.getUTCMonth() >= SEASON_START_MONTH[season];
 };
 
@@ -56,6 +62,10 @@ export const isCurrentYearTrendAvailable = (
     return false;
   }
   if (isPastDataYear(now)) {
+    return true;
+  }
+
+  if (season === "Winter") {
     return true;
   }
 

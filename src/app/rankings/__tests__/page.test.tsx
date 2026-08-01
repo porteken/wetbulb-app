@@ -182,6 +182,35 @@ describe("rankings page", () => {
     );
   });
 
+  it("keeps the current year when winter is selected", async () => {
+    mockCookies.mockResolvedValue(
+      createCookieStore({
+        [RANKINGS_SEASON_COOKIE_NAME]: "Winter",
+        [RANKINGS_YEAR_COOKIE_NAME]: "2026",
+      }),
+    );
+
+    render(
+      await RankingsPage({
+        searchParams: Promise.resolve({}),
+      }),
+    );
+
+    expect(mockFetchCityRankings).toHaveBeenCalledWith(
+      2026,
+      "Winter",
+      "max",
+      "na",
+    );
+    expect(mockRankingsMain).toHaveBeenCalledWith(
+      expect.objectContaining({
+        initialSeason: "Winter",
+        initialYear: 2026,
+      }),
+      undefined,
+    );
+  });
+
   it("falls back to the current season for an invalid season cookie", async () => {
     mockCookies.mockResolvedValue(
       createCookieStore({

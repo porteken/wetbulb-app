@@ -647,9 +647,7 @@ describe("rankingsMain", () => {
       expect(
         within(seasonSelect).getByText("Fall (Insufficient data)"),
       ).toBeDisabled();
-      expect(
-        within(seasonSelect).getByText("Winter (Insufficient data)"),
-      ).toBeDisabled();
+      expect(within(seasonSelect).getByText("Winter")).toBeEnabled();
 
       vi.useRealTimers();
     });
