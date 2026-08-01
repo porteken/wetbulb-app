@@ -165,7 +165,7 @@ const rankBadgeVariants = cva("border", {
   variants: {
     rank: {
       1: "border-amber-300 bg-amber-100 text-amber-900 dark:border-amber-500/40 dark:bg-amber-950 dark:text-amber-200",
-      2: "border-slate-300 bg-slate-100 text-slate-900 dark:border-slate-500/40 dark:bg-slate-800 dark:text-slate-100",
+      2: "border-slate-400 bg-slate-200 text-slate-950 dark:border-slate-200 dark:bg-slate-300 dark:text-slate-950",
       3: "border-orange-300 bg-orange-100 text-orange-900 dark:border-orange-500/40 dark:bg-orange-950 dark:text-orange-200",
       other: "border-border bg-background/80 text-foreground",
     },
