@@ -820,6 +820,70 @@ describe("rankingsMain", () => {
 
       expect(changeHeader).toBeInTheDocument();
     });
+
+    it("should sort forecast ranges by their upper value", () => {
+      render(
+        <RankingsMain
+          {...defaultProps}
+          rankings={[
+            createMockRankingItem({
+              city: "Higher Forecast",
+              FutureValueLower: 20,
+              FutureValueUpper: 40,
+              location_id: 101,
+            }),
+            createMockRankingItem({
+              city: "Lower Forecast",
+              FutureValueLower: 25,
+              FutureValueUpper: 30,
+              location_id: 102,
+            }),
+          ]}
+        />,
+      );
+
+      const table = screen.getByRole("table");
+      const forecastHeader = requireElement(
+        within(table).getByText("2100 Forecast Range").closest("th"),
+      );
+      fireEvent.click(within(forecastHeader).getByRole("button"));
+
+      const rows = screen.getAllByRole("row");
+      expect(rows[1]).toHaveTextContent("Lower Forecast");
+    });
+
+    it("should sort wetbulb ranges by their upper value", () => {
+      render(
+        <RankingsMain
+          {...defaultProps}
+          rankings={[
+            createMockRankingItem({
+              city: "Higher Wetbulb Range",
+              location_id: 103,
+              p5: 15,
+              p95: 35,
+            }),
+            createMockRankingItem({
+              city: "Lower Wetbulb Range",
+              location_id: 104,
+              p5: 20,
+              p95: 30,
+            }),
+          ]}
+        />,
+      );
+
+      const table = screen.getByRole("table");
+      const wetbulbRangeHeader = requireElement(
+        within(table)
+          .getByText("Wetbulb Range (5th-95th percentile)")
+          .closest("th"),
+      );
+      fireEvent.click(within(wetbulbRangeHeader).getByRole("button"));
+
+      const rows = screen.getAllByRole("row");
+      expect(rows[1]).toHaveTextContent("Lower Wetbulb Range");
+    });
   });
 
   describe("pagination", () => {

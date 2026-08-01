@@ -99,9 +99,11 @@ type SortColumn =
   | "avg_wetbulb"
   | "change"
   | "city"
+  | "forecast_range"
   | "max_wetbulb"
   | "rank"
-  | "state";
+  | "state"
+  | "wetbulb_range";
 
 function compareRankingItems(
   a: RankingItem,
@@ -118,6 +120,9 @@ function compareRankingItems(
     case "city": {
       return a.city.localeCompare(b.city);
     }
+    case "forecast_range": {
+      return (a.FutureValueUpper ?? 0) - (b.FutureValueUpper ?? 0);
+    }
     case "max_wetbulb": {
       return (a.max_wetbulb ?? 0) - (b.max_wetbulb ?? 0);
     }
@@ -126,6 +131,9 @@ function compareRankingItems(
     }
     case "state": {
       return a.state.localeCompare(b.state);
+    }
+    case "wetbulb_range": {
+      return (a.p95 ?? 0) - (b.p95 ?? 0);
     }
     default: {
       return 0;
@@ -860,9 +868,13 @@ export function RankingsMain({
                       dispatch={dispatch}
                       label="Max Wetbulb"
                     />
-                    <th className="px-3 py-4 text-left text-xs font-medium tracking-[0.15em] text-muted-foreground uppercase">
-                      Wetbulb Range (5th-95th percentile)
-                    </th>
+                    <SortHeader
+                      column="wetbulb_range"
+                      currentColumn={sortColumn}
+                      currentDirection={sortDirection}
+                      dispatch={dispatch}
+                      label="Wetbulb Range (5th-95th percentile)"
+                    />
                     <SortHeader
                       column="change"
                       currentColumn={sortColumn}
@@ -870,9 +882,13 @@ export function RankingsMain({
                       dispatch={dispatch}
                       label="Change from 2000"
                     />
-                    <th className="px-3 py-4 text-left text-xs font-medium tracking-[0.15em] text-muted-foreground uppercase">
-                      2100 Forecast Range
-                    </th>
+                    <SortHeader
+                      column="forecast_range"
+                      currentColumn={sortColumn}
+                      currentDirection={sortDirection}
+                      dispatch={dispatch}
+                      label="2100 Forecast Range"
+                    />
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border/70 bg-transparent">
