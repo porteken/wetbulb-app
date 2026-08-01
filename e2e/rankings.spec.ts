@@ -257,8 +257,30 @@ test.describe("Rankings Page", () => {
 
     const initialRowText = await firstRow.textContent();
 
+    const stateSelect = onlyVisible(page.getByTestId("rankings-state-filter"));
+    const firstStateOption = (await openMultiSelect(stateSelect)).first();
+    const stateLabel = (await firstStateOption.textContent())?.trim();
+    expect(stateLabel).toBeTruthy();
+    await firstStateOption.click();
+    await expect(stateSelect).toContainText(stateLabel ?? "");
+
+    const wetbulbLevelSelect = onlyVisible(
+      page.getByTestId("rankings-wetbulb-level-filter"),
+    );
+    const firstWetbulbLevelOption = (
+      await openMultiSelect(wetbulbLevelSelect)
+    ).first();
+    const wetbulbLevelLabel = (
+      await firstWetbulbLevelOption.textContent()
+    )?.trim();
+    expect(wetbulbLevelLabel).toBeTruthy();
+    await firstWetbulbLevelOption.click();
+    await expect(wetbulbLevelSelect).toContainText(wetbulbLevelLabel ?? "");
+
     await basisToggle.click();
     await expect(basisToggle).toHaveText("Daily Avg");
+    await expect(stateSelect).toContainText("All states/provinces");
+    await expect(wetbulbLevelSelect).toContainText("All levels");
 
     await expect(async () => {
       expect(await firstRow.textContent()).not.toStrictEqual(initialRowText);

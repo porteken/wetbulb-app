@@ -1,5 +1,6 @@
 "use client";
 
+import { useWetbulbBasis } from "@/components/app/basis-provider";
 import { PageShell } from "@/components/app/page-shell";
 import { useTemperatureUnit } from "@/components/app/unit-provider";
 import { WetbulbIndexLegend } from "@/components/app/wetbulb-index-legend";
@@ -35,7 +36,14 @@ import {
 import * as Sentry from "@sentry/nextjs";
 import { cva } from "class-variance-authority";
 import { useRouter } from "next/navigation";
-import React, { memo, useCallback, useMemo, useTransition } from "react";
+import React, {
+  memo,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useTransition,
+} from "react";
 
 import type { LocationOptionSection } from "@/types/types";
 
@@ -202,6 +210,7 @@ interface RankingsState {
 }
 
 type RankingsAction =
+  | { type: "RESET_BASIS_FILTERS" }
   | { column: SortColumn; type: "SET_SORT" }
   | { wetbulbLevels: string[]; type: "SET_WETBULB_LEVEL_FILTER" }
   | { page: number; type: "SET_PAGE" }
@@ -232,6 +241,14 @@ function rankingsReducer(
   action: RankingsAction,
 ): RankingsState {
   switch (action.type) {
+    case "RESET_BASIS_FILTERS": {
+      return {
+        ...state,
+        currentPage: 1,
+        stateFilter: [],
+        wetbulbLevelFilter: [],
+      };
+    }
     case "SET_YEAR": {
       return { ...state, wetbulbLevelFilter: [], selectedYear: action.year };
     }
@@ -631,6 +648,7 @@ export function RankingsMain({
   shouldPersistInitialSeason = false,
 }: Readonly<RankingsMainProperties>) {
   const router = useRouter();
+  const { basis } = useWetbulbBasis();
   const { unit } = useTemperatureUnit();
   const handlePush = React.useCallback(
     (url: string) => {
@@ -644,6 +662,17 @@ export function RankingsMain({
     { initialWetbulbLevel, initialSeason, initialState, initialYear },
     createInitialRankingsState,
   );
+  const previousBasis = useRef(basis);
+
+  useEffect(() => {
+    if (previousBasis.current === basis) {
+      return;
+    }
+
+    previousBasis.current = basis;
+    dispatch({ type: "RESET_BASIS_FILTERS" });
+  }, [basis]);
+
   const {
     currentPage,
     wetbulbLevelFilter,

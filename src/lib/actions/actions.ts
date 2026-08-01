@@ -125,6 +125,12 @@ export async function setWetbulbBasis(basis: string) {
     ...PREFERENCE_COOKIE_OPTIONS,
     httpOnly: false,
   });
+  cookieStore.set(RANKINGS_STATE_COOKIE_NAME, "", RANKINGS_COOKIE_OPTIONS);
+  cookieStore.set(
+    RANKINGS_WETBULB_LEVEL_COOKIE_NAME,
+    "",
+    RANKINGS_COOKIE_OPTIONS,
+  );
   revalidatePath("/rankings");
 }
 

@@ -164,7 +164,7 @@ describe("setWetbulbBasis", () => {
     mockSet = vi.mocked(cookiesResult.set);
   });
 
-  it("sets a client-readable wetbulb-basis cookie and revalidates rankings", async () => {
+  it("sets the basis, clears rankings filters, and revalidates rankings", async () => {
     const { revalidatePath } = await import("next/cache");
 
     await setWetbulbBasis("avg");
@@ -175,6 +175,24 @@ describe("setWetbulbBasis", () => {
       expect.objectContaining({
         expires: expect.any(Date),
         httpOnly: false,
+        path: "/",
+        secure: false,
+      }),
+    );
+    expect(mockSet).toHaveBeenCalledWith(
+      "rankings-state",
+      "",
+      expect.objectContaining({
+        httpOnly: true,
+        path: "/",
+        secure: false,
+      }),
+    );
+    expect(mockSet).toHaveBeenCalledWith(
+      "rankings-wetbulb-level",
+      "",
+      expect.objectContaining({
+        httpOnly: true,
         path: "/",
         secure: false,
       }),

@@ -16,6 +16,7 @@ import React from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const mockPush = mockFn();
+const { mockBasis } = vi.hoisted(() => ({ mockBasis: { current: "max" } }));
 const { mockHeaderBar } = vi.hoisted(() => ({
   mockHeaderBar: vi.fn<
     (properties: {
@@ -191,6 +192,10 @@ const { mockToast } = vi.hoisted(() => ({ mockToast: mockFn() }));
 
 vi.mock("@/components/ui/toast", () => ({
   useToast: () => ({ toast: mockToast }),
+}));
+
+vi.mock("@/components/app/basis-provider", () => ({
+  useWetbulbBasis: () => ({ basis: mockBasis.current }),
 }));
 
 vi.mock("@/features/header-bar", () => ({
@@ -494,6 +499,7 @@ const requireElement = <T extends Element>(element: null | T): T => {
 
 describe("rankingsMain", () => {
   beforeEach(() => {
+    mockBasis.current = "max";
     vi.clearAllMocks();
     mockPush.mockReset();
   });
@@ -1038,6 +1044,28 @@ describe("rankingsMain", () => {
   });
 
   describe("filter Reset", () => {
+    it("should clear subdivision and wetbulb level filters when the basis changes", async () => {
+      const properties = {
+        ...defaultProps,
+        initialState: "TX",
+        initialWetbulbLevel: "None",
+      };
+      const { rerender } = render(<RankingsMain {...properties} />);
+
+      const stateSelect = screen.getByTestId("state/province-select");
+      const wetbulbLevelSelect = screen.getByTestId("avg-wetbulb-level-select");
+      expect(stateSelect).toHaveValue(["TX"]);
+      expect(wetbulbLevelSelect).toHaveValue(["None"]);
+
+      mockBasis.current = "avg";
+      rerender(<RankingsMain {...properties} />);
+
+      await waitFor(() => {
+        expect(stateSelect).toHaveValue([]);
+        expect(wetbulbLevelSelect).toHaveValue([]);
+      });
+    });
+
     it("should clear the wetbulb level filter when season changes", async () => {
       render(
         <RankingsMain
