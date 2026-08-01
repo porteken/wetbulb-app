@@ -13,7 +13,10 @@ import {
   RANKINGS_YEAR_COOKIE_NAME,
   WETBULB_BASIS_COOKIE_NAME,
 } from "@/lib/constants";
-import { isCurrentYearRankingAvailable } from "@/lib/utils/season-availability";
+import {
+  getCurrentGraphSeason,
+  isCurrentYearRankingAvailable,
+} from "@/lib/utils/season-availability";
 import { cookies } from "next/headers";
 
 import type { Metadata } from "next";
@@ -31,7 +34,10 @@ const yearMapping = (
   } else if (cookie_value) {
     return Number(cookie_value);
   }
-  return GRAPH_CONFIG.YEAR_RANGE.END;
+  return Math.min(
+    Math.max(new Date().getUTCFullYear(), GRAPH_CONFIG.YEAR_RANGE.START),
+    GRAPH_CONFIG.YEAR_RANGE.END,
+  );
 };
 
 export default async function RankingsPage({
@@ -53,7 +59,11 @@ export default async function RankingsPage({
     cookieStore.get(DATA_REGION_COOKIE_NAME)?.value,
   );
 
-  const initialSeason = normalizeGraphSeason(seasonFromCookie);
+  const normalizedSeason = normalizeGraphSeason(seasonFromCookie);
+  const initialSeason =
+    seasonFromCookie === undefined || seasonFromCookie !== normalizedSeason
+      ? getCurrentGraphSeason()
+      : normalizedSeason;
   const shouldPersistInitialSeason =
     seasonFromCookie !== undefined && seasonFromCookie !== initialSeason;
   const requestedYear = yearMapping(parameters.year, yearFromCookie);

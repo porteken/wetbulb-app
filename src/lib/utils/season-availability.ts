@@ -7,6 +7,27 @@ const SEASON_START_MONTH: Record<Exclude<GraphSeason, "Annual">, number> = {
   Winter: 11,
 };
 
+export const getCurrentGraphSeason = (
+  now = new Date(),
+): Exclude<GraphSeason, "Annual"> => {
+  const month = now.getUTCMonth();
+
+  if (month < SEASON_START_MONTH.Spring) {
+    return "Winter";
+  }
+  if (month < SEASON_START_MONTH.Summer) {
+    return "Spring";
+  }
+  if (month < SEASON_START_MONTH.Fall) {
+    return "Summer";
+  }
+  if (month < SEASON_START_MONTH.Winter) {
+    return "Fall";
+  }
+
+  return "Winter";
+};
+
 const isPastDataYear = (now: Date): boolean =>
   GRAPH_CONFIG.YEAR_RANGE.END < now.getUTCFullYear();
 

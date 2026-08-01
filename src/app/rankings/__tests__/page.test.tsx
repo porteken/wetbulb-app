@@ -5,7 +5,7 @@ import {
   RANKINGS_YEAR_COOKIE_NAME,
 } from "@/lib/constants";
 import { render, screen } from "@testing-library/react";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import RankingsPage, { metadata } from "../page";
 
@@ -45,6 +45,8 @@ const createCookieStore = (values: Partial<Record<string, string>>) => ({
 
 describe("rankings page", () => {
   beforeEach(() => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-08-01T12:00:00.000Z"));
     vi.clearAllMocks();
     mockFetchCityRankings.mockResolvedValue([
       {
@@ -63,6 +65,10 @@ describe("rankings page", () => {
         },
       ],
     });
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
   });
 
   it("uses the search param year before the cookie year", async () => {
@@ -120,7 +126,7 @@ describe("rankings page", () => {
     );
   });
 
-  it("falls back to the cookie year and default annual season when the season cookie is missing", async () => {
+  it("uses the cookie year and current season when the season cookie is missing", async () => {
     mockCookies.mockResolvedValue(
       createCookieStore({
         [RANKINGS_YEAR_COOKIE_NAME]: "2028",
@@ -135,14 +141,14 @@ describe("rankings page", () => {
 
     expect(mockFetchCityRankings).toHaveBeenCalledWith(
       2028,
-      "Annual",
+      "Summer",
       "max",
       "na",
     );
     expect(mockRankingsMain).toHaveBeenCalledWith(
       expect.objectContaining({
         initialWetbulbLevel: "",
-        initialSeason: "Annual",
+        initialSeason: "Summer",
         initialState: "",
         initialYear: 2028,
         shouldPersistInitialSeason: false,
@@ -151,7 +157,7 @@ describe("rankings page", () => {
     );
   });
 
-  it("defaults to the previous year for annual rankings", async () => {
+  it("defaults to the current year and season", async () => {
     mockCookies.mockResolvedValue(createCookieStore({}));
 
     render(
@@ -161,22 +167,22 @@ describe("rankings page", () => {
     );
 
     expect(mockFetchCityRankings).toHaveBeenCalledWith(
-      2025,
-      "Annual",
+      2026,
+      "Summer",
       "max",
       "na",
     );
     expect(mockRankingsMain).toHaveBeenCalledWith(
       expect.objectContaining({
-        initialSeason: "Annual",
-        initialYear: 2025,
+        initialSeason: "Summer",
+        initialYear: 2026,
         shouldPersistInitialSeason: false,
       }),
       undefined,
     );
   });
 
-  it("normalizes an invalid season cookie back to annual", async () => {
+  it("falls back to the current season for an invalid season cookie", async () => {
     mockCookies.mockResolvedValue(
       createCookieStore({
         [RANKINGS_SEASON_COOKIE_NAME]: "Monsoon",
@@ -190,14 +196,14 @@ describe("rankings page", () => {
     );
 
     expect(mockFetchCityRankings).toHaveBeenCalledWith(
-      2025,
-      "Annual",
+      2026,
+      "Summer",
       "max",
       "na",
     );
     expect(mockRankingsMain).toHaveBeenCalledWith(
       expect.objectContaining({
-        initialSeason: "Annual",
+        initialSeason: "Summer",
         shouldPersistInitialSeason: true,
       }),
       undefined,
