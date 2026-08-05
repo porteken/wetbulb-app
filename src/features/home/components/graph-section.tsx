@@ -1,6 +1,6 @@
+import { AppSelect as Select } from "@/components/app/app-select";
 import { ForecastControls } from "@/components/app/forecast-controls";
 import { Button } from "@/components/ui/button";
-import { Select } from "@/components/ui/select";
 import {
   GRAPH_CONFIG,
   type GraphSeason,

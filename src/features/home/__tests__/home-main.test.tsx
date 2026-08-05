@@ -187,8 +187,8 @@ vi.mock("@/components/ui/button", () => ({
   )),
 }));
 
-vi.mock("@/components/ui/select", () => ({
-  Select: mockFn((props: React.ComponentProps<typeof MockSelectControl>) => (
+vi.mock("@/components/app/app-select", () => ({
+  AppSelect: mockFn((props: React.ComponentProps<typeof MockSelectControl>) => (
     <MockSelectControl {...props} getTestId={getHomeSelectTestId} />
   )),
 }));

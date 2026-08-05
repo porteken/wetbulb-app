@@ -1,12 +1,12 @@
 "use client";
 
+import { AppPagination as Pagination } from "@/components/app/app-pagination";
+import { AppSelect as Select } from "@/components/app/app-select";
 import { useWetbulbBasis } from "@/components/app/basis-provider";
 import { PageShell } from "@/components/app/page-shell";
 import { useTemperatureUnit } from "@/components/app/unit-provider";
 import { WetbulbIndexLegend } from "@/components/app/wetbulb-index-legend";
 import { MultiSelect } from "@/components/ui/multi-select";
-import { Pagination } from "@/components/ui/pagination";
-import { Select } from "@/components/ui/select";
 import { useToast } from "@/components/ui/toast";
 import {
   setRankingsWetbulbLevel,

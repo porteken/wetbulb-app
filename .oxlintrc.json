@@ -41,6 +41,7 @@
     "playwright-report/**",
     "test-results/**",
     "blob-report/**",
+    "src/components/ui/**",
     "next-env.d.ts"
   ],
   "rules": {

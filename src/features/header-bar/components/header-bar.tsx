@@ -1,11 +1,11 @@
 "use client";
 
+import { AppSelect as Select } from "@/components/app/app-select";
 import { BasisToggle } from "@/components/app/basis-toggle";
 import { RegionToggle } from "@/components/app/region-toggle";
 import { ThemeToggle } from "@/components/app/theme-toggle";
 import { UnitToggle } from "@/components/app/unit-toggle";
 import { Button } from "@/components/ui/button";
-import { Select } from "@/components/ui/select";
 import { APP_CONFIG } from "@/lib/constants";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";

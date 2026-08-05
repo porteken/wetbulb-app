@@ -202,8 +202,8 @@ vi.mock("@/features/header-bar", () => ({
   HeaderBar: mockHeaderBar,
 }));
 
-vi.mock("@/components/ui/select", () => ({
-  Select: mockFn((props: React.ComponentProps<typeof MockSelectControl>) => (
+vi.mock("@/components/app/app-select", () => ({
+  AppSelect: mockFn((props: React.ComponentProps<typeof MockSelectControl>) => (
     <MockSelectControl {...props} />
   )),
 }));
@@ -216,8 +216,8 @@ vi.mock("@/components/ui/multi-select", () => ({
   ),
 }));
 
-vi.mock("@/components/ui/pagination", () => ({
-  Pagination: mockFn(
+vi.mock("@/components/app/app-pagination", () => ({
+  AppPagination: mockFn(
     (props: React.ComponentProps<typeof MockPaginationControl>) => (
       <MockPaginationControl {...props} />
     ),
