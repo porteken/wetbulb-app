@@ -69,7 +69,7 @@ const About: FC<AboutProperties> = ({ LocationOptions }: AboutProperties) => (
         </div>
 
         <p className="mt-4 max-w-3xl text-base/7 text-muted-foreground">
-          The 68–76°F (20–24°C) low-risk range is based on{" "}
+          The 68.0–75.2°F (20–24°C) low-risk range is based on{" "}
           <Link
             className="text-primary underline underline-offset-4 transition hover:text-primary/80"
             href={APP_CONFIG.WETBULB_LOW_RISK_URL}

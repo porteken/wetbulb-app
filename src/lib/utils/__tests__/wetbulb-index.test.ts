@@ -52,7 +52,7 @@ describe("wetbulb-index", () => {
       );
       expect(lowRisk).toBeDefined();
       expect(getWetbulbRangeLabel(lowRisk!, "C")).toBe("20–24°C");
-      expect(getWetbulbRangeLabel(lowRisk!, "F")).toBe("68–76°F");
+      expect(getWetbulbRangeLabel(lowRisk!, "F")).toBe("68.0–75.2°F");
     });
   });
 
@@ -78,11 +78,11 @@ describe("wetbulb-index", () => {
       expect(result.value).toBe("24.0°C");
     });
 
-    it("should return Moderate Risk for wetbulb just above 24", () => {
-      const result = getWetbulbInfo(24.1, "C");
+    it("should return Moderate Risk at 25", () => {
+      const result = getWetbulbInfo(25, "C");
       expect(result.level).toBe("Moderate Risk");
       expect(result.color).toBe("text-amber-600");
-      expect(result.value).toBe("24.1°C");
+      expect(result.value).toBe("25.0°C");
     });
 
     it("should keep wetbulb = 26 in Moderate Risk", () => {
@@ -92,11 +92,11 @@ describe("wetbulb-index", () => {
       expect(result.value).toBe("26.0°C");
     });
 
-    it("should return High Risk for wetbulb just above 26", () => {
-      const result = getWetbulbInfo(26.1, "C");
+    it("should return High Risk at 27", () => {
+      const result = getWetbulbInfo(27, "C");
       expect(result.level).toBe("High Risk");
       expect(result.color).toBe("text-orange-600");
-      expect(result.value).toBe("26.1°C");
+      expect(result.value).toBe("27.0°C");
     });
 
     it("should keep wetbulb = 28 in High Risk", () => {
@@ -106,11 +106,18 @@ describe("wetbulb-index", () => {
       expect(result.value).toBe("28.0°C");
     });
 
-    it("should return Extreme Risk for wetbulb just above 28", () => {
-      const result = getWetbulbInfo(28.1, "C");
+    it("should keep Conway's 28.2 wetbulb in High Risk", () => {
+      const result = getWetbulbInfo(28.2, "C");
+      expect(result.level).toBe("High Risk");
+      expect(result.color).toBe("text-orange-600");
+      expect(result.value).toBe("28.2°C");
+    });
+
+    it("should return Extreme Risk at 29", () => {
+      const result = getWetbulbInfo(29, "C");
       expect(result.level).toBe("Extreme Risk");
       expect(result.color).toBe("text-red-600");
-      expect(result.value).toBe("28.1°C");
+      expect(result.value).toBe("29.0°C");
     });
 
     it("should keep wetbulb = 30 in Extreme Risk", () => {
@@ -120,11 +127,11 @@ describe("wetbulb-index", () => {
       expect(result.value).toBe("30.0°C");
     });
 
-    it("should return Empirical Limit for wetbulb just above 30", () => {
-      const result = getWetbulbInfo(30.1, "C");
+    it("should return Empirical Limit at 31", () => {
+      const result = getWetbulbInfo(31, "C");
       expect(result.level).toBe("Empirical Limit");
       expect(result.color).toBe("text-red-800");
-      expect(result.value).toBe("30.1°C");
+      expect(result.value).toBe("31.0°C");
     });
 
     it("should keep wetbulb = 34 in Empirical Limit", () => {
@@ -134,11 +141,11 @@ describe("wetbulb-index", () => {
       expect(result.value).toBe("34.0°C");
     });
 
-    it("should return Theoretical Limit for wetbulb just above 34", () => {
-      const result = getWetbulbInfo(34.1, "C");
+    it("should return Theoretical Limit at 35", () => {
+      const result = getWetbulbInfo(35, "C");
       expect(result.level).toBe("Theoretical Limit");
       expect(result.color).toBe("text-purple-800");
-      expect(result.value).toBe("34.1°C");
+      expect(result.value).toBe("35.0°C");
     });
 
     it("should return Theoretical Limit for very high wetbulb values", () => {

@@ -112,11 +112,13 @@ describe("aboutMain", () => {
 
     const table = screen.getByRole("table");
     expect(within(table).getByText("None")).toBeInTheDocument();
-    expect(within(table).getByText("< 68°F (< 20°C)")).toBeInTheDocument();
+    expect(within(table).getByText("< 68.0°F (< 20°C)")).toBeInTheDocument();
     expect(within(table).getByText("Low Risk")).toBeInTheDocument();
-    expect(within(table).getByText("68–76°F (20–24°C)")).toBeInTheDocument();
+    expect(
+      within(table).getByText("68.0–75.2°F (20–24°C)"),
+    ).toBeInTheDocument();
     expect(within(table).getByText("Theoretical Limit")).toBeInTheDocument();
-    expect(within(table).getByText("≥ 95°F (≥ 35°C)")).toBeInTheDocument();
+    expect(within(table).getByText("≥ 95.0°F (≥ 35°C)")).toBeInTheDocument();
   });
 
   it("should render without location options", () => {

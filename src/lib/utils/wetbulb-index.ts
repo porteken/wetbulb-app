@@ -39,54 +39,54 @@ export const WETBULB_INDEX_LEGEND_ITEMS: readonly WetbulbIndexLegendItem[] = [
     level: "None",
     max: 20,
     rangeLabelC: "< 20°C",
-    rangeLabelF: "< 68°F",
+    rangeLabelF: "< 68.0°F",
   },
   {
     colorClass: "text-yellow-600",
     fillClass: "bg-yellow-400",
     level: "Low Risk",
-    max: 24,
+    max: 25,
     rangeLabelC: "20–24°C",
-    rangeLabelF: "68–76°F",
+    rangeLabelF: "68.0–75.2°F",
   },
   {
     colorClass: "text-amber-600",
     fillClass: "bg-amber-500",
     level: "Moderate Risk",
-    max: 26,
+    max: 27,
     rangeLabelC: "25–26°C",
-    rangeLabelF: "77–80°F",
+    rangeLabelF: "77.0–78.8°F",
   },
   {
     colorClass: "text-orange-600",
     fillClass: "bg-orange-500",
     level: "High Risk",
-    max: 28,
+    max: 29,
     rangeLabelC: "27–28°C",
-    rangeLabelF: "81–83°F",
+    rangeLabelF: "80.6–82.4°F",
   },
   {
     colorClass: "text-red-600",
     fillClass: "bg-red-500",
     level: "Extreme Risk",
-    max: 30,
+    max: 31,
     rangeLabelC: "29–30°C",
-    rangeLabelF: "84–87°F",
+    rangeLabelF: "84.2–86.0°F",
   },
   {
     colorClass: "text-red-800",
     fillClass: "bg-red-700",
     level: "Empirical Limit",
-    max: 34,
+    max: 35,
     rangeLabelC: "31–34°C",
-    rangeLabelF: "88–94°F",
+    rangeLabelF: "87.8–93.2°F",
   },
   {
     colorClass: "text-purple-800",
     fillClass: "bg-purple-700",
     level: "Theoretical Limit",
     rangeLabelC: "≥ 35°C",
-    rangeLabelF: "≥ 95°F",
+    rangeLabelF: "≥ 95.0°F",
   },
 ];
 
@@ -184,13 +184,11 @@ export function getWetbulbInfo(
   wetbulbValueCelsius: number,
   unit: TemperatureUnit = DEFAULT_TEMPERATURE_UNIT,
 ): WetbulbInfo {
-  const foundItem = WETBULB_INDEX_LEGEND_ITEMS.find((legendItem, index) => {
+  const foundItem = WETBULB_INDEX_LEGEND_ITEMS.find((legendItem) => {
     if (legendItem.max === undefined) {
       return true;
     }
-    return index === 0
-      ? wetbulbValueCelsius < legendItem.max
-      : wetbulbValueCelsius <= legendItem.max;
+    return wetbulbValueCelsius < legendItem.max;
   });
 
   const item = foundItem ?? WETBULB_INDEX_LEGEND_ITEMS.at(-1);

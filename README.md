@@ -21,17 +21,17 @@ A comprehensive web application hosted [here](https://wetbulb-app.vercel.app/) t
 
 This app classifies wet-bulb temperature into the following risk levels:
 
-| Level             | Range (°F) | Range (°C) |
-| ----------------- | ---------- | ---------- |
-| None              | < 68°F     | < 20°C     |
-| Low Risk          | 68–76°F    | 20–24°C    |
-| Moderate Risk     | 77–80°F    | 25–26°C    |
-| High Risk         | 81–83°F    | 27–28°C    |
-| Extreme Risk      | 84–87°F    | 29–30°C    |
-| Empirical Limit   | 88–94°F    | 31–34°C    |
-| Theoretical Limit | ≥ 95°F     | ≥ 35°C     |
+| Level             | Range (°F)  | Range (°C) |
+| ----------------- | ----------- | ---------- |
+| None              | < 68.0°F    | < 20°C     |
+| Low Risk          | 68.0–75.2°F | 20–24°C    |
+| Moderate Risk     | 77.0–78.8°F | 25–26°C    |
+| High Risk         | 80.6–82.4°F | 27–28°C    |
+| Extreme Risk      | 84.2–86.0°F | 29–30°C    |
+| Empirical Limit   | 87.8–93.2°F | 31–34°C    |
+| Theoretical Limit | ≥ 95.0°F    | ≥ 35°C     |
 
-- The 68–76°F (20–24°C) low-risk range is based on [this research](https://escholarship.org/content/qt2xz601d0/qt2xz601d0.pdf).
+- The 68.0–75.2°F (20–24°C) low-risk range is based on [this research](https://escholarship.org/content/qt2xz601d0/qt2xz601d0.pdf).
 - The 77–94°F (25–34°C) moderate-through-extreme thresholds are based on [this exercise-safety guidance](https://www.princetonmedicine.com/blog/wet-bulb-temperature-and-exercise-safety-what-you-need-to-know).
 - The ~88°F (31°C) empirical survivability limit, lower than the long-assumed 95°F (35°C) theoretical limit, is based on [this study](https://www.psu.edu/news/research/story/humans-cant-endure-temperatures-and-humidities-high-previously-thought).
 
