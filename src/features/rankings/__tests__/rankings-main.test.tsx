@@ -236,7 +236,7 @@ const mockLocationOptions = [
 
 const createMockRankingItem = (overrides = {}) => ({
   avg_wetbulb: 25,
-  changeFrom2000: 0.5,
+  changeFromBaseline: 0.5,
   city: "Test City",
   FutureValueLower: 25,
   FutureValueUpper: 30,
@@ -459,15 +459,18 @@ const mockRankings = [
 ];
 
 const hotCityRankings = [
-  createMockRankingItem({ changeFrom2000: 1.5, city: "Hot City" }),
+  createMockRankingItem({ changeFromBaseline: 1.5, city: "Hot City" }),
 ];
 
 const coolCityRankings = [
-  createMockRankingItem({ changeFrom2000: -0.5, city: "Cool City" }),
+  createMockRankingItem({ changeFromBaseline: -0.5, city: "Cool City" }),
 ];
 
 const noDataCityRankings = [
-  createMockRankingItem({ changeFrom2000: undefined, city: "No Data City" }),
+  createMockRankingItem({
+    changeFromBaseline: undefined,
+    city: "No Data City",
+  }),
 ];
 
 const rangeCityRankings = [
@@ -491,7 +494,7 @@ const noFutureCityRankings = [
 ];
 
 const stableCityRankings = [
-  createMockRankingItem({ changeFrom2000: 0, city: "Stable City" }),
+  createMockRankingItem({ changeFromBaseline: 0, city: "Stable City" }),
 ];
 
 const extremeHeatCityRankings = [
@@ -512,6 +515,8 @@ const emptyRankings: Array<ReturnType<typeof createMockRankingItem>> = [];
 const topFiveRankings = mockRankings.slice(0, 5);
 
 const defaultProps = {
+  baselineYear: 1990,
+  earliestYear: 1990,
   initialWetbulbLevel: "",
   initialSeason: "Annual" as const,
   initialState: "",
@@ -604,7 +609,7 @@ describe("rankingsMain", () => {
       expect(
         within(table).getByText("Wetbulb Range (5th-95th percentile)"),
       ).toBeInTheDocument();
-      expect(within(table).getByText("Change from 2000")).toBeInTheDocument();
+      expect(within(table).getByText("Change from 1990")).toBeInTheDocument();
       expect(
         within(table).getByText("2100 Forecast Range"),
       ).toBeInTheDocument();
@@ -843,12 +848,12 @@ describe("rankingsMain", () => {
       expect(rows[1]).toHaveTextContent("AZ");
     });
 
-    it("should sort by change when Change from 2000 header is clicked", () => {
+    it("should sort by change when Change from 1990 header is clicked", () => {
       render(<RankingsMain {...defaultProps} />);
 
       const table = screen.getByRole("table");
       const changeHeader = requireElement(
-        within(table).getByText("Change from 2000").closest("th"),
+        within(table).getByText("Change from 1990").closest("th"),
       );
       fireEvent.click(changeHeader);
 

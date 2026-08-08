@@ -11,11 +11,13 @@ import RankingsPage, { metadata } from "../page";
 
 const {
   mockCookies,
+  mockFetchAvailableYearRange,
   mockFetchCityRankings,
   mockFetchLocations,
   mockRankingsMain,
 } = vi.hoisted(() => ({
   mockCookies: mockFn(),
+  mockFetchAvailableYearRange: mockFn(),
   mockFetchCityRankings: mockFn(),
   mockFetchLocations: mockFn(),
   mockRankingsMain: mockFn((_properties?: unknown) => (
@@ -32,6 +34,7 @@ vi.mock("@/features/rankings", () => ({
 }));
 
 vi.mock("@/lib/api/fetch-server", () => ({
+  FetchAvailableYearRange: mockFetchAvailableYearRange,
   FetchCityRankings: mockFetchCityRankings,
   FetchLocations: mockFetchLocations,
 }));
@@ -48,6 +51,10 @@ describe("rankings page", () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date("2026-08-01T12:00:00.000Z"));
     vi.clearAllMocks();
+    mockFetchAvailableYearRange.mockResolvedValue({
+      end_year: 2026,
+      start_year: 1990,
+    });
     mockFetchCityRankings.mockResolvedValue([
       {
         avg_wetbulb: 35.5,
@@ -100,6 +107,8 @@ describe("rankings page", () => {
     expect(screen.getByTestId("rankings-main")).toBeInTheDocument();
     expect(mockRankingsMain).toHaveBeenCalledWith(
       {
+        baselineYear: 1990,
+        earliestYear: 1990,
         initialWetbulbLevel: "severe",
         initialSeason: "Winter",
         initialState: "Arizona",

@@ -57,17 +57,17 @@ const getWetbulbRange = (
   unit: TemperatureUnit,
 ): string =>
   `${convertFromCelsius(p5, unit).toFixed(1)}-${convertFromCelsius(p95, unit).toFixed(1)}`;
-const convertChangeFrom2000 = (
-  changeFrom2000: number | undefined,
+const convertChangeFromBaseline = (
+  changeFromBaseline: number | undefined,
   unit: TemperatureUnit,
 ): number | undefined => {
-  if (changeFrom2000 === undefined) {
+  if (changeFromBaseline === undefined) {
     return undefined;
   }
 
   return unit === "F"
-    ? celsiusDeltaToFahrenheit(changeFrom2000)
-    : changeFrom2000;
+    ? celsiusDeltaToFahrenheit(changeFromBaseline)
+    : changeFromBaseline;
 };
 const colorMapping = (value: number) => {
   if (value > 0) {
@@ -91,7 +91,7 @@ const RANKINGS_WETBULB_LEVELS = WETBULB_INDEX_LEGEND_ITEMS.map((item) => ({
 
 interface RankingItem {
   avg_wetbulb: number;
-  changeFrom2000: number | undefined;
+  changeFromBaseline: number | undefined;
   city: string;
   FutureValueLower: number | undefined;
   FutureValueUpper: number | undefined;
@@ -118,7 +118,7 @@ const rankingComparators: Record<
   (a: RankingItem, b: RankingItem) => number
 > = {
   avg_wetbulb: (a, b) => a.avg_wetbulb - b.avg_wetbulb,
-  change: (a, b) => (a.changeFrom2000 ?? 0) - (b.changeFrom2000 ?? 0),
+  change: (a, b) => (a.changeFromBaseline ?? 0) - (b.changeFromBaseline ?? 0),
   city: (a, b) => a.city.localeCompare(b.city),
   forecast_range: (a, b) =>
     (a.FutureValueUpper ?? 0) - (b.FutureValueUpper ?? 0),
@@ -176,6 +176,8 @@ function getRankBadgeClasses(rank: number): string {
 }
 
 interface RankingsMainProperties {
+  baselineYear: number;
+  earliestYear: number;
   initialWetbulbLevel: string;
   initialSeason: GraphSeason;
   initialState: string;
@@ -284,6 +286,7 @@ function rankingsReducer(
 
 interface RankingsFiltersProperties {
   dispatch: RankingsDispatch;
+  earliestYear: number;
   wetbulbLevelFilter: string[];
   wetbulbLevelOptions: SelectOption[];
   isPending: boolean;
@@ -298,6 +301,7 @@ interface RankingsFiltersProperties {
 const RankingsFilters = memo(
   ({
     dispatch,
+    earliestYear,
     wetbulbLevelFilter,
     wetbulbLevelOptions,
     isPending,
@@ -309,8 +313,12 @@ const RankingsFilters = memo(
     stateOptions,
   }: RankingsFiltersProperties) => {
     const yearOptions = useMemo(
-      () => YearOptions().map(({ key, label }) => ({ label, value: key })),
-      [],
+      () =>
+        YearOptions({ startYear: earliestYear }).map(({ key, label }) => ({
+          label,
+          value: key,
+        })),
+      [earliestYear],
     );
     const seasonOptions = useMemo(
       () =>
@@ -514,7 +522,7 @@ interface RankingRowProperties {
 const RankingRow = memo(({ item, push, rank, unit }: RankingRowProperties) => {
   const {
     avg_wetbulb,
-    changeFrom2000,
+    changeFromBaseline,
     city,
     FutureValueLower,
     FutureValueUpper,
@@ -540,7 +548,10 @@ const RankingRow = memo(({ item, push, rank, unit }: RankingRowProperties) => {
   );
 
   const avgWetbulbInfo = getWetbulbInfo(avg_wetbulb);
-  const changeFrom2000InUnit = convertChangeFrom2000(changeFrom2000, unit);
+  const changeFromBaselineInUnit = convertChangeFromBaseline(
+    changeFromBaseline,
+    unit,
+  );
 
   return (
     <tr
@@ -588,14 +599,14 @@ const RankingRow = memo(({ item, push, rank, unit }: RankingRowProperties) => {
         )}
       </td>
       <td className="px-3 py-4 text-sm whitespace-nowrap">
-        {changeFrom2000InUnit === undefined ? (
+        {changeFromBaselineInUnit === undefined ? (
           <span className="text-muted-foreground">N/A</span>
         ) : (
           <span
-            className={`font-semibold ${colorMapping(changeFrom2000InUnit)}`}
+            className={`font-semibold ${colorMapping(changeFromBaselineInUnit)}`}
           >
-            {changeFrom2000InUnit > 0 ? "+" : ""}
-            {changeFrom2000InUnit.toFixed(1)}°{unit}
+            {changeFromBaselineInUnit > 0 ? "+" : ""}
+            {changeFromBaselineInUnit.toFixed(1)}°{unit}
           </span>
         )}
       </td>
@@ -625,6 +636,8 @@ const RankingRow = memo(({ item, push, rank, unit }: RankingRowProperties) => {
 RankingRow.displayName = "RankingRow";
 
 export function RankingsMain({
+  baselineYear,
+  earliestYear,
   initialWetbulbLevel,
   initialSeason,
   initialState,
@@ -789,6 +802,7 @@ export function RankingsMain({
 
         <RankingsFilters
           dispatch={dispatch}
+          earliestYear={earliestYear}
           wetbulbLevelFilter={wetbulbLevelFilter}
           wetbulbLevelOptions={wetbulbLevelOptions}
           isPending={isPending}
@@ -896,7 +910,7 @@ export function RankingsMain({
                       currentColumn={sortColumn}
                       currentDirection={sortDirection}
                       dispatch={dispatch}
-                      label="Change from 2000"
+                      label={`Change from ${baselineYear}`}
                     />
                     <SortHeader
                       column="forecast_range"

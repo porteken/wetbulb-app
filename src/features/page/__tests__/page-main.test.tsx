@@ -84,6 +84,7 @@ describe("pageMain", () => {
   const defaultProps: React.ComponentProps<typeof PageMain> = {
     CurrentDates: [new Date("2023-01-01"), new Date("2023-02-01")],
     CurrentWetbulbs: [15, 25],
+    earliestYear: 1990,
     IncreasePerYear: 0.5,
     id: 1,
     initialForecastEnabled: false,

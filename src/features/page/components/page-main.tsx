@@ -21,6 +21,7 @@ import type { FC } from "react";
 const Main: FC<PageProperties> = ({
   CurrentDates,
   CurrentWetbulbs,
+  earliestYear,
   graphDataError,
   IncreasePerYear,
   id,
@@ -105,6 +106,7 @@ const Main: FC<PageProperties> = ({
           <ReferenceData
             CurrentDates={CurrentDates}
             CurrentWetbulbs={CurrentWetbulbs}
+            earliestYear={earliestYear}
             id={id}
             initialHasError={graphDataError}
             initialReferenceYear={initialReferenceYear}

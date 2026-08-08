@@ -12,30 +12,39 @@ export const SeasonOptions: SelectOptionProperties[] = GRAPH_SEASONS.map(
 );
 
 interface YearOptionsConfig {
+  endYear?: number;
   includeLatestYear?: boolean;
+  startYear?: number;
 }
 
 export const YearOptions = ({
+  endYear = GRAPH_CONFIG.YEAR_RANGE.END,
   includeLatestYear = true,
+  startYear = GRAPH_CONFIG.YEAR_RANGE.START,
 }: YearOptionsConfig = {}): SelectOptionProperties[] => {
-  const { END, START } = GRAPH_CONFIG.YEAR_RANGE;
-  const endYear = includeLatestYear ? END : END - 1;
+  const lastYear = includeLatestYear ? endYear : endYear - 1;
 
-  return Array.from({ length: endYear - START + 1 }, (_, index) => {
-    const year = (START + index).toString();
+  return Array.from(
+    { length: Math.max(lastYear - startYear + 1, 0) },
+    (_, index) => {
+      const year = (startYear + index).toString();
 
-    return { key: year, label: year };
-  });
+      return { key: year, label: year };
+    },
+  );
 };
 
-export const isSelectableReferenceYear = (year: string): boolean => {
+export const isSelectableReferenceYear = (
+  year: string,
+  startYear: number = GRAPH_CONFIG.YEAR_RANGE.START,
+  endYear: number = GRAPH_CONFIG.YEAR_RANGE.END,
+): boolean => {
   const numericYear = Number(year);
-  const { END, START } = GRAPH_CONFIG.YEAR_RANGE;
 
   return (
     Number.isInteger(numericYear) &&
-    numericYear >= START &&
-    numericYear < END &&
+    numericYear >= startYear &&
+    numericYear < endYear &&
     year === numericYear.toString()
   );
 };

@@ -1,5 +1,4 @@
 import { expect, test } from "./fixtures";
-import { selectCustomOption } from "./utils/custom-select";
 import {
   MAP_CONTAINER_SELECTOR,
   gotoAndWaitForMapPage,
@@ -24,10 +23,14 @@ test.describe("Home Page", () => {
     await expect(trendChart).toBeVisible({ timeout: 15_000 });
 
     const comboboxes = modal.getByRole("combobox");
-    await selectCustomOption(page, comboboxes.first(), /^Summer$/u);
+    await comboboxes.first().click();
+    await page.getByRole("option", { name: "Summer", exact: true }).click();
+    await expect(comboboxes.first()).toHaveText("Summer");
     await expect(trendChart).toBeVisible({ timeout: 10_000 });
 
-    await selectCustomOption(page, comboboxes.nth(1), /^Max$/u);
+    await comboboxes.nth(1).click();
+    await page.getByRole("option", { name: "Max", exact: true }).click();
+    await expect(comboboxes.nth(1)).toHaveText("Max");
     await expect(trendChart).toBeVisible({ timeout: 10_000 });
 
     await modal.getByRole("checkbox", { name: "Show Forecast" }).check();

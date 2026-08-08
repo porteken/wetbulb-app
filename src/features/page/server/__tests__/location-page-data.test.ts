@@ -17,12 +17,14 @@ import { loadLocationPageData } from "../location-page-data";
 
 const {
   mockCookies,
+  mockFetchAvailableYearRange,
   mockFetchForecastData,
   mockFetchLocations,
   mockFetchReferenceGraphData,
   mockFetchTrendGraphData,
 } = vi.hoisted(() => ({
   mockCookies: mockFn(),
+  mockFetchAvailableYearRange: mockFn(),
   mockFetchForecastData: mockFn(),
   mockFetchLocations: mockFn(),
   mockFetchReferenceGraphData: mockFn(),
@@ -34,6 +36,7 @@ vi.mock("next/headers", () => ({
 }));
 
 vi.mock("@/lib/api/fetch-server", () => ({
+  FetchAvailableYearRange: mockFetchAvailableYearRange,
   FetchForecastData: mockFetchForecastData,
   FetchLocations: mockFetchLocations,
   FetchReferenceGraphData: mockFetchReferenceGraphData,
@@ -72,6 +75,10 @@ const createCookieStore = (
 describe("loadLocationPageData", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockFetchAvailableYearRange.mockResolvedValue({
+      end_year: 2026,
+      start_year: 1990,
+    });
     mockCookies.mockResolvedValue(createCookieStore({}));
   });
 
@@ -196,6 +203,7 @@ describe("loadLocationPageData", () => {
       payload: {
         CurrentDates: [new Date("2024-01-01")],
         CurrentWetbulbs: [31],
+        earliestYear: 1990,
         graphDataError: false,
         IncreasePerYear: 0,
         ReferenceWetbulbs: [25],
@@ -250,6 +258,7 @@ describe("loadLocationPageData", () => {
       payload: {
         CurrentDates: [],
         CurrentWetbulbs: [],
+        earliestYear: 1990,
         graphDataError: false,
         IncreasePerYear: 0.5,
         ReferenceWetbulbs: [],
@@ -333,6 +342,7 @@ describe("loadLocationPageData", () => {
       payload: {
         CurrentDates: currentDates,
         CurrentWetbulbs: [31, 32],
+        earliestYear: 1990,
         graphDataError: false,
         IncreasePerYear: 0.5,
         id: 7,

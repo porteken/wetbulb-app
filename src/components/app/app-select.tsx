@@ -30,6 +30,7 @@ interface SelectGroupOption {
 
 interface AppSelectProps {
   className?: string;
+  contentClassName?: string;
   clearable?: boolean;
   data: (SelectOption | SelectGroupOption)[];
   disabled?: boolean;
@@ -45,6 +46,7 @@ interface AppSelectProps {
 
 export function AppSelect({
   className,
+  contentClassName,
   clearable,
   data,
   disabled,
@@ -117,7 +119,7 @@ export function AppSelect({
           <SelectTrigger className="w-full" data-testid={testId} size={size}>
             <SelectValue placeholder={placeholder} />
           </SelectTrigger>
-          <SelectContent>
+          <SelectContent className={contentClassName}>
             {searchable && (
               <div className="sticky top-0 z-10 flex items-center border-b bg-popover px-3 py-2">
                 <SearchIcon className="mr-2 size-4 shrink-0 opacity-50" />

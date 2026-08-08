@@ -212,8 +212,8 @@ const MOCK_TABLES: RuntimeMockTables = {
         return {
           avg_wetbulb: avg,
           avg_wetbulb_avg: round(avg + AVG_BASIS_OFFSET),
-          change_from_2000: round((year - 2000) * location.trendPerYear),
-          change_from_2000_avg: round(
+          change_from_baseline: round((year - 2000) * location.trendPerYear),
+          change_from_baseline_avg: round(
             (year - 2000) * location.trendPerYear + AVG_BASIS_OFFSET,
           ),
           city: location.city,

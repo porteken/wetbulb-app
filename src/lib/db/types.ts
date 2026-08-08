@@ -3,8 +3,6 @@ export type NumericLike = number | string;
 export interface WetbulbCityRankingsViewTable {
   avg_wetbulb: NumericLike;
   avg_wetbulb_avg: NumericLike;
-  change_from_2000: NumericLike | null;
-  change_from_2000_avg: NumericLike | null;
   city: string;
   future_lower: NumericLike | null;
   future_lower_avg: NumericLike | null;
@@ -24,6 +22,11 @@ export interface WetbulbCityRankingsViewTable {
   season?: string | null;
   state: string;
   year: number;
+}
+
+export interface AvailableYearRangeRow {
+  end_year: NumericLike | null;
+  start_year: NumericLike | null;
 }
 
 interface LocationsTable {

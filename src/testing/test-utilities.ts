@@ -29,6 +29,7 @@ vi.mock("@/lib/utils/simple-linear-regression", () => ({
 }));
 
 vi.mock("@/lib/db/queries", () => ({
+  fetchAvailableYearRange: mockFn(),
   fetchCityRankingsRows: mockFn(),
   fetchForecastRows: mockFn(),
   fetchHistoricalYearRow: mockFn(),
@@ -69,6 +70,10 @@ export const setupApiServerTest = async () => {
   );
 
   const dbQueries = await import("@/lib/db/queries");
+  vi.mocked(dbQueries.fetchAvailableYearRange).mockResolvedValue({
+    endYear: 2026,
+    startYear: 1990,
+  });
 
   const { SimpleLinearRegression } =
     await import("@/lib/utils/simple-linear-regression");
@@ -89,6 +94,7 @@ export const setupApiServerTest = async () => {
   return {
     mockCookieStore,
     mockDbQueries: {
+      fetchAvailableYearRange: vi.mocked(dbQueries.fetchAvailableYearRange),
       fetchCityRankingsRows: vi.mocked(dbQueries.fetchCityRankingsRows),
       fetchForecastRows: vi.mocked(dbQueries.fetchForecastRows),
       fetchHistoricalYearRow: vi.mocked(dbQueries.fetchHistoricalYearRow),

@@ -51,13 +51,28 @@ describe("fetchCityRankingsRows retry and fallback behavior", () => {
   });
 
   describe("max basis", () => {
+    it("computes change from a supplied earliest baseline year", async () => {
+      const rows = [{ avg_wetbulb: 22, city: "Phoenix", location_id: 1 }];
+      mockSelectFromQueue([
+        async () => rows,
+        async () => [{ location_id: 1, wetbulb: 20 }],
+      ]);
+
+      const result = await fetchCityRankingsRows(2024, "Summer", "max", {
+        baselineYear: 1980,
+        region: "na",
+      });
+
+      expect(result[0]).toMatchObject({ change_from_baseline: 2 });
+    });
+
     it("fetches rankings for a season successfully", async () => {
       const rows = [{ city: "Phoenix" }];
       mockSelectFromQueue([async () => rows]);
 
       const result = await fetchCityRankingsRows(2024, "Summer", "max");
 
-      expect(result).toBe(rows);
+      expect(result).toStrictEqual(rows);
     });
 
     it("retries without a season filter when the season column is missing", async () => {
@@ -71,7 +86,7 @@ describe("fetchCityRankingsRows retry and fallback behavior", () => {
 
       const result = await fetchCityRankingsRows(2024, "Summer", "max");
 
-      expect(result).toBe(rows);
+      expect(result).toStrictEqual(rows);
     });
 
     it("throws a classified database error for unrecoverable failures", async () => {
@@ -94,7 +109,7 @@ describe("fetchCityRankingsRows retry and fallback behavior", () => {
 
       const result = await fetchCityRankingsRows(2024, "Summer", "avg");
 
-      expect(result).toBe(rows);
+      expect(result).toStrictEqual(rows);
     });
 
     it("retries without a season filter when the season column is missing", async () => {
@@ -108,7 +123,7 @@ describe("fetchCityRankingsRows retry and fallback behavior", () => {
 
       const result = await fetchCityRankingsRows(2024, "Summer", "avg");
 
-      expect(result).toBe(rows);
+      expect(result).toStrictEqual(rows);
     });
 
     it("falls back to the legacy mixed select when the avg columns are missing", async () => {
@@ -125,7 +140,7 @@ describe("fetchCityRankingsRows retry and fallback behavior", () => {
 
       const result = await fetchCityRankingsRows(2024, "Summer", "avg");
 
-      expect(result).toBe(rows);
+      expect(result).toStrictEqual(rows);
     });
 
     it("falls back to the legacy mixed select without season when both avg columns and season are missing", async () => {
@@ -145,7 +160,7 @@ describe("fetchCityRankingsRows retry and fallback behavior", () => {
 
       const result = await fetchCityRankingsRows(2024, "Summer", "avg");
 
-      expect(result).toBe(rows);
+      expect(result).toStrictEqual(rows);
     });
 
     it("falls back to non-avg bounds when avg columns and p5/p95 are both missing", async () => {
@@ -165,7 +180,7 @@ describe("fetchCityRankingsRows retry and fallback behavior", () => {
 
       const result = await fetchCityRankingsRows(2024, "Summer", "avg");
 
-      expect(result).toBe(rows);
+      expect(result).toStrictEqual(rows);
     });
 
     it("throws a classified database error when the legacy fallback is unrecoverable", async () => {
@@ -197,7 +212,7 @@ describe("fetchCityRankingsRows retry and fallback behavior", () => {
 
       const result = await fetchCityRankingsRows(2024, "Summer", "avg");
 
-      expect(result).toBe(rows);
+      expect(result).toStrictEqual(rows);
     });
 
     it("throws a classified database error for unrecoverable failures", async () => {
@@ -225,7 +240,7 @@ describe("fetchTrendGraphRows and fetchReferenceGraphRows query building", () =>
 
     const result = await fetchTrendGraphRows(1, "avg", "Annual", "max");
 
-    expect(result).toBe(rows);
+    expect(result).toStrictEqual(rows);
   });
 
   it("builds and executes the reference graph query", async () => {
@@ -234,6 +249,6 @@ describe("fetchTrendGraphRows and fetchReferenceGraphRows query building", () =>
 
     const result = await fetchReferenceGraphRows(1, "2020");
 
-    expect(result).toBe(rows);
+    expect(result).toStrictEqual(rows);
   });
 });

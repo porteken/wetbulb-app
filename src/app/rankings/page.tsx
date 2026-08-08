@@ -1,5 +1,9 @@
 import { RankingsMain } from "@/features/rankings";
-import { FetchCityRankings, FetchLocations } from "@/lib/api/fetch-server";
+import {
+  FetchAvailableYearRange,
+  FetchCityRankings,
+  FetchLocations,
+} from "@/lib/api/fetch-server";
 import {
   DATA_REGION_COOKIE_NAME,
   DEFAULT_WETBULB_BASIS,
@@ -40,6 +44,22 @@ const yearMapping = (
   );
 };
 
+const resolveRankingsYear = (
+  queryYear: string | undefined,
+  cookieYear: string | undefined,
+  earliestYear: number,
+  season: ReturnType<typeof normalizeGraphSeason>,
+) => {
+  const requestedYear = Math.max(
+    yearMapping(queryYear, cookieYear),
+    earliestYear,
+  );
+  return requestedYear === GRAPH_CONFIG.YEAR_RANGE.END &&
+    !isCurrentYearRankingAvailable(season)
+    ? GRAPH_CONFIG.YEAR_RANGE.END - 1
+    : requestedYear;
+};
+
 export default async function RankingsPage({
   searchParams,
 }: Readonly<{
@@ -66,12 +86,16 @@ export default async function RankingsPage({
       : normalizedSeason;
   const shouldPersistInitialSeason =
     seasonFromCookie !== undefined && seasonFromCookie !== initialSeason;
-  const requestedYear = yearMapping(parameters.year, yearFromCookie);
-  const year =
-    requestedYear === GRAPH_CONFIG.YEAR_RANGE.END &&
-    !isCurrentYearRankingAvailable(initialSeason)
-      ? GRAPH_CONFIG.YEAR_RANGE.END - 1
-      : requestedYear;
+  const availableYearRange = await FetchAvailableYearRange(region);
+  const earliestYear = availableYearRange
+    ? availableYearRange.start_year
+    : GRAPH_CONFIG.YEAR_RANGE.START;
+  const year = resolveRankingsYear(
+    parameters.year,
+    yearFromCookie,
+    earliestYear,
+    initialSeason,
+  );
   const basis = normalizeWetbulbBasis(basisFromCookie ?? DEFAULT_WETBULB_BASIS);
   const [rankings, { LocationOptions }] = await Promise.all([
     FetchCityRankings(year, initialSeason, basis, region),
@@ -81,6 +105,8 @@ export default async function RankingsPage({
   return (
     <RankingsMain
       initialWetbulbLevel={wetbulbLevelFromCookie ?? ""}
+      baselineYear={earliestYear}
+      earliestYear={earliestYear}
       initialSeason={initialSeason}
       initialState={stateFromCookie ?? ""}
       initialYear={year}

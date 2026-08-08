@@ -48,7 +48,7 @@ describe("fetch-server", () => {
       mockDbQueries.fetchCityRankingsRows.mockResolvedValue([
         {
           avg_wetbulb: 35.5,
-          change_from_2000: 1.5,
+          change_from_baseline: 1.5,
           city: "Phoenix",
           future_lower: 38,
           future_upper: 42,
@@ -61,7 +61,7 @@ describe("fetch-server", () => {
         },
         {
           avg_wetbulb: 30.2,
-          change_from_2000: 1.2,
+          change_from_baseline: 1.2,
           city: "Austin",
           future_lower: 33,
           future_upper: 37,
@@ -80,11 +80,11 @@ describe("fetch-server", () => {
         2024,
         "Annual",
         "max",
-        "na",
+        { baselineYear: 1990, region: "na" },
       );
       expect(result[0]).toStrictEqual({
         avg_wetbulb: 35.5,
-        changeFrom2000: 1.5,
+        changeFromBaseline: 1.5,
         city: "Phoenix",
         FutureValueLower: 38,
         FutureValueUpper: 42,
@@ -99,8 +99,8 @@ describe("fetch-server", () => {
     });
 
     it("throws for an invalid year", async () => {
-      await expect(fetchServer.FetchCityRankings(1999)).rejects.toThrow(
-        new DatabaseError("Invalid year: 1999. Must be between 2000 and 2100."),
+      await expect(fetchServer.FetchCityRankings(1899)).rejects.toThrow(
+        new DatabaseError("Invalid year: 1899. Must be between 1900 and 2100."),
       );
     });
 

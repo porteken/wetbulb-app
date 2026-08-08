@@ -13,7 +13,7 @@ import { sql } from "kysely";
 
 import { getDb, withDbRetry } from "./kysely";
 
-import type { NumericLike } from "./types";
+import type { AvailableYearRangeRow, NumericLike } from "./types";
 import type {
   DataRegion,
   ForecastScenario,
@@ -51,6 +51,16 @@ interface TrendGraphRow {
   location_id: number;
   wetbulb: NumericLike;
   year: number;
+}
+
+export interface AvailableYearRange {
+  endYear: number;
+  startYear: number;
+}
+
+interface RankingsQueryOptions {
+  baselineYear?: number;
+  region?: DataRegion;
 }
 
 const isMissingColumnError = (
@@ -115,7 +125,7 @@ const getRuntimeCityRankingsRows = (
       if (basis === "avg") {
         Object.assign(row, {
           avg_wetbulb: row.avg_wetbulb_avg,
-          change_from_2000: row.change_from_2000_avg,
+          change_from_baseline: row.change_from_baseline_avg,
           future_lower: row.future_lower_avg,
           future_upper: row.future_upper_avg,
           max_wetbulb: row.max_wetbulb_avg,
@@ -275,7 +285,6 @@ const buildMaxBasisRankingsQuery = (
     .selectFrom(view)
     .select([
       "avg_wetbulb",
-      "change_from_2000",
       "city",
       "future_lower",
       "future_upper",
@@ -318,7 +327,6 @@ const buildAvgBasisRankingsQuery = (
       useLegacyMixed
         ? [
             "avg_wetbulb_avg as avg_wetbulb",
-            "change_from_2000",
             "city",
             "future_lower",
             "future_upper",
@@ -329,7 +337,6 @@ const buildAvgBasisRankingsQuery = (
           ]
         : [
             "avg_wetbulb_avg as avg_wetbulb",
-            "change_from_2000_avg as change_from_2000",
             "city",
             "future_lower_avg as future_lower",
             "future_upper_avg as future_upper",
@@ -367,7 +374,6 @@ const isMissingAvgBasisRankingsColumnError = (
   view: CityRankingsView,
 ) =>
   isMissingColumnError(error, view, "max_wetbulb_avg") ||
-  isMissingColumnError(error, view, "change_from_2000_avg") ||
   isMissingColumnError(error, view, "future_lower_avg") ||
   isMissingColumnError(error, view, "future_upper_avg");
 
@@ -458,23 +464,141 @@ async function fetchCityRankingsAvgBasisRows(
   }
 }
 
-export function fetchCityRankingsRows(
+export async function fetchCityRankingsRows(
   year: number,
   season?: GraphSeason,
   basis: WetbulbBasis = DEFAULT_WETBULB_BASIS,
-  region: DataRegion = DEFAULT_DATA_REGION,
+  regionOrOptions: DataRegion | RankingsQueryOptions = DEFAULT_DATA_REGION,
 ) {
+  const { baselineYear, region } =
+    typeof regionOrOptions === "string"
+      ? { baselineYear: undefined, region: regionOrOptions }
+      : {
+          baselineYear: regionOrOptions.baselineYear,
+          region: regionOrOptions.region ?? DEFAULT_DATA_REGION,
+        };
   if (shouldUseRuntimeDbMocks()) {
-    return Promise.resolve(
-      getRuntimeCityRankingsRows(year, season, basis, region),
-    );
+    return getRuntimeCityRankingsRows(year, season, basis, region);
   }
 
   const view = getCityRankingsView(region);
-
-  return basis === "max"
+  const rows = await (basis === "max"
     ? fetchCityRankingsMaxBasisRows(view, year, season)
-    : fetchCityRankingsAvgBasisRows(view, year, season);
+    : fetchCityRankingsAvgBasisRows(view, year, season));
+  if (baselineYear === undefined) {
+    return rows.map((row) =>
+      Object.assign(row, { change_from_baseline: null }),
+    );
+  }
+
+  const baselineRows = await fetchBaselineRows(
+    baselineYear,
+    season,
+    basis,
+    region,
+  );
+  const baselineByLocation = new Map(
+    baselineRows.map((row) => [row.location_id, Number(row.wetbulb)]),
+  );
+
+  return rows.map((row) => {
+    const baseline = baselineByLocation.get(row.location_id);
+    return Object.assign(row, {
+      change_from_baseline:
+        baseline === undefined ? null : Number(row.avg_wetbulb) - baseline,
+    });
+  });
+}
+
+export async function fetchAvailableYearRange(
+  region: DataRegion = DEFAULT_DATA_REGION,
+  locationId?: number,
+): Promise<AvailableYearRange | undefined> {
+  if (shouldUseRuntimeDbMocks()) {
+    const years = getRuntimeMockTableRows("wetbulb_year_stats")
+      .filter(
+        (row) =>
+          (locationId === undefined || row.location_id === locationId) &&
+          regionForLocationId(row.location_id) === region,
+      )
+      .map((row) => row.year);
+    if (years.length === 0) {
+      return undefined;
+    }
+    return { endYear: Math.max(...years), startYear: Math.min(...years) };
+  }
+
+  let query = getDb()
+    .selectFrom("wetbulb_year_stats")
+    .select((eb) => [
+      eb.fn.min("year").as("start_year"),
+      eb.fn.max("year").as("end_year"),
+    ]);
+  query =
+    region === "eu"
+      ? query.where("location_id", ">=", EU_LOCATION_ID_MIN)
+      : query.where("location_id", "<", EU_LOCATION_ID_MIN);
+  if (locationId !== undefined) {
+    query = query.where("location_id", "=", locationId);
+  }
+
+  const row = (await withDbRetry(() => query.executeTakeFirst())) as
+    | AvailableYearRangeRow
+    | undefined;
+  if (row?.start_year === null || row?.end_year === null || !row) {
+    return undefined;
+  }
+  return {
+    endYear: Number(row.end_year),
+    startYear: Number(row.start_year),
+  };
+}
+
+async function fetchBaselineRows(
+  year: number,
+  season: GraphSeason | undefined,
+  basis: WetbulbBasis,
+  region: DataRegion,
+) {
+  if (shouldUseRuntimeDbMocks()) {
+    const metric = basis === "avg" ? "avg_wetbulb_avg" : "avg_wetbulb";
+    return getRuntimeMockTableRows("wetbulb_year_stats")
+      .filter(
+        (row) =>
+          row.year === year &&
+          regionForLocationId(row.location_id) === region &&
+          (season === undefined || row.season === season),
+      )
+      .map((row) => ({ location_id: row.location_id, wetbulb: row[metric] }));
+  }
+
+  const metric = basis === "avg" ? "avg_wetbulb_avg" : "avg_wetbulb";
+  const buildQuery = (selectedSeason?: GraphSeason) => {
+    let query = getDb()
+      .selectFrom("wetbulb_year_stats")
+      .select((eb) => ["location_id", eb.ref(metric).as("wetbulb")])
+      .where("year", "=", year);
+    query =
+      region === "eu"
+        ? query.where("location_id", ">=", EU_LOCATION_ID_MIN)
+        : query.where("location_id", "<", EU_LOCATION_ID_MIN);
+    if (selectedSeason !== undefined) {
+      query = query.where("season", "=", selectedSeason);
+    }
+    return query;
+  };
+
+  try {
+    return await withDbRetry(() => buildQuery(season).execute());
+  } catch (error) {
+    if (
+      season !== undefined &&
+      isMissingColumnError(error, "wetbulb_year_stats", "season")
+    ) {
+      return buildQuery().execute();
+    }
+    throw classifyDbError(error);
+  }
 }
 
 export async function fetchLocationRows(

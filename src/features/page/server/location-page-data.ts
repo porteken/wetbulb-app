@@ -1,11 +1,11 @@
 import {
   FetchForecastData,
+  FetchAvailableYearRange,
   FetchLocations,
   FetchReferenceGraphData,
   FetchTrendGraphData,
 } from "@/lib/api/fetch-server";
 import {
-  DEFAULT_REFERENCE_YEAR,
   DEFAULT_GRAPH_SEASON,
   DEFAULT_FORECAST_ENABLED,
   DEFAULT_DATA_REGION,
@@ -138,53 +138,59 @@ const parseLocationId = (id: string): number | undefined => {
   return locationId;
 };
 
-const getPreferencesFromCookies =
-  async (): Promise<LocationPagePreferences> => {
-    const cookieStore = await cookies();
-    const initialGraphMeasure =
-      getLatestCookieValue(cookieStore, GRAPH_MEASURE_COOKIE_NAME) ??
-      DEFAULT_GRAPH_MEASURE;
-    const initialGraphSeason = normalizeGraphSeason(
-      getLatestCookieValue(cookieStore, GRAPH_SEASON_COOKIE_NAME) ??
-        getCurrentGraphSeason(),
-    );
-    const rawReferenceYear = getLatestCookieValue(
-      cookieStore,
-      REFERENCE_YEAR_COOKIE_NAME,
-    );
-    const initialReferenceYear =
-      rawReferenceYear && isSelectableReferenceYear(rawReferenceYear)
-        ? rawReferenceYear
-        : DEFAULT_REFERENCE_YEAR;
-    const initialForecastEnabled =
-      getLatestCookieValue(cookieStore, FORECAST_ENABLED_COOKIE_NAME) === "true"
-        ? true
-        : DEFAULT_FORECAST_ENABLED;
+const getPreferencesFromCookies = async (
+  earliestYear: number,
+): Promise<LocationPagePreferences> => {
+  const cookieStore = await cookies();
+  const initialGraphMeasure =
+    getLatestCookieValue(cookieStore, GRAPH_MEASURE_COOKIE_NAME) ??
+    DEFAULT_GRAPH_MEASURE;
+  const initialGraphSeason = normalizeGraphSeason(
+    getLatestCookieValue(cookieStore, GRAPH_SEASON_COOKIE_NAME) ??
+      getCurrentGraphSeason(),
+  );
+  const rawReferenceYear = getLatestCookieValue(
+    cookieStore,
+    REFERENCE_YEAR_COOKIE_NAME,
+  );
+  const initialReferenceYear =
+    rawReferenceYear &&
+    isSelectableReferenceYear(
+      rawReferenceYear,
+      earliestYear,
+      GRAPH_CONFIG.YEAR_RANGE.END,
+    )
+      ? rawReferenceYear
+      : String(earliestYear);
+  const initialForecastEnabled =
+    getLatestCookieValue(cookieStore, FORECAST_ENABLED_COOKIE_NAME) === "true"
+      ? true
+      : DEFAULT_FORECAST_ENABLED;
 
-    const rawForecastYearsAhead = Number(
-      getLatestCookieValue(cookieStore, FORECAST_YEARS_AHEAD_COOKIE_NAME),
-    );
-    const initialForecastYearsAhead =
-      Number.isInteger(rawForecastYearsAhead) &&
-      rawForecastYearsAhead >= MIN_FORECAST_YEARS_AHEAD &&
-      rawForecastYearsAhead <= MAX_FORECAST_YEARS_AHEAD
-        ? rawForecastYearsAhead
-        : DEFAULT_FORECAST_YEARS_AHEAD;
+  const rawForecastYearsAhead = Number(
+    getLatestCookieValue(cookieStore, FORECAST_YEARS_AHEAD_COOKIE_NAME),
+  );
+  const initialForecastYearsAhead =
+    Number.isInteger(rawForecastYearsAhead) &&
+    rawForecastYearsAhead >= MIN_FORECAST_YEARS_AHEAD &&
+    rawForecastYearsAhead <= MAX_FORECAST_YEARS_AHEAD
+      ? rawForecastYearsAhead
+      : DEFAULT_FORECAST_YEARS_AHEAD;
 
-    const initialWetbulbBasis = normalizeWetbulbBasis(
-      getLatestCookieValue(cookieStore, WETBULB_BASIS_COOKIE_NAME) ??
-        DEFAULT_WETBULB_BASIS,
-    );
+  const initialWetbulbBasis = normalizeWetbulbBasis(
+    getLatestCookieValue(cookieStore, WETBULB_BASIS_COOKIE_NAME) ??
+      DEFAULT_WETBULB_BASIS,
+  );
 
-    return {
-      initialForecastEnabled,
-      initialForecastYearsAhead,
-      initialGraphMeasure,
-      initialGraphSeason,
-      initialReferenceYear,
-      initialWetbulbBasis,
-    };
+  return {
+    initialForecastEnabled,
+    initialForecastYearsAhead,
+    initialGraphMeasure,
+    initialGraphSeason,
+    initialReferenceYear,
+    initialWetbulbBasis,
   };
+};
 
 interface FetchGraphDataOptions {
   basis: WetbulbBasis;
@@ -315,10 +321,19 @@ export const loadLocationPageData = async (
     };
   }
 
-  const preferences = await getPreferencesFromCookies();
+  const region = regionForLocationId(locationId);
+  let availableYearRange;
+  try {
+    availableYearRange = await FetchAvailableYearRange(region, locationId);
+  } catch {
+    availableYearRange = undefined;
+  }
+  const earliestYear =
+    availableYearRange?.start_year ?? GRAPH_CONFIG.YEAR_RANGE.START;
+  const preferences = await getPreferencesFromCookies(earliestYear);
 
   const [locationData, graphData] = await Promise.all([
-    fetchLocationData(regionForLocationId(locationId)),
+    fetchLocationData(region),
     fetchGraphData({
       basis: preferences.initialWetbulbBasis,
       forecastEnabled: preferences.initialForecastEnabled,
@@ -375,6 +390,7 @@ export const loadLocationPageData = async (
       initialGraphSeason: preferences.initialGraphSeason,
       initialReferenceYear: preferences.initialReferenceYear,
       initialWetbulbBasis: preferences.initialWetbulbBasis,
+      earliestYear,
       location: selectedLocation,
       LocationOptions,
       ReferenceWetbulbs: graphData.reference_wetbulbs,

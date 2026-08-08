@@ -5,6 +5,7 @@ import type { LocationOptionSection, LocationProperties } from "@/types/types";
 export interface PageProperties {
   CurrentDates: Date[];
   CurrentWetbulbs: number[];
+  earliestYear: number;
   graphDataError: boolean;
   IncreasePerYear: number;
   id: number;

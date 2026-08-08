@@ -47,7 +47,7 @@ const locationRowSchema = z.object({
 
 const rankingViewRowSchema = z.object({
   avg_wetbulb: finiteNumberSchema,
-  change_from_2000: finiteNumberSchema.nullable(),
+  change_from_baseline: finiteNumberSchema.nullable(),
   city: z.string().min(1),
   future_lower: finiteNumberSchema.nullable(),
   future_upper: finiteNumberSchema.nullable(),
@@ -57,6 +57,11 @@ const rankingViewRowSchema = z.object({
   p95: finiteNumberSchema.nullable(),
   state: z.string().min(1),
   year: yearSchema,
+});
+
+const availableYearRangeSchema = z.object({
+  end_year: yearSchema,
+  start_year: yearSchema,
 });
 
 const trendGraphDataResponseSchema = z.object({
@@ -107,6 +112,9 @@ export const formatSchemaValidationError = (
 
 export const parseTrendGraphRows = (rows: unknown) =>
   z.array(trendGraphRowSchema).parse(rows);
+
+export const parseAvailableYearRange = (row: unknown) =>
+  availableYearRangeSchema.parse(row);
 
 export const parseReferenceGraphRows = (rows: unknown) =>
   z.array(referenceGraphRowSchema).parse(rows);

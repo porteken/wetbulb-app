@@ -20,6 +20,7 @@ import React from "react";
 interface ReferenceDataProperties {
   CurrentDates: Date[];
   CurrentWetbulbs: number[];
+  earliestYear: number;
   id: number;
   initialHasError?: boolean;
   initialReferenceYear: string;
@@ -133,6 +134,7 @@ const ReferenceGraphContent = ({
 const ReferenceDataComponent: React.FC<ReferenceDataProperties> = ({
   CurrentDates,
   CurrentWetbulbs,
+  earliestYear,
   id,
   initialHasError = false,
   initialReferenceYear,
@@ -142,8 +144,12 @@ const ReferenceDataComponent: React.FC<ReferenceDataProperties> = ({
   ReferenceWetbulbs,
 }) => {
   const REFERENCE_YEARS = React.useMemo(
-    () => YearOptions({ includeLatestYear: false }),
-    [],
+    () =>
+      YearOptions({
+        includeLatestYear: false,
+        startYear: earliestYear,
+      }),
+    [earliestYear],
   );
   const isMobileViewport = useIsMobileViewport();
   const [isMobileLegendOpen, setIsMobileLegendOpen] = React.useState(false);

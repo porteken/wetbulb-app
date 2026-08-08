@@ -37,6 +37,7 @@ vi.mock("@/lib/api/fetch-client", () => ({
 const defaultProps: React.ComponentProps<typeof ReferenceData> = {
   CurrentDates: [new Date("2023-06-01"), new Date("2023-06-02")],
   CurrentWetbulbs: [22, 24],
+  earliestYear: 1990,
   id: 1,
   initialReferenceYear: "2000",
   initialWetbulbBasis: DEFAULT_WETBULB_BASIS,

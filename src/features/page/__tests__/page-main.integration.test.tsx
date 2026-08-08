@@ -152,6 +152,7 @@ describe("pageMain Integration Tests", () => {
     defaultProps = {
       CurrentDates: [new Date("2023-01-01"), new Date("2023-02-01")],
       CurrentWetbulbs: [15, 25],
+      earliestYear: 1990,
       IncreasePerYear: 0.5,
       id: location.location_id,
       initialForecastEnabled: false,

@@ -351,7 +351,7 @@ describe("setRankingsYear", () => {
   it("ignores a year outside the configured range without setting a cookie", async () => {
     const { revalidatePath } = await import("next/cache");
 
-    await setRankingsYear(1999);
+    await setRankingsYear(1989);
 
     expect(mockSet).not.toHaveBeenCalled();
     expect(revalidatePath).not.toHaveBeenCalled();

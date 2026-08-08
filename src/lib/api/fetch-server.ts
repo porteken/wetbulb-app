@@ -9,6 +9,7 @@ import {
   formatSchemaValidationError,
   isSchemaValidationError,
   parseForecastRows,
+  parseAvailableYearRange,
   parseHistoricalYearRows,
   parseLocationRows,
   parseRankingViewRows,
@@ -31,6 +32,7 @@ import {
 } from "@/lib/constants";
 import {
   fetchCityRankingsRows,
+  fetchAvailableYearRange,
   fetchForecastRows,
   fetchHistoricalYearRow,
   fetchLocationRows,
@@ -56,7 +58,7 @@ import type {
   TrendGraphDataProperties,
 } from "@/types/types";
 
-const MIN_YEAR = 2000;
+const MIN_YEAR = 1900;
 const MAX_YEAR = 2100;
 const DATA_CACHE_REVALIDATE_SECONDS = 60 * 60;
 const fetchReferenceGraphRowsCached = unstable_cache(
@@ -77,11 +79,38 @@ interface LocationQueryRow {
   state: unknown;
 }
 
-const parseWithDatabaseError = <T>(
+async function fetchAvailableYearRangeUncached(
+  region: DataRegion = DEFAULT_DATA_REGION,
+  locationId?: number,
+) {
+  let range;
+  try {
+    range = await fetchAvailableYearRange(
+      normalizeDataRegion(region),
+      locationId,
+    );
+  } catch (error) {
+    throw new DatabaseError("Failed to fetch available year range", error);
+  }
+
+  if (!range) {
+    return null;
+  }
+  return parseWithDatabaseError(
+    "Available year range",
+    parseAvailableYearRange,
+    {
+      end_year: range.endYear,
+      start_year: range.startYear,
+    },
+  );
+}
+
+function parseWithDatabaseError<T>(
   resource: string,
   parser: (payload: unknown) => T,
   payload: unknown,
-): T => {
+): T {
   try {
     return parser(payload);
   } catch (error) {
@@ -94,7 +123,7 @@ const parseWithDatabaseError = <T>(
 
     throw error;
   }
-};
+}
 
 async function fetchCityRankingsUncached(
   year: number,
@@ -104,7 +133,7 @@ async function fetchCityRankingsUncached(
 ): Promise<
   Array<{
     avg_wetbulb: number;
-    changeFrom2000: number | undefined;
+    changeFromBaseline: number | undefined;
     city: string;
     FutureValueLower: number | undefined;
     FutureValueUpper: number | undefined;
@@ -135,12 +164,11 @@ async function fetchCityRankingsUncached(
 
   let rows;
   try {
-    rows = await fetchCityRankingsRows(
-      year,
-      resolvedSeason,
-      resolvedBasis,
-      resolvedRegion,
-    );
+    const range = await fetchAvailableYearRange(resolvedRegion);
+    rows = await fetchCityRankingsRows(year, resolvedSeason, resolvedBasis, {
+      baselineYear: range?.startYear,
+      region: resolvedRegion,
+    });
   } catch (error) {
     throw new DatabaseError(
       "Failed to fetch city rankings from database",
@@ -158,7 +186,7 @@ async function fetchCityRankingsUncached(
     .toSorted((a, b) => b.avg_wetbulb - a.avg_wetbulb)
     .map((row, index) => ({
       avg_wetbulb: row.avg_wetbulb,
-      changeFrom2000: row.change_from_2000 ?? undefined,
+      changeFromBaseline: row.change_from_baseline ?? undefined,
       city: row.city,
       FutureValueLower: row.future_lower ?? undefined,
       FutureValueUpper: row.future_upper ?? undefined,
@@ -393,6 +421,15 @@ export const FetchCityRankings = unstable_cache(
   {
     revalidate: DATA_CACHE_REVALIDATE_SECONDS,
     tags: ["rankings"],
+  },
+);
+
+export const FetchAvailableYearRange = unstable_cache(
+  fetchAvailableYearRangeUncached,
+  ["available-year-range"],
+  {
+    revalidate: DATA_CACHE_REVALIDATE_SECONDS,
+    tags: ["available-year-range"],
   },
 );
 

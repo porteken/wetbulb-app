@@ -115,7 +115,7 @@ export const GRAPH_SEASONS = [
 ] as const;
 export type GraphSeason = (typeof GRAPH_SEASONS)[number];
 export const DEFAULT_GRAPH_SEASON = "Annual" as const;
-export const DEFAULT_REFERENCE_YEAR = "2000" as const;
+export const DEFAULT_REFERENCE_YEAR = "1990" as const;
 export const DEFAULT_FORECAST_ENABLED = false as const;
 const DEFAULT_FORECAST_YEARS = 10;
 const MIN_FORECAST_YEARS = 5;
@@ -169,7 +169,7 @@ export const GRAPH_CONFIG = {
   },
   YEAR_RANGE: {
     END: 2026,
-    START: 2000,
+    START: 1990,
   },
 } as const;
 

@@ -266,6 +266,7 @@ const GraphControlsPanel = memo(
         <div>
           <Select
             className="w-full"
+            contentClassName="z-12000"
             data={seasonOptions}
             label="Season"
             onChange={handleSeasonChange}
@@ -281,6 +282,7 @@ const GraphControlsPanel = memo(
         </div>
         <Select
           className="w-full"
+          contentClassName="z-12000"
           data={selectOptions}
           label="Measure"
           onChange={handleMeasureChange}
