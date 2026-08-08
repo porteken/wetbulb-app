@@ -5,6 +5,9 @@ import userEvent from "@testing-library/user-event";
 import React from "react";
 import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 
+import type { BasisToggle as BasisToggleComponent } from "@/components/app/basis-toggle";
+import type { RegionToggle as RegionToggleComponent } from "@/components/app/region-toggle";
+import type { UnitToggle as UnitToggleComponent } from "@/components/app/unit-toggle";
 import type { LocationOptionSection } from "@/types/types";
 
 const {
@@ -90,20 +93,29 @@ vi.mock("next/navigation", () => ({
   useSearchParams: () => mockUseSearchParameters(),
 }));
 
-vi.mock("@/components/app/unit-toggle", () => ({
-  // noinspection JSUnusedGlobalSymbols -- consumed by the mocked module
-  UnitToggle: () => null,
-}));
+vi.mock(
+  "@/components/app/unit-toggle",
+  () =>
+    ({
+      UnitToggle: () => <></>,
+    }) satisfies { UnitToggle: typeof UnitToggleComponent },
+);
 
-vi.mock("@/components/app/basis-toggle", () => ({
-  // noinspection JSUnusedGlobalSymbols -- consumed by the mocked module
-  BasisToggle: () => null,
-}));
+vi.mock(
+  "@/components/app/basis-toggle",
+  () =>
+    ({
+      BasisToggle: () => <></>,
+    }) satisfies { BasisToggle: typeof BasisToggleComponent },
+);
 
-vi.mock("@/components/app/region-toggle", () => ({
-  // noinspection JSUnusedGlobalSymbols -- consumed by the mocked module
-  RegionToggle: () => null,
-}));
+vi.mock(
+  "@/components/app/region-toggle",
+  () =>
+    ({
+      RegionToggle: () => <></>,
+    }) satisfies { RegionToggle: typeof RegionToggleComponent },
+);
 
 describe("headerBar", () => {
   beforeAll(() => {
@@ -122,19 +134,18 @@ describe("headerBar", () => {
     });
 
     const disconnect = mockFn();
-    const observe = mockFn();
+    const observe = mockFn<(target: Element) => void>();
 
-    // noinspection JSUnusedGlobalSymbols -- ResizeObserver methods are invoked by React internals
-    class MockResizeObserver {
+    class MockResizeObserver implements ResizeObserver {
       disconnect(): void {
         disconnect();
       }
 
-      observe(): void {
-        observe();
+      observe(target: Element): void {
+        observe(target);
       }
 
-      unobserve(): void {}
+      unobserve(_target: Element): void {}
     }
 
     globalThis.ResizeObserver = MockResizeObserver;

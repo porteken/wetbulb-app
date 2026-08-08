@@ -34,7 +34,7 @@ const isPastDataYear = (now: Date): boolean =>
 const isFutureDataYear = (now: Date): boolean =>
   GRAPH_CONFIG.YEAR_RANGE.END > now.getUTCFullYear();
 
-export const isCurrentYearRankingAvailable = (
+const isCurrentYearSeasonAvailable = (
   season: GraphSeason,
   now = new Date(),
 ): boolean => {
@@ -54,20 +54,6 @@ export const isCurrentYearRankingAvailable = (
   return now.getUTCMonth() >= SEASON_START_MONTH[season];
 };
 
-export const isCurrentYearTrendAvailable = (
-  season: GraphSeason,
-  now = new Date(),
-): boolean => {
-  if (season === "Annual" || isFutureDataYear(now)) {
-    return false;
-  }
-  if (isPastDataYear(now)) {
-    return true;
-  }
+export const isCurrentYearRankingAvailable = isCurrentYearSeasonAvailable;
 
-  if (season === "Winter") {
-    return true;
-  }
-
-  return now.getUTCMonth() >= SEASON_START_MONTH[season];
-};
+export const isCurrentYearTrendAvailable = isCurrentYearSeasonAvailable;

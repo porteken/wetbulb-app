@@ -4,13 +4,6 @@ import { waitForLocationDetailsPage } from "./utils/map-page";
 
 import type { Locator } from "@playwright/test";
 
-// The App Router streams this page inside the Suspense boundary that
-// `src/app/loading.tsx` creates, so the real markup is delivered in a trailing
-// `<div id="S:0" hidden>` and then moved into place. When the client renders
-// the boundary before that HTML lands, React orphans the server copy and a
-// second, invisible copy of the page (`<main>`, filters, table and all) stays
-// in the DOM. CSS-based locators still match inside it, so scope to the copy
-// the user can actually see rather than letting strict mode trip over orphans.
 const onlyVisible = (locator: Locator): Locator =>
   locator.filter({ visible: true });
 

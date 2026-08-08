@@ -91,9 +91,6 @@ const Home: FC<MapProperties> = ({
     [locations],
   );
 
-  // Derived here rather than passed from the server: `locations` already
-  // carries every city name and id, so serializing the grouped options too
-  // duplicated that data in the RSC payload.
   const LocationOptions = useMemo(
     () => groupLocationsByState(locations),
     [locations],

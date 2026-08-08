@@ -1,11 +1,5 @@
 import { expect, type Locator, type Page } from "@playwright/test";
 
-// Radix keeps a closing popup mounted while it animates out, so a bare
-// `[data-slot="select-content"]` can resolve to a stale listbox whose options no
-// longer react to clicks. Scope every lookup to the popup Radix still reports as
-// open. Note that the trigger cannot be inspected while the popup is up: Radix
-// calls `hideOthers`, which `aria-hidden`s everything outside the listbox and
-// makes role-based trigger locators stop resolving.
 const CUSTOM_SELECT_OPEN_CONTENT_SELECTOR =
   '[data-slot="select-content"][data-state="open"]';
 const CUSTOM_SELECT_OPTION_TEST_ID = "searchable-select-option";
@@ -30,10 +24,6 @@ function isCustomSelectOpen(page: Page): Promise<boolean> {
   return content.isVisible().catch(() => false);
 }
 
-// `hideOthers` keeps the trigger out of the accessibility tree while its popup
-// is up, so a role-based trigger locator only resolves again once the popup is
-// gone. Escape dismisses just the topmost layer, leaving any surrounding dialog
-// open.
 async function closeOpenCustomSelect(page: Page): Promise<void> {
   if (!(await isCustomSelectOpen(page))) {
     return;
@@ -45,10 +35,7 @@ async function closeOpenCustomSelect(page: Page): Promise<void> {
       0,
       { timeout: CUSTOM_SELECT_CLOSE_TIMEOUT },
     );
-  } catch {
-    // Leave the popup for the next open attempt to deal with; failing here
-    // would mask the selection error that triggered the retry.
-  }
+  } catch {}
 }
 
 async function waitForCustomSelectToOpen(page: Page): Promise<boolean> {
@@ -87,9 +74,6 @@ export async function openCustomSelect(
   ];
 
   for (const openAttempt of openAttempts) {
-    // Re-check between attempts, not just once up front: an attempt can open the
-    // popup a moment after its own wait expires, and pressing the trigger again
-    // would dismiss it, leaving the caller racing a popup that toggles shut.
     if (await isCustomSelectOpen(page)) {
       break;
     }
@@ -130,11 +114,6 @@ export async function selectCustomOption(
 ): Promise<void> {
   let lastError: unknown;
 
-  // Radix commits a mouse selection on `pointerup`, so a click whose pointer
-  // events straddle a re-render (or land while the popup is still settling) can
-  // leave the listbox open on the old value without failing the click. Radix
-  // always closes the popup when an item is selected, so treat "still open" as a
-  // dropped selection and pick the option again.
   for (let attempt = 0; attempt < CUSTOM_SELECT_SELECT_ATTEMPTS; attempt += 1) {
     if (attempt > 0) {
       await closeOpenCustomSelect(page);
@@ -147,9 +126,6 @@ export async function selectCustomOption(
       .first();
     await expect(option).toBeVisible({ timeout: CUSTOM_SELECT_TIMEOUT });
 
-    // Keyboard selection runs off the item's own keydown handler, so it does
-    // not depend on where pointer events land when a select is portalled from
-    // inside a modal dialog.
     await option.focus();
     await option.press("Enter");
 
