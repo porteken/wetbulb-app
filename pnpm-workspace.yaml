@@ -98,4 +98,4 @@ minimumReleaseAgeExclude:
   - maplibre-gl@6.0.0
   - radix-ui@1.6.5
   - shadcn@4.14.0
-  - '@types/pg@8.21.0'
+  - "@types/pg@8.21.0"
