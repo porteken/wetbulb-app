@@ -102,5 +102,8 @@
       "oxfmt"
     ]
   },
+  "engines": {
+    "node": "22.x"
+  },
   "packageManager": "pnpm@11.20.0"
 }

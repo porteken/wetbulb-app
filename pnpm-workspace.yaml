@@ -2,7 +2,9 @@ packages:
   - "."
 allowBuilds:
   "@sentry/cli": true
-  cpu-features: true
+  # Optional ssh2 accelerator pulled in by testcontainers. The JavaScript
+  # fallback is sufficient for tests and avoids compiling its NAN addon in CI.
+  cpu-features: false
   esbuild: true
   msw: true
   protobufjs: true
