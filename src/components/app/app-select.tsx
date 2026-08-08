@@ -58,7 +58,7 @@ export function AppSelect({
   value,
   size,
   "data-testid": testId,
-}: AppSelectProps) {
+}: Readonly<AppSelectProps>) {
   const [searchTerm, setSearchTerm] = React.useState("");
   const [open, setOpen] = React.useState(false);
   const searchInputRef = React.useRef<HTMLInputElement>(null);

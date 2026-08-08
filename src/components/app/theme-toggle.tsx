@@ -6,10 +6,17 @@ import { useTheme } from "next-themes";
 import * as React from "react";
 
 const THEME_ORDER = ["system", "light", "dark"] as const;
+const THEME_VALUES: readonly string[] = THEME_ORDER;
 type Theme = (typeof THEME_ORDER)[number];
 
 const isTheme = (value: string | undefined): value is Theme =>
-  THEME_ORDER.some((theme) => theme === value);
+  value !== undefined && THEME_VALUES.includes(value);
+
+const ThemeIcon = ({ theme }: Readonly<{ theme: Theme }>) => {
+  if (theme === "dark") return <MoonStar className="size-4" />;
+  if (theme === "light") return <SunMedium className="size-4" />;
+  return <Monitor className="size-4" />;
+};
 
 export const ThemeToggle = () => {
   const { setTheme, theme } = useTheme();
@@ -42,13 +49,7 @@ export const ThemeToggle = () => {
       type="button"
       variant="outline"
     >
-      {currentTheme === "dark" ? (
-        <MoonStar className="size-4" />
-      ) : currentTheme === "light" ? (
-        <SunMedium className="size-4" />
-      ) : (
-        <Monitor className="size-4" />
-      )}
+      <ThemeIcon theme={currentTheme} />
       <span className="hidden sm:inline">{mounted ? themeLabel : "Theme"}</span>
     </Button>
   );

@@ -16,7 +16,11 @@ interface AppPaginationProps {
   value: number;
 }
 
-export function AppPagination({ onChange, total, value }: AppPaginationProps) {
+export function AppPagination({
+  onChange,
+  total,
+  value,
+}: Readonly<AppPaginationProps>) {
   const pages = React.useMemo(() => {
     const items: (number | string)[] = [];
     const maxVisible = 5;
