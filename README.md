@@ -1,10 +1,10 @@
 # Historical Wetbulb App
 
-A comprehensive web application hosted [here](https://wetbulb-app.vercel.app/) that visualizes wet-bulb temperature data from 2000 through 2026 YTD for the top 500 largest cities across Canada and the contiguous United States, plus the top 500 largest cities in Europe. The data pipeline for getting the data is [here](https://github.com/porteken/wetbulb-data).
+A comprehensive web application hosted [here](https://wetbulb-app.vercel.app/) that visualizes wet-bulb temperature data from 1990 through 2026 YTD for the largest cities across Canada and the contiguous United States, plus the top largest cities in Europe. The data pipeline for getting the data is [here](https://github.com/porteken/wetbulb-data).
 
 ## Features
 
-- **North American and European City Maps**: Explore wet-bulb temperature data for 1,000 cities across Canada, the contiguous United States, and Europe.
+- **North American and European City Maps**: Explore wet-bulb temperature data for cities across Canada, the contiguous United States, and Europe.
 - **City Trend Charts**: Open a city modal from the map and view wet-bulb temperature trends.
 - **Seasonal Analysis**: Switch between annual, spring, summer, fall, and winter views.
 - **Measure Selection**: Switch between average and maximum wet-bulb temperature.
