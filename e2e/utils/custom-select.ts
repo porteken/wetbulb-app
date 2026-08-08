@@ -147,14 +147,11 @@ export async function selectCustomOption(
       .first();
     await expect(option).toBeVisible({ timeout: CUSTOM_SELECT_TIMEOUT });
 
-    if (attempt === 0) {
-      await option.click();
-    } else {
-      // Keyboard selection runs off the item's own keydown handler, so it does
-      // not depend on where the pointer events landed.
-      await option.focus();
-      await option.press("Enter");
-    }
+    // Keyboard selection runs off the item's own keydown handler, so it does
+    // not depend on where pointer events land when a select is portalled from
+    // inside a modal dialog.
+    await option.focus();
+    await option.press("Enter");
 
     try {
       await expect(
