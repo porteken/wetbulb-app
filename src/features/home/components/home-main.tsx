@@ -260,7 +260,7 @@ const Home: FC<MapProperties> = ({
   return (
     <div className="flex h-dvh w-full flex-col">
       <PageShell
-        headerWrapperClassName="z-10010 shrink-0"
+        headerWrapperClassName="z-20 shrink-0"
         LocationOptions={LocationOptions}
         mainClassName="relative min-h-0 flex-1 overflow-hidden"
       >
