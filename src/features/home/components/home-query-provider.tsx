@@ -7,7 +7,7 @@ import * as React from "react";
 export const HomeQueryProvider = ({
   children,
 }: Readonly<{ children: React.ReactNode }>) => {
-  const queryClient = React.useMemo(createQueryClient, []);
+  const [queryClient] = React.useState(() => createQueryClient());
 
   return (
     <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>

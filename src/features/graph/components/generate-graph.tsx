@@ -209,15 +209,17 @@ const shouldAnimateCharts = (): boolean => {
   return !globalThis.matchMedia("(prefers-reduced-motion: reduce)").matches;
 };
 
-const useInitialChartAnimation = (): boolean => {
-  const animationsAllowed = React.useMemo(() => shouldAnimateCharts(), []);
-  const hasRenderedRef = React.useRef(false);
+const useInitialChartAnimation = (properties: object): boolean => {
+  const [initialProperties] = React.useState(properties);
+  const [animationsAllowed, setAnimationsAllowed] =
+    React.useState(shouldAnimateCharts);
 
-  React.useEffect(() => {
-    hasRenderedRef.current = true;
-  }, []);
+  if (animationsAllowed && properties !== initialProperties) {
+    setAnimationsAllowed(false);
+    return false;
+  }
 
-  return animationsAllowed && !hasRenderedRef.current;
+  return animationsAllowed;
 };
 
 const getDecadeTicks = (years: number[]): number[] => {
@@ -769,20 +771,23 @@ const convertForecastData = (
     ),
   };
 
-export const GenerateTrendGraph = ({
-  forecastData,
-  increasePerYear,
-  isMobileViewport = false,
-  option,
-  season = DEFAULT_GRAPH_SEASON,
-  showLegend = true,
-  trendlineWetbulbs: _trendlineWetbulbs,
-  unit = DEFAULT_TEMPERATURE_UNIT,
-  useCompactDesktopHeight = false,
-  yearWetbulbs,
-  years,
-}: GenerateTrendGraphOptions): React.ReactElement => {
-  const shouldAnimate = useInitialChartAnimation();
+export const GenerateTrendGraph = (
+  properties: GenerateTrendGraphOptions,
+): React.ReactElement => {
+  const {
+    forecastData,
+    increasePerYear,
+    isMobileViewport = false,
+    option,
+    season = DEFAULT_GRAPH_SEASON,
+    showLegend = true,
+    trendlineWetbulbs: _trendlineWetbulbs,
+    unit = DEFAULT_TEMPERATURE_UNIT,
+    useCompactDesktopHeight = false,
+    yearWetbulbs,
+    years,
+  } = properties;
+  const shouldAnimate = useInitialChartAnimation(properties);
 
   if (!hasTrendGraphData(years, yearWetbulbs)) {
     return (
@@ -830,18 +835,21 @@ export const GenerateTrendGraph = ({
   );
 };
 
-export const GenerateReferenceGraph = ({
-  currentWetbulbs,
-  currentYear = GRAPH_CONFIG.YEAR_RANGE.END,
-  dates,
-  isMobileViewport = false,
-  referenceWetbulbs,
-  referenceYear,
-  season = DEFAULT_GRAPH_SEASON,
-  showLegend = true,
-  unit = DEFAULT_TEMPERATURE_UNIT,
-}: GenerateReferenceGraphOptions): React.ReactElement => {
-  const shouldAnimate = useInitialChartAnimation();
+export const GenerateReferenceGraph = (
+  properties: GenerateReferenceGraphOptions,
+): React.ReactElement => {
+  const {
+    currentWetbulbs,
+    currentYear = GRAPH_CONFIG.YEAR_RANGE.END,
+    dates,
+    isMobileViewport = false,
+    referenceWetbulbs,
+    referenceYear,
+    season = DEFAULT_GRAPH_SEASON,
+    showLegend = true,
+    unit = DEFAULT_TEMPERATURE_UNIT,
+  } = properties;
+  const shouldAnimate = useInitialChartAnimation(properties);
 
   if (!hasReferenceGraphData(dates, currentWetbulbs, referenceWetbulbs)) {
     return (

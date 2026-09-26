@@ -1,5 +1,6 @@
 "use client";
 
+import { useHydrated } from "@/hooks/use-hydrated";
 import {
   DEFAULT_WETBULB_BASIS,
   normalizeWetbulbBasis,
@@ -39,11 +40,10 @@ export function BasisProvider({
 }: Readonly<{
   children: React.ReactNode;
 }>): React.ReactElement {
-  const [basis, setBasis] = React.useState<WetbulbBasis>(DEFAULT_WETBULB_BASIS);
-
-  React.useEffect(() => {
-    setBasis(readCookieBasis());
-  }, []);
+  const hydrated = useHydrated();
+  const [selectedBasis, setBasis] =
+    React.useState<WetbulbBasis>(readCookieBasis);
+  const basis = hydrated ? selectedBasis : DEFAULT_WETBULB_BASIS;
 
   const contextValue = React.useMemo(
     () => ({ basis, setBasis }),

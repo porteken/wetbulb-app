@@ -1,5 +1,6 @@
 "use client";
 
+import { useHydrated } from "@/hooks/use-hydrated";
 import {
   DEFAULT_TEMPERATURE_UNIT,
   normalizeTemperatureUnit,
@@ -39,13 +40,10 @@ export function UnitProvider({
 }: Readonly<{
   children: React.ReactNode;
 }>): React.ReactElement {
-  const [unit, setUnit] = React.useState<TemperatureUnit>(
-    DEFAULT_TEMPERATURE_UNIT,
-  );
-
-  React.useEffect(() => {
-    setUnit(readCookieUnit());
-  }, []);
+  const hydrated = useHydrated();
+  const [selectedUnit, setUnit] =
+    React.useState<TemperatureUnit>(readCookieUnit);
+  const unit = hydrated ? selectedUnit : DEFAULT_TEMPERATURE_UNIT;
 
   const contextValue = React.useMemo(
     () => ({ setUnit, unit }),

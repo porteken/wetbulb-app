@@ -1,12 +1,11 @@
 import { DatabaseError } from "@/components/app/database-error";
 import About from "@/features/about";
-import { FetchLocations } from "@/lib/api/fetch-server";
+import { FetchLocations as fetchLocations } from "@/lib/api/fetch-server";
 
 const Page = async () => {
+  let locationData;
   try {
-    const { LocationOptions } = await FetchLocations();
-
-    return <About LocationOptions={LocationOptions} />;
+    locationData = await fetchLocations();
   } catch {
     return (
       <DatabaseError
@@ -15,6 +14,8 @@ const Page = async () => {
       />
     );
   }
+
+  return <About LocationOptions={locationData.LocationOptions} />;
 };
 
 export default Page;

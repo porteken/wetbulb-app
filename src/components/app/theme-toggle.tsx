@@ -1,6 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import { useHydrated } from "@/hooks/use-hydrated";
 import { Monitor, MoonStar, SunMedium } from "lucide-react";
 import { useTheme } from "next-themes";
 import * as React from "react";
@@ -20,11 +21,7 @@ const ThemeIcon = ({ theme }: Readonly<{ theme: Theme }>) => {
 
 export const ThemeToggle = () => {
   const { setTheme, theme } = useTheme();
-  const [mounted, setMounted] = React.useState(false);
-
-  React.useEffect(() => {
-    setMounted(true);
-  }, []);
+  const mounted = useHydrated();
 
   const currentTheme: Theme = mounted && isTheme(theme) ? theme : "system";
   const currentThemeIndex = THEME_ORDER.indexOf(currentTheme);

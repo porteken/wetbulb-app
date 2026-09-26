@@ -12,7 +12,7 @@ import {
   GRAPH_CONFIG,
   type WetbulbBasis,
 } from "@/lib/constants";
-import { YearOptions } from "@/lib/utils/select-options";
+import { YearOptions as getYearOptions } from "@/lib/utils/select-options";
 import { useQuery } from "@tanstack/react-query";
 import dynamic from "next/dynamic";
 import React from "react";
@@ -145,7 +145,7 @@ const ReferenceDataComponent: React.FC<ReferenceDataProperties> = ({
 }) => {
   const REFERENCE_YEARS = React.useMemo(
     () =>
-      YearOptions({
+      getYearOptions({
         includeLatestYear: false,
         startYear: earliestYear,
       }),

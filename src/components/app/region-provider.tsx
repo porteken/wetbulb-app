@@ -1,5 +1,6 @@
 "use client";
 
+import { useHydrated } from "@/hooks/use-hydrated";
 import {
   DATA_REGION_COOKIE_NAME,
   DEFAULT_DATA_REGION,
@@ -41,11 +42,10 @@ export function RegionProvider({
   children: React.ReactNode;
   initialRegion?: DataRegion;
 }>): React.ReactElement {
-  const [region, setRegion] = React.useState<DataRegion>(initialRegion);
-
-  React.useEffect(() => {
-    setRegion(readCookieRegion());
-  }, []);
+  const hydrated = useHydrated();
+  const [selectedRegion, setRegion] =
+    React.useState<DataRegion>(readCookieRegion);
+  const region = hydrated ? selectedRegion : initialRegion;
 
   const contextValue = React.useMemo(
     () => ({ region, setRegion }),

@@ -24,7 +24,7 @@ import {
   type TemperatureUnit,
 } from "@/lib/constants";
 import { isCurrentYearRankingAvailable } from "@/lib/utils/season-availability";
-import { YearOptions } from "@/lib/utils/select-options";
+import { YearOptions as getYearOptions } from "@/lib/utils/select-options";
 import {
   celsiusDeltaToFahrenheit,
   convertFromCelsius,
@@ -314,7 +314,7 @@ const RankingsFilters = memo(
   }: RankingsFiltersProperties) => {
     const yearOptions = useMemo(
       () =>
-        YearOptions({ startYear: earliestYear }).map(({ key, label }) => ({
+        getYearOptions({ startYear: earliestYear }).map(({ key, label }) => ({
           label,
           value: key,
         })),

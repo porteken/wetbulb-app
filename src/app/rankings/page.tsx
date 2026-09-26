@@ -1,8 +1,8 @@
 import { RankingsMain } from "@/features/rankings";
 import {
-  FetchAvailableYearRange,
-  FetchCityRankings,
-  FetchLocations,
+  FetchAvailableYearRange as fetchAvailableYearRange,
+  FetchCityRankings as fetchCityRankings,
+  FetchLocations as fetchLocations,
 } from "@/lib/api/fetch-server";
 import {
   DATA_REGION_COOKIE_NAME,
@@ -86,7 +86,7 @@ export default async function RankingsPage({
       : normalizedSeason;
   const shouldPersistInitialSeason =
     seasonFromCookie !== undefined && seasonFromCookie !== initialSeason;
-  const availableYearRange = await FetchAvailableYearRange(region);
+  const availableYearRange = await fetchAvailableYearRange(region);
   const earliestYear = availableYearRange
     ? availableYearRange.start_year
     : GRAPH_CONFIG.YEAR_RANGE.START;
@@ -98,8 +98,8 @@ export default async function RankingsPage({
   );
   const basis = normalizeWetbulbBasis(basisFromCookie ?? DEFAULT_WETBULB_BASIS);
   const [rankings, { LocationOptions }] = await Promise.all([
-    FetchCityRankings(year, initialSeason, basis, region),
-    FetchLocations(region),
+    fetchCityRankings(year, initialSeason, basis, region),
+    fetchLocations(region),
   ]);
 
   return (

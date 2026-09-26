@@ -6,6 +6,7 @@ import {
   renderHook,
   screen,
 } from "@testing-library/react";
+import { renderToString } from "react-dom/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import {
@@ -26,6 +27,8 @@ vi.mock("@/lib/actions/actions", () => ({
 }));
 
 let cookieValue = "";
+
+const UnitValue = () => <span>{useTemperatureUnit().unit}</span>;
 
 const setCookie = (value: string) => {
   cookieValue = `temperature-unit=${value}`;
@@ -77,6 +80,24 @@ describe("unitProvider", () => {
     });
 
     expect(result.current.unit).toBe("F");
+  });
+
+  it("hydrates the default unit before applying the saved cookie preference", () => {
+    setCookie("C");
+    const content = (
+      <UnitProvider>
+        <UnitValue />
+      </UnitProvider>
+    );
+    const container = document.createElement("div");
+    container.innerHTML = renderToString(content);
+    expect(container).toHaveTextContent("F");
+    const onRecoverableError = vi.fn<() => void>();
+
+    render(content, { container, hydrate: true, onRecoverableError });
+
+    expect(container).toHaveTextContent("C");
+    expect(onRecoverableError).not.toHaveBeenCalled();
   });
 
   it("should update state when setUnit is called", () => {

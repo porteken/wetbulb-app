@@ -80,11 +80,13 @@ const Home: FC<MapProperties> = ({
     graphSeason: selectedGraphSeason,
   });
 
-  markerPrefetchOptionsRef.current = {
-    basis,
-    graphMeasure: selectedGraphMeasure,
-    graphSeason: selectedGraphSeason,
-  };
+  React.useLayoutEffect(() => {
+    markerPrefetchOptionsRef.current = {
+      basis,
+      graphMeasure: selectedGraphMeasure,
+      graphSeason: selectedGraphSeason,
+    };
+  }, [basis, selectedGraphMeasure, selectedGraphSeason]);
 
   const locationMap = useMemo(
     () => new Map(locations.map((loc) => [loc.location_id, loc])),
