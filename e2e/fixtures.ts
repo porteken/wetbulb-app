@@ -73,6 +73,17 @@ const formatErrors = (errors: BrowserError[]): string =>
 export const test = base.extend<BrowserErrorFixtures>({
   allowedConsoleErrors: [[], { option: true }],
 
+  context: async ({ context, baseURL }, use) => {
+    if (!baseURL) {
+      throw new Error("Browser tests require a base URL");
+    }
+
+    await context.addCookies([
+      { name: "rankings-season", value: "Summer", url: baseURL },
+    ]);
+    await use(context);
+  },
+
   page: async ({ page, baseURL, allowedConsoleErrors }, use, testInfo) => {
     const errors: BrowserError[] = [];
     const seenExceptionMessages = new Set<string>();
