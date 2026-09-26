@@ -1,6 +1,7 @@
 import { GenerateTrendGraph } from "@/features/graph";
 import { setForecastPreferences } from "@/lib/actions/actions";
 import { FetchForecastData, FetchTrendGraphData } from "@/lib/api/fetch-client";
+import { GRAPH_CONFIG } from "@/lib/constants";
 import {
   getForecastWetbulbDescription,
   getWetbulbDescription,
@@ -106,17 +107,33 @@ const waitForInitialTrendAnalysisRender = async () => {
 };
 
 describe("trendAnalysis", () => {
-  it("indicates when the selected season has no current-year point", () => {
-    renderWithQueryClient(
-      <TrendAnalysis {...defaultProps} graphSeason="Fall" />,
-    );
+  it.each([
+    { available: false, month: 7, day: 31 },
+    { available: true, month: 8, day: 1 },
+  ])(
+    "shows Fall availability as $available on month $month, day $day",
+    async ({ available, month, day }) => {
+      vi.useFakeTimers({ toFake: ["Date"] });
+      vi.setSystemTime(
+        new Date(Date.UTC(GRAPH_CONFIG.YEAR_RANGE.END, month, day)),
+      );
 
-    expect(
-      screen.getByText(
-        "2026 point unavailable — insufficient data for this season.",
-      ),
-    ).toBeInTheDocument();
-  });
+      try {
+        renderWithQueryClient(
+          <TrendAnalysis {...defaultProps} graphSeason="Fall" />,
+        );
+        await waitForInitialTrendAnalysisRender();
+
+        const message = screen.queryByText(
+          `${GRAPH_CONFIG.YEAR_RANGE.END} point unavailable — insufficient data for this season.`,
+        );
+
+        expect(message === null).toBe(available);
+      } finally {
+        vi.useRealTimers();
+      }
+    },
+  );
 
   beforeEach(() => {
     vi.clearAllMocks();
