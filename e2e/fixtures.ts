@@ -80,6 +80,7 @@ export const test = base.extend<BrowserErrorFixtures>({
 
     await context.addCookies([
       { name: "rankings-season", value: "Summer", url: baseURL },
+      { name: "graph-season", value: "Summer", url: baseURL },
     ]);
     await use(context);
   },
