@@ -80,7 +80,7 @@ describe("aPI Interceptor", () => {
   });
 
   afterAll(() => {
-    server.listen({ onUnhandledRequest: "bypass" });
+    server.listen({ onUnhandledFrame: "bypass" });
   });
 
   describe("handleApiResponse", () => {

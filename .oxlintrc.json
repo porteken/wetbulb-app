@@ -29,7 +29,7 @@
   },
   "settings": {
     "react": {
-      "version": "19.2.5"
+      "version": "19.3.1"
     },
     "next": {
       "rootDir": "."
@@ -41,7 +41,6 @@
     "playwright-report/**",
     "test-results/**",
     "blob-report/**",
-    "src/components/ui/**",
     "next-env.d.ts"
   ],
   "rules": {
@@ -88,10 +87,17 @@
     "eslint/no-console": [
       "error",
       {
-        "allow": ["error", "error"]
+        "allow": ["error"]
       }
     ],
     "eslint/eqeqeq": "error",
+    "eslint/array-callback-return": "error",
+    "eslint/no-constructor-return": "error",
+    "eslint/no-loop-func": "error",
+    "eslint/no-self-compare": "error",
+    "eslint/no-var": "error",
+    "eslint/prefer-const": "error",
+    "eslint/no-prototype-builtins": "error",
     "eslint/no-promise-executor-return": "error",
     "eslint/require-unicode-regexp": "error",
     "eslint/no-useless-assignment": "error",
@@ -113,6 +119,11 @@
     ],
     "typescript/unbound-method": "error",
     "typescript/no-explicit-any": "error",
+    "typescript/no-empty-object-type": "error",
+    "typescript/no-unsafe-function-type": "error",
+    "typescript/restrict-plus-operands": "error",
+    "typescript/prefer-promise-reject-errors": "error",
+    "typescript/use-unknown-in-catch-callback-variable": "error",
     "typescript/no-non-null-assertion": "error",
     "typescript/no-unsafe-type-assertion": "error",
     "typescript/no-unsafe-call": "error",
@@ -136,6 +147,7 @@
     "import/export": "error",
     "import/named": "error",
     "import/namespace": "error",
+    "import/no-cycle": "error",
     "import/no-unassigned-import": [
       "error",
       {
@@ -157,12 +169,29 @@
     ],
     "react/react-in-jsx-scope": "off",
     "react/require-render-return": "error",
+    "react/button-has-type": "error",
+    "react/no-unknown-property": "error",
+    "react-perf/jsx-no-new-function-as-prop": "off",
+    "react-perf/jsx-no-new-object-as-prop": "off",
+    "react-perf/jsx-no-new-array-as-prop": "off",
+    "react-perf/jsx-no-jsx-as-prop": "off",
     "unicorn/prefer-import-meta-properties": "error",
     "unicorn/no-useless-iterator-to-array": "error",
     "unicorn/no-useless-undefined": "error",
     "unicorn/no-abusive-eslint-disable": "error"
   },
   "overrides": [
+    {
+      "files": ["src/testing/matchers.d.ts"],
+      "rules": {
+        "typescript/no-empty-object-type": [
+          "error",
+          {
+            "allowWithName": "^Matchers$"
+          }
+        ]
+      }
+    },
     {
       "files": [
         "**/__tests__/**/*.{ts,tsx}",
@@ -249,8 +278,7 @@
       "rules": {
         "eslint/complexity": "off",
         "eslint/max-statements": "off",
-        "eslint/max-params": "off",
-        "react-perf/jsx-no-new-function-as-prop": "off"
+        "eslint/max-params": "off"
       }
     },
     {

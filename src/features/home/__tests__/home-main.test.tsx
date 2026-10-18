@@ -1,5 +1,5 @@
 import { GenerateTrendGraph } from "@/features/graph";
-import { setGraphMeasure } from "@/lib/actions/actions";
+import { setForecastPreferences, setGraphMeasure } from "@/lib/actions/actions";
 import { FetchForecastData, FetchTrendGraphData } from "@/lib/api/fetch-client";
 import {
   MockForecastControls,
@@ -479,6 +479,50 @@ describe("home", () => {
   });
 
   describe("forecast Heat Stress", () => {
+    it("should report a failed forecast toggle save and keep forecasting enabled", async () => {
+      vi.mocked(setForecastPreferences).mockRejectedValueOnce(
+        new Error("Preference save failed"),
+      );
+      renderHome(<Home {...defaultProps} />);
+      await selectFirstMapMarker();
+
+      fireEvent.click(screen.getByTestId("forecast-toggle"));
+
+      expect(setForecastPreferences).toHaveBeenCalledWith(true, 10);
+      await waitFor(() => {
+        expect(mockToast).toHaveBeenCalledWith({
+          description: "It will reset next visit.",
+          title: "Couldn't save your preference",
+          variant: "destructive",
+        });
+      });
+      expect(screen.getByTestId("forecast-toggle")).toHaveTextContent(
+        "Disable Forecast",
+      );
+    });
+
+    it("should report a failed forecast years save and keep the selected years", async () => {
+      vi.mocked(setForecastPreferences).mockRejectedValueOnce(
+        new Error("Preference save failed"),
+      );
+      renderHome(<Home {...defaultProps} initialForecastEnabled={true} />);
+      await selectFirstMapMarker();
+
+      fireEvent.change(screen.getByTestId("forecast-years"), {
+        target: { value: "20" },
+      });
+
+      expect(setForecastPreferences).toHaveBeenCalledWith(true, 20);
+      await waitFor(() => {
+        expect(mockToast).toHaveBeenCalledWith({
+          description: "It will reset next visit.",
+          title: "Couldn't save your preference",
+          variant: "destructive",
+        });
+      });
+      expect(screen.getByTestId("forecast-years")).toHaveValue(20);
+    });
+
     it("should fetch forecast data when forecast is enabled and marker clicked", async () => {
       vi.mocked(FetchForecastData).mockResolvedValue(buildForecastData());
 

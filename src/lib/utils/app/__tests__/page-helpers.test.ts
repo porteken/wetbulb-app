@@ -182,7 +182,7 @@ describe("page-helpers", () => {
     it("returns defaults when cookies are missing", async () => {
       const mockCookieStore = {
         get: mockFn(
-          (name: string) => (({}) as Record<string, { value: string }>)[name],
+          (name: string) => ({} as Record<string, { value: string }>)[name],
         ),
       };
       mockCookies.mockResolvedValue(mockCookieStore);
@@ -202,10 +202,10 @@ describe("page-helpers", () => {
         get: mockFn(
           (name: string) =>
             (
-              ({
+              {
                 "forecast-enabled": { value: "true" },
                 "forecast-years-ahead": { value: "25" },
-              }) as Record<string, { value: string }>
+              } as Record<string, { value: string }>
             )[name],
         ),
       };
@@ -224,10 +224,10 @@ describe("page-helpers", () => {
         get: mockFn(
           (name: string) =>
             (
-              ({
+              {
                 "forecast-enabled": { value: "true" },
                 "forecast-years-ahead": { value: "200" },
-              }) as Record<string, { value: string }>
+              } as Record<string, { value: string }>
             )[name],
         ),
       };
@@ -246,10 +246,10 @@ describe("page-helpers", () => {
         get: mockFn(
           (name: string) =>
             (
-              ({
+              {
                 "forecast-enabled": { value: "false" },
                 "forecast-years-ahead": { value: "15" },
-              }) as Record<string, { value: string }>
+              } as Record<string, { value: string }>
             )[name],
         ),
       };

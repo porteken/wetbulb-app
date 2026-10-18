@@ -18,7 +18,6 @@ init({
   dsn: "https://6619376332d420d45e48ed32bcb5faf5@o4509742136950784.ingest.us.sentry.io/4509742137606144",
   enabled: !isE2ETestRun,
 
-  enableLogs: true,
   integrations: shouldEnableReplay ? [replayIntegration()] : [],
 
   replaysOnErrorSampleRate: shouldEnableReplay ? 1 : 0,

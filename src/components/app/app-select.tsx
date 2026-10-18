@@ -1,7 +1,5 @@
 "use client";
 
-/* oxlint-disable react-perf/jsx-no-new-function-as-prop */
-
 import {
   Select as SelectRoot,
   SelectContent,

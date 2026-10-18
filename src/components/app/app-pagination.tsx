@@ -8,8 +8,6 @@ import {
 import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
 import * as React from "react";
 
-/* oxlint-disable react-perf/jsx-no-new-function-as-prop */
-
 interface AppPaginationProps {
   onChange: (page: number) => void;
   total: number;

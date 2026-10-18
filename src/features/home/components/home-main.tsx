@@ -230,17 +230,21 @@ const Home: FC<MapProperties> = ({
   const handleForecastToggle = useCallback(
     (enabled: boolean) => {
       setForecastEnabled(enabled);
-      void setForecastPreferences(enabled, forecastYearsAhead);
+      void ignorePersistenceError(
+        setForecastPreferences(enabled, forecastYearsAhead),
+      );
     },
-    [forecastYearsAhead],
+    [forecastYearsAhead, ignorePersistenceError],
   );
 
   const handleForecastYearsChange = useCallback(
     (yearsAhead: number) => {
       setForecastYearsAhead(yearsAhead);
-      void setForecastPreferences(forecastEnabled, yearsAhead);
+      void ignorePersistenceError(
+        setForecastPreferences(forecastEnabled, yearsAhead),
+      );
     },
-    [forecastEnabled],
+    [forecastEnabled, ignorePersistenceError],
   );
 
   const handleModalClose = useCallback(() => {
