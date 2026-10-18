@@ -29,7 +29,7 @@
   },
   "settings": {
     "react": {
-      "version": "19.3.0"
+      "version": "19.3.1"
     },
     "next": {
       "rootDir": "."
@@ -181,6 +181,17 @@
     "unicorn/no-abusive-eslint-disable": "error"
   },
   "overrides": [
+    {
+      "files": ["src/testing/matchers.d.ts"],
+      "rules": {
+        "typescript/no-empty-object-type": [
+          "error",
+          {
+            "allowWithName": "^Matchers$"
+          }
+        ]
+      }
+    },
     {
       "files": [
         "**/__tests__/**/*.{ts,tsx}",

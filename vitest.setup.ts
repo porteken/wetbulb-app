@@ -1,4 +1,4 @@
-import "@testing-library/jest-dom";
+import "@testing-library/jest-dom/vitest";
 
 import { mockFn } from "@/testing/mock-fn";
 import { server } from "@/testing/server";
@@ -72,7 +72,7 @@ process.env.NEXT_PUBLIC_E2E_TEST ??= "false";
 process.env.E2E_USE_RUNTIME_MOCKS ??= "false";
 
 beforeAll(() => {
-  server.listen({ onUnhandledRequest: "bypass" });
+  server.listen({ onUnhandledFrame: "bypass" });
 });
 
 afterEach(() => {

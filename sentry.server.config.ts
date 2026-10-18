@@ -5,7 +5,5 @@ Sentry.init({
 
   tracesSampleRate: 1,
 
-  enableLogs: true,
-
   dataCollection: {},
 });
